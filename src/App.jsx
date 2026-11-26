@@ -1,122 +1,181 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useState } from 'react'
+import DashboardView from './components/DashboardView'
+import Header from './components/Header'
+import Sidebar from './components/Sidebar'
+import {
+  AcademicProgressView,
+  AnnouncementsView,
+  EngagementAnalyticsView,
+  PerformanceInsightsView,
+  ProfileView,
+  ScheduleView,
+  TasksView,
+} from './components/SubViews'
+import { DEFAULT_STUDENT_DATA } from './data/defaultStudentData'
+import {
+  seedDemoStudentData,
+  subscribeToStudentData,
+  updateStudentFields,
+} from './services/studentService'
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [data, setData] = useState(DEFAULT_STUDENT_DATA)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
+  const [seedingMessage, setSeedingMessage] = useState('')
+  const [loggedOut, setLoggedOut] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = subscribeToStudentData(setData, setSyncStatus)
+    return () => unsubscribe()
+  }, [])
+
+  const handleToggleTask = async (taskId) => {
+    const updatedTasks = data.tasks.map((task) =>
+      task.id === taskId ? { ...task, completed: !task.completed } : task
+    )
+    setData((prev) => ({ ...prev, tasks: updatedTasks }))
+    try {
+      await updateStudentFields({ tasks: updatedTasks })
+    } catch (err) {
+      setSyncStatus((prev) => ({ ...prev, error: err.message }))
+    }
+  }
+
+  const handleAddTask = async (newTask) => {
+    const updatedTasks = [newTask, ...data.tasks]
+    setData((prev) => ({ ...prev, tasks: updatedTasks }))
+    try {
+      await updateStudentFields({ tasks: updatedTasks })
+    } catch (err) {
+      setSyncStatus((prev) => ({ ...prev, error: err.message }))
+    }
+  }
+
+  const handleUpdateGrade = async (subjectId, newGrade) => {
+    const safeGrade = Math.min(100, Math.max(60, Number.isNaN(newGrade) ? 60 : newGrade))
+    const updatedSubjects = data.subjects.map((subj) =>
+      subj.id === subjectId ? { ...subj, grade: safeGrade } : subj
+    )
+    setData((prev) => ({ ...prev, subjects: updatedSubjects }))
+    try {
+      await updateStudentFields({ subjects: updatedSubjects })
+    } catch (err) {
+      setSyncStatus((prev) => ({ ...prev, error: err.message }))
+    }
+  }
+
+  const handleSeedFirestore = async () => {
+    setSeedingMessage('Syncing...')
+    try {
+      await seedDemoStudentData()
+      setSeedingMessage('Demo data saved to Firestore!')
+    } catch (err) {
+      setSeedingMessage(err.message)
+    }
+  }
+
+  if (loggedOut) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f5fb] p-6">
+        <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-purple-100">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#a67bf5] to-[#7c3aed] text-white">
+            <svg className="h-7 w-7" viewBox="0 0 64 64" fill="currentColor">
+              <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" />
+              <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" />
+            </svg>
+          </div>
+          <h1 className="text-lg font-bold text-slate-900">Signed Out</h1>
+          <p className="mt-1 text-xs text-slate-500">
+            Demo session ended for {data.student.name} ({data.student.school}).
+          </p>
+          <button
+            type="button"
+            onClick={() => setLoggedOut(false)}
+            className="mt-6 w-full rounded-full bg-gradient-to-r from-[#9b6bf2] to-[#7c3aed] py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95"
+          >
+            Sign Back In
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'academic-progress':
+        return (
+          <AcademicProgressView
+            data={data}
+            searchQuery={searchQuery}
+            onUpdateGrade={handleUpdateGrade}
+          />
+        )
+      case 'tasks':
+        return (
+          <TasksView
+            data={data}
+            searchQuery={searchQuery}
+            onToggleTask={handleToggleTask}
+            onAddTask={handleAddTask}
+          />
+        )
+      case 'performance-insights':
+        return <PerformanceInsightsView data={data} />
+      case 'engagement-analytics':
+        return <EngagementAnalyticsView data={data} />
+      case 'announcements':
+        return <AnnouncementsView data={data} searchQuery={searchQuery} />
+      case 'schedule':
+        return <ScheduleView data={data} />
+      case 'profile':
+        return (
+          <ProfileView
+            data={data}
+            syncStatus={syncStatus}
+            onSeedFirestore={handleSeedFirestore}
+            seedingMessage={seedingMessage}
+          />
+        )
+      case 'dashboard':
+      default:
+        return (
+          <DashboardView
+            data={data}
+            searchQuery={searchQuery}
+            onNavigate={setActiveTab}
+          />
+        )
+    }
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-[#f6f5fb] p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
+      <div className="mx-auto flex h-full max-w-[1380px] gap-6">
+        <Sidebar
+          activeTab={activeTab}
+          onSelectTab={setActiveTab}
+          onLogout={() => setLoggedOut(true)}
+          mobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
+        />
 
-      <div className="ticks"></div>
+        <main className="flex min-w-0 flex-1 flex-col gap-5 lg:overflow-y-auto lg:pr-1">
+          <Header
+            student={data.student}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onOpenMobileMenu={() => setMobileMenuOpen(true)}
+            announcements={data.announcements}
+            syncStatus={syncStatus}
+            onNavigate={setActiveTab}
+          />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+          <div className="pb-4">{renderContent()}</div>
+        </main>
+      </div>
+    </div>
   )
 }
-
-export default App
