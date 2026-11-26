@@ -79,9 +79,9 @@ export default function App() {
 
   if (loggedOut) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f6f5fb] p-6">
-        <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-purple-100">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#a67bf5] to-[#7c3aed] text-white">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] p-6">
+        <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-[#35408e]/15">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4754ab] to-[#35408e] text-[#ffd41c]">
             <svg className="h-7 w-7" viewBox="0 0 64 64" fill="currentColor">
               <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" />
               <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" />
@@ -94,7 +94,7 @@ export default function App() {
           <button
             type="button"
             onClick={() => setLoggedOut(false)}
-            className="mt-6 w-full rounded-full bg-gradient-to-r from-[#9b6bf2] to-[#7c3aed] py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95"
+            className="mt-6 w-full rounded-full bg-gradient-to-r from-[#4754ab] to-[#35408e] py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95"
           >
             Sign Back In
           </button>
@@ -152,7 +152,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f5fb] p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
+    <div className="min-h-screen bg-[#f5f6fb] p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
       <div className="mx-auto flex h-full max-w-[1380px] gap-6">
         <Sidebar
           activeTab={activeTab}

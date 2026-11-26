@@ -50,7 +50,7 @@ export default function Header({
             onChange={(e) => onSearchChange(e.target.value)}
             placeholder="Search"
             aria-label="Search subjects, tasks, or recommendations"
-            className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(124,58,237,0.06)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-purple-400"
+            className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e]"
           />
         </div>
       </div>
@@ -66,12 +66,12 @@ export default function Header({
           className={`hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline-flex ${
             syncStatus.mode === 'firestore'
               ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-              : 'bg-purple-50 text-purple-700 ring-1 ring-purple-200'
+              : 'bg-[#ffd41c]/20 text-[#35408e] ring-1 ring-[#ffd41c]'
           }`}
         >
           <span
             className={`h-1.5 w-1.5 rounded-full ${
-              syncStatus.mode === 'firestore' ? 'bg-emerald-500' : 'bg-purple-500'
+              syncStatus.mode === 'firestore' ? 'bg-emerald-500' : 'bg-[#35408e]'
             }`}
           />
           {syncStatus.mode === 'firestore' ? 'Firestore Live' : 'Demo Mode'}
@@ -82,7 +82,7 @@ export default function Header({
           onClick={() => onNavigate('profile')}
           className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-purple-600 text-xs font-bold text-white shadow-sm ring-2 ring-purple-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#35408e] text-xs font-bold text-[#ffd41c] shadow-sm ring-2 ring-[#ffd41c]">
             {initials}
           </div>
           <div className="leading-tight">
@@ -96,13 +96,13 @@ export default function Header({
         <button
           type="button"
           onClick={() => setShowNotifications((prev) => !prev)}
-          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-800 shadow-sm ring-1 ring-slate-100 transition hover:bg-purple-50"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#35408e] shadow-sm ring-1 ring-slate-100 transition hover:bg-[#eef0fb]"
           aria-label="Toggle notifications"
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
           </svg>
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 ring-2 ring-white" />
+          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#ffd41c] ring-2 ring-white" />
         </button>
 
         {showNotifications && (
@@ -115,7 +115,7 @@ export default function Header({
                   setShowNotifications(false)
                   onNavigate('announcements')
                 }}
-                className="text-xs font-semibold text-purple-600 hover:text-purple-700"
+                className="text-xs font-semibold text-[#35408e] hover:text-[#242c66]"
               >
                 See all
               </button>

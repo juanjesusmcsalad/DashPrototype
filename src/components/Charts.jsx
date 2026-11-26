@@ -36,10 +36,10 @@ export function GradeTrendLineChart({ gradeHistory }) {
       {
         label: 'Grade Average',
         data: gradeHistory.values,
-        borderColor: '#7c3aed',
-        backgroundColor: 'rgba(139, 92, 246, 0.14)',
-        pointBackgroundColor: '#7c3aed',
-        pointBorderColor: '#ffffff',
+        borderColor: '#35408e',
+        backgroundColor: 'rgba(53, 64, 142, 0.14)',
+        pointBackgroundColor: '#ffd41c',
+        pointBorderColor: '#35408e',
         pointBorderWidth: 2,
         pointRadius: 4,
         tension: 0.35,
@@ -54,7 +54,7 @@ export function GradeTrendLineChart({ gradeHistory }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#1f1b2e',
+        backgroundColor: '#232b66',
         padding: 10,
         cornerRadius: 10,
       },
@@ -88,7 +88,7 @@ export function SubjectBarChart({ subjects }) {
         label: 'Current Grade',
         data: subjects.map((s) => s.grade),
         backgroundColor: subjects.map((s) =>
-          s.grade >= 90 ? '#8b5cf6' : '#c4b5fd'
+          s.grade >= 90 ? '#35408e' : '#ffd41c'
         ),
         borderRadius: 8,
         barThickness: 28,
@@ -130,13 +130,13 @@ export function WeeklyEngagementBarChart({ weeklyEngagement }) {
       {
         label: 'Study Hours',
         data: weeklyEngagement.studyHours,
-        backgroundColor: '#8b5cf6',
+        backgroundColor: '#35408e',
         borderRadius: 8,
       },
       {
         label: 'Weekly Target',
         data: weeklyEngagement.targetHours,
-        backgroundColor: '#ddd6fe',
+        backgroundColor: '#ffd41c',
         borderRadius: 8,
       },
     ],
@@ -178,8 +178,8 @@ export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
     datasets: [
       {
         data: [completedCount, pendingCount],
-        backgroundColor: ['#8b5cf6', '#ede9fe'],
-        borderColor: ['#7c3aed', '#ddd6fe'],
+        backgroundColor: ['#35408e', '#ffd41c'],
+        borderColor: ['#242c66', '#e6bd0e'],
         borderWidth: 1,
       },
     ],

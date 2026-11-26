@@ -60,7 +60,7 @@ export function AcademicProgressView({ data, searchQuery, onUpdateGrade }) {
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100">
                     <div
-                      className="h-full rounded-full bg-purple-500"
+                      className="h-full rounded-full bg-[#35408e]"
                       style={{ width: `${subject.progress}%` }}
                     />
                   </div>
@@ -73,7 +73,7 @@ export function AcademicProgressView({ data, searchQuery, onUpdateGrade }) {
                     max="100"
                     value={subject.grade}
                     onChange={(e) => onUpdateGrade(subject.id, Number(e.target.value))}
-                    className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center text-xs font-bold text-purple-700 outline-none focus:border-purple-500"
+                    className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e]"
                   />
                 </label>
               </div>
@@ -133,8 +133,8 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
               onClick={() => setFilter(tab)}
               className={`rounded-full px-3.5 py-1 text-xs font-semibold capitalize transition ${
                 filter === tab
-                  ? 'bg-purple-600 text-white'
-                  : 'text-slate-600 hover:bg-purple-50 hover:text-purple-700'
+                  ? 'bg-[#35408e] text-white'
+                  : 'text-slate-600 hover:bg-[#eef0fb] hover:text-[#35408e]'
               }`}
             >
               {tab}
@@ -152,12 +152,12 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Add a new assignment or research task..."
-          className="min-w-52 flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-purple-500"
+          className="min-w-52 flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e]"
         />
         <select
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-purple-500"
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e]"
         >
           {data.subjects.map((s) => (
             <option key={s.id} value={s.shortName}>
@@ -167,7 +167,7 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
         </select>
         <button
           type="submit"
-          className="rounded-xl bg-gradient-to-r from-[#9b6bf2] to-[#7c3aed] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-95"
+          className="rounded-xl bg-[#35408e] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#262f6d]"
         >
           Add Task
         </button>
@@ -177,14 +177,14 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
         {filteredTasks.map((task) => (
           <label
             key={task.id}
-            className="flex cursor-pointer items-center justify-between gap-4 px-5 py-3.5 transition hover:bg-purple-50/40"
+            className="flex cursor-pointer items-center justify-between gap-4 px-5 py-3.5 transition hover:bg-[#eef0fb]/50"
           >
             <div className="flex items-center gap-3">
               <input
                 type="checkbox"
                 checked={task.completed}
                 onChange={() => onToggleTask(task.id)}
-                className="h-4 w-4 rounded accent-purple-600"
+                className="h-4 w-4 rounded accent-[#35408e]"
               />
               <div>
                 <p
@@ -230,15 +230,15 @@ export function PerformanceInsightsView({ data }) {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-purple-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold text-purple-600 uppercase">Strongest Subject</p>
+        <div className="rounded-2xl border border-[#35408e]/30 bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold text-[#35408e] uppercase">Strongest Subject</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{topSubject?.name}</p>
           <p className="mt-1 text-xs text-slate-500">
             Current grade: <span className="font-bold text-slate-800">{topSubject?.grade}%</span>
           </p>
         </div>
-        <div className="rounded-2xl border border-amber-200 bg-white p-5 shadow-sm">
-          <p className="text-xs font-semibold text-amber-600 uppercase">Needs Extra Focus</p>
+        <div className="rounded-2xl border border-[#ffd41c] bg-white p-5 shadow-sm">
+          <p className="text-xs font-semibold text-[#b38f00] uppercase">Needs Extra Focus</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{focusSubject?.name}</p>
           <p className="mt-1 text-xs text-slate-500">
             Current grade: <span className="font-bold text-slate-800">{focusSubject?.grade}%</span>
@@ -257,10 +257,10 @@ export function PerformanceInsightsView({ data }) {
             {data.recommendations.map((rec) => (
               <li
                 key={rec.id}
-                className="flex items-center justify-between rounded-xl bg-purple-50/60 px-4 py-3 text-sm font-medium text-slate-800"
+                className="flex items-center justify-between rounded-xl bg-[#eef0fb]/70 px-4 py-3 text-sm font-medium text-slate-800"
               >
                 <span>{rec.text}</span>
-                <span className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200">
+                <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e]">
                   {rec.category}
                 </span>
               </li>
@@ -289,7 +289,7 @@ export function EngagementAnalyticsView({ data }) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <p className="text-xs text-slate-500">Weekly Study Hours</p>
-          <p className="mt-1 text-2xl font-bold text-purple-700">{totalStudyHours} hrs</p>
+          <p className="mt-1 text-2xl font-bold text-[#35408e]">{totalStudyHours} hrs</p>
         </div>
         <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <p className="text-xs text-slate-500">Attendance Rate</p>
@@ -337,7 +337,7 @@ export function AnnouncementsView({ data, searchQuery }) {
         {items.map((item) => (
           <article key={item.id} className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="rounded-full bg-purple-50 px-3 py-0.5 text-xs font-semibold text-purple-700">
+              <span className="rounded-full bg-[#ffd41c]/30 px-3 py-0.5 text-xs font-bold text-[#35408e]">
                 {item.tag}
               </span>
               <span className="text-xs text-slate-400">{item.date}</span>
@@ -363,10 +363,10 @@ export function ScheduleView({ data }) {
         {data.schedule.map((slot) => (
           <div key={slot.id} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold tracking-wide text-purple-600 uppercase">
+              <span className="text-xs font-bold tracking-wide text-[#35408e] uppercase">
                 {slot.day}
               </span>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+              <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-semibold text-[#35408e]">
                 {slot.room}
               </span>
             </div>
@@ -418,11 +418,11 @@ export function ProfileView({ data, syncStatus, onSeedFirestore, seedingMessage 
         </div>
       </div>
 
-      <div className="rounded-2xl border border-purple-200 bg-purple-50/50 p-5">
+      <div className="rounded-2xl border border-[#35408e]/25 bg-[#eef0fb]/70 p-5">
         <h2 className="text-sm font-bold text-slate-900">Firebase Firestore Status</h2>
         <p className="mt-1 text-xs text-slate-600">
           Current mode:{' '}
-          <span className="font-bold text-purple-700">
+          <span className="font-bold text-[#35408e]">
             {syncStatus.mode === 'firestore' ? 'Connected to Firestore (Live)' : 'Local Demo Mode'}
           </span>
         </p>
@@ -439,7 +439,7 @@ export function ProfileView({ data, syncStatus, onSeedFirestore, seedingMessage 
           <button
             type="button"
             onClick={onSeedFirestore}
-            className="rounded-xl bg-gradient-to-r from-[#9b6bf2] to-[#7c3aed] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:opacity-95"
+            className="rounded-xl bg-[#35408e] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#262f6d]"
           >
             Seed / Reset Demo Data in Firestore
           </button>

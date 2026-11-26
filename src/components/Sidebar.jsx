@@ -10,7 +10,7 @@ const NAV_ITEMS = [
 ]
 
 function NavIcon({ name, active }) {
-  const stroke = active ? 'stroke-white' : 'stroke-white/75'
+  const stroke = active ? 'stroke-[#232b66]' : 'stroke-white/75'
   const common = `h-4 w-4 shrink-0 ${stroke}`
 
   switch (name) {
@@ -94,18 +94,18 @@ export default function Sidebar({ activeTab, onSelectTab, onLogout, mobileOpen, 
       )}
 
       <aside
-        className={`fixed inset-y-4 left-4 z-40 flex w-56 flex-col justify-between rounded-3xl bg-gradient-to-b from-[#a67bf5] via-[#905cf0] to-[#7c3aed] p-5 text-white shadow-xl shadow-purple-500/20 transition-transform duration-200 lg:static lg:inset-auto lg:h-full lg:shrink-0 lg:translate-x-0 ${
+        className={`fixed inset-y-4 left-4 z-40 flex w-56 flex-col justify-between rounded-3xl bg-gradient-to-b from-[#424fa6] via-[#35408e] to-[#242c66] p-5 text-white shadow-xl shadow-[#35408e]/25 transition-transform duration-200 lg:static lg:inset-auto lg:h-full lg:shrink-0 lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-[120%]'
         }`}
       >
         <div>
-          {/* Top graduation emblem matching mockup */}
+          {/* Top graduation emblem */}
           <div className="mb-8 flex items-center justify-center pt-1">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6d28d9]/70 to-[#5b21b6]/80 shadow-inner ring-1 ring-white/15">
-              <svg className="h-11 w-11 text-white" viewBox="0 0 64 64" fill="currentColor">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 shadow-inner ring-1 ring-[#ffd41c]/40">
+              <svg className="h-11 w-11 text-[#ffd41c]" viewBox="0 0 64 64" fill="currentColor">
                 <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" />
-                <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" opacity="0.9" />
-                <rect x="18" y="49" width="28" height="6" rx="3" opacity="0.95" />
+                <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" opacity="0.92" />
+                <rect x="18" y="49" width="28" height="6" rx="3" fill="#ffffff" opacity="0.95" />
               </svg>
             </div>
           </div>
@@ -120,8 +120,8 @@ export default function Sidebar({ activeTab, onSelectTab, onLogout, mobileOpen, 
                   onClick={() => handleSelect(item.id)}
                   className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition-all ${
                     isActive
-                      ? 'bg-white/20 font-semibold text-white shadow-sm ring-1 ring-white/20'
-                      : 'font-medium text-white/75 hover:bg-white/10 hover:text-white'
+                      ? 'bg-[#ffd41c] font-bold text-[#232b66] shadow-sm'
+                      : 'font-medium text-white/80 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   <NavIcon name={item.icon} active={isActive} />

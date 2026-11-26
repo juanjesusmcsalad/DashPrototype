@@ -1,13 +1,13 @@
 export default function WelcomeBanner({ firstName, displayDate }) {
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#a678f5] via-[#915bf0] to-[#874cf0] px-6 py-6 text-white shadow-lg shadow-purple-500/15 sm:px-8 sm:py-7">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#424fa6] via-[#35408e] to-[#242c66] px-6 py-6 text-white shadow-lg shadow-[#35408e]/20 sm:px-8 sm:py-7">
       {/* Soft ambient background shapes */}
-      <div className="pointer-events-none absolute -top-12 right-24 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-      <div className="pointer-events-none absolute -bottom-16 right-8 h-44 w-44 rounded-full bg-purple-900/20 blur-2xl" />
+      <div className="pointer-events-none absolute -top-12 right-24 h-40 w-40 rounded-full bg-[#ffd41c]/15 blur-2xl" />
+      <div className="pointer-events-none absolute -bottom-16 right-8 h-44 w-44 rounded-full bg-[#1a214f]/40 blur-2xl" />
 
       <div className="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div className="max-w-md">
-          <p className="text-xs font-medium text-white/80">{displayDate}</p>
+          <p className="text-xs font-semibold text-[#ffd41c]">{displayDate}</p>
           <h1 className="mt-4 text-2xl font-bold tracking-tight sm:text-3xl">
             Welcome back, {firstName}!
           </h1>
