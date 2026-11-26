@@ -243,7 +243,8 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
 }
 
 export function PerformanceInsightsView({ data }) {
-  const sorted = [...data.subjects].sort((a, b) => b.grade - a.grade)
+  const hasRecordedGrades = data.subjects.some((s) => Number(s.grade || 0) > 0)
+  const sorted = [...data.subjects].sort((a, b) => Number(b.grade || 0) - Number(a.grade || 0))
   const topSubject = sorted[0]
   const focusSubject = sorted[sorted.length - 1]
 
@@ -259,16 +260,26 @@ export function PerformanceInsightsView({ data }) {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-[#35408e]/30 bg-white p-5 shadow-sm dark:border-[#4c59b5] dark:bg-[#181e38]">
           <p className="text-xs font-semibold text-[#35408e] uppercase dark:text-[#ffd41c]">Strongest Subject</p>
-          <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{topSubject?.name}</p>
+          <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+            {hasRecordedGrades ? topSubject?.name : 'Not yet graded'}
+          </p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Current grade: <span className="font-bold text-slate-800 dark:text-slate-100">{topSubject?.grade}%</span>
+            Current grade:{' '}
+            <span className="font-bold text-slate-800 dark:text-slate-100">
+              {hasRecordedGrades ? topSubject?.grade : 0}%
+            </span>
           </p>
         </div>
         <div className="rounded-2xl border border-[#ffd41c] bg-white p-5 shadow-sm dark:border-[#ffd41c]/60 dark:bg-[#181e38]">
           <p className="text-xs font-semibold text-[#b38f00] uppercase dark:text-[#ffd41c]">Needs Extra Focus</p>
-          <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{focusSubject?.name}</p>
+          <p className="mt-1 text-lg font-bold text-slate-900 dark:text-white">
+            {hasRecordedGrades ? focusSubject?.name : 'Not yet graded'}
+          </p>
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            Current grade: <span className="font-bold text-slate-800 dark:text-slate-100">{focusSubject?.grade}%</span>
+            Current grade:{' '}
+            <span className="font-bold text-slate-800 dark:text-slate-100">
+              {hasRecordedGrades ? focusSubject?.grade : 0}%
+            </span>
           </p>
         </div>
       </div>
@@ -280,19 +291,23 @@ export function PerformanceInsightsView({ data }) {
         </div>
         <div className={`${CARD} p-5`}>
           <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Personalized Recommendations</h2>
-          <ul className="space-y-3">
-            {data.recommendations.map((rec) => (
-              <li
-                key={rec.id}
-                className="flex items-center justify-between rounded-xl bg-[#eef0fb]/70 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-[#11162b] dark:text-slate-100"
-              >
-                <span>{rec.text}</span>
-                <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
-                  {rec.category}
-                </span>
-              </li>
-            ))}
-          </ul>
+          {data.recommendations.length === 0 ? (
+            <p className="text-xs text-slate-500 dark:text-slate-400">No recommendations yet.</p>
+          ) : (
+            <ul className="space-y-3">
+              {data.recommendations.map((rec) => (
+                <li
+                  key={rec.id}
+                  className="flex items-center justify-between rounded-xl bg-[#eef0fb]/70 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-[#11162b] dark:text-slate-100"
+                >
+                  <span>{rec.text}</span>
+                  <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
+                    {rec.category}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
@@ -329,7 +344,7 @@ export function EngagementAnalyticsView({ data, onLogStudyHours }) {
         </div>
         <div className={`${CARD} p-5`}>
           <p className="text-xs text-slate-500 dark:text-slate-400">Attendance Rate</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{data.student.attendanceRate}%</p>
+          <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{data.student.attendanceRate ?? 0}%</p>
         </div>
         <div className={`${CARD} p-5`}>
           <p className="text-xs text-slate-500 dark:text-slate-400">Task Completion</p>

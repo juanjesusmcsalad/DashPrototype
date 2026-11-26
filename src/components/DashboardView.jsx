@@ -54,7 +54,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 onClick={() => onNavigate('academic-progress')}
               />
               <StatCard
-                value={`${student.attendanceRate}%`}
+                value={`${student.attendanceRate ?? 0}%`}
                 label="Attendance Rate"
                 highlighted
                 onClick={() => onNavigate('engagement-analytics')}
@@ -202,7 +202,9 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Personalized Recommendations</h3>
               <ul className="mt-4 space-y-3.5">
                 {filteredRecommendations.length === 0 ? (
-                  <li className="text-xs text-slate-500 dark:text-slate-400">No matching recommendations.</li>
+                  <li className="text-xs text-slate-500 dark:text-slate-400">
+                    {query ? 'No matching recommendations.' : 'No recommendations yet.'}
+                  </li>
                 ) : (
                   filteredRecommendations.map((rec) => (
                     <li key={rec.id} className="flex items-start gap-2.5 text-xs font-semibold text-slate-800 dark:text-slate-200">

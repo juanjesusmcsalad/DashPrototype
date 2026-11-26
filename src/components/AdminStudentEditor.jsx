@@ -20,12 +20,12 @@ export default function AdminStudentEditor({
   const [name, setName] = useState(() => studentRecord?.student?.name || '')
   const [section, setSection] = useState(() => studentRecord?.student?.section || '12SHS2510')
   const [attendanceRate, setAttendanceRate] = useState(() =>
-    String(studentRecord?.student?.attendanceRate ?? 96)
+    String(studentRecord?.student?.attendanceRate ?? 0)
   )
   const [subjects, setSubjects] = useState(() =>
     (studentRecord?.subjects || []).map((s) => ({
       ...s,
-      gradeInput: String(s.grade ?? 85),
+      gradeInput: String(s.grade ?? 0),
     }))
   )
   const [isDirty, setIsDirty] = useState(false)
@@ -39,7 +39,7 @@ export default function AdminStudentEditor({
     (studentRecord?.weeklyEngagement?.studyHours || [0, 0, 0, 0, 0, 0, 0]).map(String)
   )
   const [targetHoursInput, setTargetHoursInput] = useState(() =>
-    (studentRecord?.weeklyEngagement?.targetHours || [3.5, 3.5, 3.5, 3.5, 3.5, 2, 1.5]).map(String)
+    (studentRecord?.weeklyEngagement?.targetHours || [0, 0, 0, 0, 0, 0, 0]).map(String)
   )
   const [savingHours, setSavingHours] = useState(false)
 
@@ -87,7 +87,7 @@ export default function AdminStudentEditor({
       const rawAtt = Number(attendanceRate)
       const parsedAttendance =
         attendanceRate.trim() === '' || Number.isNaN(rawAtt)
-          ? Number(studentRecord.student?.attendanceRate ?? 96)
+          ? Number(studentRecord.student?.attendanceRate ?? 0)
           : Math.min(100, Math.max(0, Math.round(rawAtt)))
 
       const cleanedSubjects = subjects.map(({ gradeInput, ...rest }) => {
@@ -96,8 +96,8 @@ export default function AdminStudentEditor({
           ...rest,
           grade:
             gradeInput.trim() === '' || Number.isNaN(rawGrade)
-              ? Number(rest.grade ?? 75)
-              : Math.min(100, Math.max(60, rawGrade)),
+              ? Number(rest.grade ?? 0)
+              : Math.min(100, Math.max(0, rawGrade)),
         }
       })
 
@@ -328,7 +328,7 @@ export default function AdminStudentEditor({
                   </span>
                   <input
                     type="number"
-                    min="60"
+                    min="0"
                     max="100"
                     step="0.5"
                     aria-label={`${subj.shortName} grade`}

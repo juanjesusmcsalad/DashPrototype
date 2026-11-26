@@ -87,7 +87,7 @@ export function GradeTrendLineChart({ gradeHistory }) {
         ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
-        min: 80,
+        min: 0,
         max: 100,
         grid: { color: gridColor },
         ticks: { color: tickColor, font: BASE_FONT },
@@ -134,7 +134,7 @@ export function SubjectBarChart({ subjects }) {
         ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
-        min: 70,
+        min: 0,
         max: 100,
         grid: { color: gridColor },
         ticks: { color: tickColor, font: BASE_FONT },
@@ -230,6 +230,15 @@ export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
     },
   }
 
+  if (completedCount + pendingCount === 0) {
+    return (
+      <div className="flex h-56 w-full flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 text-center dark:border-slate-700">
+        <span className="text-2xl font-bold text-slate-400 dark:text-slate-500">0%</span>
+        <span className="mt-1 text-xs text-slate-500 dark:text-slate-400">No tasks assigned yet</span>
+      </div>
+    )
+  }
+
   return (
     <div className="h-56 w-full">
       <Doughnut data={data} options={options} />
@@ -276,7 +285,7 @@ export function StudentComparisonBarChart({ labels, averages, attendanceRates })
         ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
-        min: 60,
+        min: 0,
         max: 100,
         grid: { color: gridColor },
         ticks: { color: tickColor, font: BASE_FONT },

@@ -559,7 +559,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                               isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                             }`}
                           >
-                            {entry.student?.section || '12SHS2510'} • {entry.student?.attendanceRate ?? 96}% att •{' '}
+                            {entry.student?.section || '12SHS2510'} • {entry.student?.attendanceRate ?? 0}% att •{' '}
                             {pendingTasks} pending
                           </p>
                         </div>
