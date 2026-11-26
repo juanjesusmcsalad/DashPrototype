@@ -533,9 +533,14 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
                 <div className="max-h-[540px] space-y-2 overflow-y-auto pr-1">
                   {filteredStudents.length === 0 ? (
-                    <p className="rounded-xl bg-[#f5f6fb] p-4 text-center text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
-                      No students registered yet. Students appear here once they sign up.
-                    </p>
+                    <div className="rounded-xl bg-[#f5f6fb] p-4 text-center text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
+                      <p>No students registered yet. Students appear here once they sign up.</p>
+                      {syncStatus.mode !== 'firestore' && students.length === 0 && (
+                        <p className="mt-1.5 text-[11px] text-amber-700 dark:text-amber-300">
+                          Running in Local Demo Mode: student records are stored only in the browser where they signed up. Connect Firebase &amp; deploy <code>firestore.rules</code> so all admins share live records.
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     filteredStudents.map((entry) => {
                     const isSelected = selectedStudent?.id === entry.id
@@ -1248,6 +1253,13 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </button>
             </div>
           </header>
+
+          {syncStatus.error && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
+              Firestore sync error: {syncStatus.error}. Make sure you have deployed the updated{' '}
+              <code>firestore.rules</code> in Firebase Console so administrators can read all student records.
+            </div>
+          )}
 
           {saveMessage && (
             <div className="flex items-center justify-between rounded-2xl border border-[#35408e]/20 bg-[#eef0fb] px-4 py-2.5 text-xs font-semibold text-[#35408e] dark:border-slate-700 dark:bg-[#1e2647] dark:text-[#ffd41c]">

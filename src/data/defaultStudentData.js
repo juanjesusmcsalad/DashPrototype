@@ -2,7 +2,7 @@ export const ALLOWED_SUBJECTS = [
   { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 0, teacher: 'Mr. Min Soo T. Kim' },
   { id: 'research', name: 'Research', shortName: 'Research', grade: 0, teacher: 'Mr. Joash J. Goboy' },
   { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 0, teacher: 'Ms. Ricca Mae P. Mique' },
-  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 0, teacher: 'Pujan Mehta' },
+  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 0, teacher: 'Sir Jun P. Balili' },
   { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 0, teacher: 'Ms. Jasmin M. Garzota' },
 ]
 

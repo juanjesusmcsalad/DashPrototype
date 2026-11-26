@@ -17,6 +17,13 @@ export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
 const DEMO_USERS_KEY = 'dashprototype_demo_users_v4'
 const DEMO_SESSION_KEY = 'dashprototype_demo_session_v4'
 
+export const ADMIN_EMAILS = [
+  'johannpaulreblando@gmail.com',
+  'paulvincentlaguardia@gmail.com',
+  'danielvn2012@gmail.com',
+  'carloslouieconde@gmail.com',
+]
+
 const DEFAULT_DEMO_USERS = [
   {
     uid: 'admin-johann',
@@ -57,7 +64,21 @@ function readDemoUsers() {
     const raw = localStorage.getItem(DEMO_USERS_KEY)
     if (raw) {
       const parsed = JSON.parse(raw)
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const merged = [...parsed]
+        let changed = false
+        for (const admin of DEFAULT_DEMO_USERS) {
+          const exists = merged.some(
+            (u) => u.email?.toLowerCase() === admin.email.toLowerCase()
+          )
+          if (!exists) {
+            merged.push(admin)
+            changed = true
+          }
+        }
+        if (changed) writeDemoUsers(merged)
+        return merged
+      }
     }
   } catch {
     // Ignore storage read errors.
@@ -100,21 +121,39 @@ function writeDemoSession(sessionUser, staySignedIn = true) {
 }
 
 async function resolveFirebaseUserProfile(firebaseUser) {
-  let role = 'student'
+  const cleanEmail = (firebaseUser.email || '').toLowerCase()
+  const isAllowlistedAdmin = ADMIN_EMAILS.includes(cleanEmail)
+  let role = isAllowlistedAdmin ? 'admin' : 'student'
   let name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student'
-  let section = '12SHS2510'
+  let section = isAllowlistedAdmin ? 'Admin' : '12SHS2510'
 
   if (db) {
     try {
-      const userSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
+      const userRef = doc(db, 'users', firebaseUser.uid)
+      const userSnap = await getDoc(userRef)
       if (userSnap.exists()) {
         const userData = userSnap.data()
-        role = userData.role === 'admin' ? 'admin' : 'student'
+        role = userData.role === 'admin' || isAllowlistedAdmin ? 'admin' : 'student'
         name = userData.name || name
         section = userData.section || section
+        if (isAllowlistedAdmin && userData.role !== 'admin') {
+          await setDoc(userRef, { role: 'admin', section: 'Admin', email: cleanEmail }, { merge: true })
+        }
+      } else if (isAllowlistedAdmin) {
+        await setDoc(
+          userRef,
+          {
+            uid: firebaseUser.uid,
+            name,
+            email: cleanEmail,
+            role: 'admin',
+            section: 'Admin',
+          },
+          { merge: true }
+        )
       }
     } catch {
-      // Default to least-privilege 'student' role if profile lookup fails.
+      // Default to allowlisted admin or least-privilege 'student' if lookup fails.
     }
   }
 
