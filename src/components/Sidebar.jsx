@@ -123,18 +123,14 @@ export default function Sidebar({
         }`}
       >
         <div>
-          {/* Clean transparent graduation emblem (no purple box) */}
+          {/* National University Logo */}
           <div className="mb-7 flex flex-col items-center justify-center pt-1">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 shadow-inner ring-1 ring-[#ffd41c]/45">
-              <svg className="h-11 w-11" viewBox="0 0 64 64" fill="none">
-                <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" fill="#FFD41C" />
-                <path
-                  d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z"
-                  fill="#FFFFFF"
-                  opacity="0.95"
-                />
-                <rect x="18" y="49" width="28" height="6" rx="3" fill="#FFD41C" />
-              </svg>
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 p-2 shadow-inner ring-1 ring-[#ffd41c]/45">
+              <img
+                src="/models/nu-logo.png"
+                alt="National University Logo"
+                className="h-full w-full object-contain drop-shadow"
+              />
             </div>
             {badgeText ? (
               <span className="mt-2.5 rounded-full bg-[#ffd41c] px-3 py-0.5 text-[10px] font-bold tracking-wider text-[#232b66] uppercase">

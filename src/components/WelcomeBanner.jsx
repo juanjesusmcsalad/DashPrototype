@@ -24,7 +24,7 @@ export default function WelcomeBanner({ firstName, displayDate }) {
             className="pointer-events-none absolute -bottom-8 left-0 h-40 w-40 object-contain drop-shadow-md"
           />
           <img
-            src="/models/college-student.png"
+            src="/models/bulldawg.png"
             alt=""
             className="pointer-events-none absolute -top-3 right-12 h-40 w-40 object-contain drop-shadow-lg"
           />

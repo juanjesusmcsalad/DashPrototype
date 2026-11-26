@@ -88,9 +88,9 @@ export default function Header({
           className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70 dark:hover:bg-white/10"
         >
           <img
-            src="/models/avatar.png"
+            src="/models/nu-logo.png"
             alt={initials}
-            className="h-10 w-10 rounded-full bg-[#35408e] object-cover shadow-sm ring-2 ring-[#ffd41c]"
+            className="h-10 w-10 rounded-full bg-[#242c66] object-contain p-1 shadow-sm ring-2 ring-[#ffd41c]"
           />
           <div className="leading-tight">
             <p className="text-xs font-bold text-slate-900 sm:text-sm dark:text-slate-100">{student.name}</p>
