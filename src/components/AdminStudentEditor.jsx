@@ -8,7 +8,7 @@ export default function AdminStudentEditor({
   onToggleTask,
   onAddTask,
   onDeleteTask,
-  onToggleMilestone,
+  onSaveWeeklyEngagement,
   onAddRecommendation,
   onDeleteRecommendation,
   onPrevStudent,
@@ -31,6 +31,18 @@ export default function AdminStudentEditor({
   )
   const [isDirty, setIsDirty] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  // Weekly study hours state
+  const [studyLabels] = useState(
+    () => studentRecord?.weeklyEngagement?.labels || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  )
+  const [studyHoursInput, setStudyHoursInput] = useState(() =>
+    (studentRecord?.weeklyEngagement?.studyHours || [0, 0, 0, 0, 0, 0, 0]).map(String)
+  )
+  const [targetHoursInput, setTargetHoursInput] = useState(() =>
+    (studentRecord?.weeklyEngagement?.targetHours || [3.5, 3.5, 3.5, 3.5, 3.5, 2, 1.5]).map(String)
+  )
+  const [savingHours, setSavingHours] = useState(false)
 
   // Task form state
   const [taskTitle, setTaskTitle] = useState('')
@@ -128,10 +140,32 @@ export default function AdminStudentEditor({
     setNewRec('')
   }
 
+  const handleSaveHours = async (e) => {
+    e.preventDefault()
+    setSavingHours(true)
+    try {
+      const cleanedStudy = studyHoursInput.map((val) =>
+        Math.min(16, Math.max(0, Number(Number(val) || 0).toFixed(1)))
+      )
+      const cleanedTarget = targetHoursInput.map((val) =>
+        Math.min(16, Math.max(0, Number(Number(val) || 0).toFixed(1)))
+      )
+      await onSaveWeeklyEngagement(studentRecord.id, {
+        labels: studyLabels,
+        studyHours: cleanedStudy,
+        targetHours: cleanedTarget,
+      })
+    } finally {
+      setSavingHours(false)
+    }
+  }
+
   const tasks = studentRecord.tasks || []
   const pendingCount = tasks.filter((t) => !t.completed).length
-  const milestones = studentRecord.researchMilestones || []
   const recommendations = studentRecord.recommendations || []
+  const totalStudyHours = studyHoursInput
+    .reduce((sum, val) => sum + (Number(val) || 0), 0)
+    .toFixed(1)
 
   return (
     <div className="space-y-4">
@@ -214,7 +248,7 @@ export default function AdminStudentEditor({
               : 'bg-[#f5f6fb] text-slate-600 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-300'
           }`}
         >
-          Milestones &amp; Notes
+          Study Hours &amp; Notes
         </button>
       </div>
 
@@ -419,30 +453,68 @@ export default function AdminStudentEditor({
         </div>
       )}
 
-      {/* Tab 3: Research Milestones & Recommendations */}
+      {/* Tab 3: Weekly Study Hours & Recommendations */}
       {editorTab === 'notes' && (
         <div className="space-y-5">
-          <div>
-            <h3 className="mb-2 text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-              Research Chapter Milestones
-            </h3>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {milestones.map((step) => (
-                <label
-                  key={step.id}
-                  className="flex cursor-pointer items-center gap-2 rounded-xl bg-[#f5f6fb] px-3 py-2 text-xs font-semibold text-slate-800 dark:bg-[#11162b] dark:text-slate-200"
+          <form onSubmit={handleSaveHours} className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+                Weekly Study Hours (Total: {totalStudyHours} hrs)
+              </h3>
+              <span className="text-[11px] text-slate-400">Logged vs Target hours/day</span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
+              {studyLabels.map((day, idx) => (
+                <div
+                  key={day}
+                  className="rounded-xl bg-[#f5f6fb] p-2.5 text-center dark:bg-[#11162b]"
                 >
-                  <input
-                    type="checkbox"
-                    checked={step.completed}
-                    onChange={() => onToggleMilestone(studentRecord.id, step.id)}
-                    className="h-4 w-4 rounded accent-[#35408e] dark:accent-[#ffd41c]"
-                  />
-                  <span>{step.label}</span>
-                </label>
+                  <p className="text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">{day}</p>
+                  <label className="mt-1.5 block text-[10px] text-slate-500 dark:text-slate-400">
+                    Logged
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="16"
+                      value={studyHoursInput[idx] ?? '0'}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setStudyHoursInput((prev) => prev.map((v, i) => (i === idx ? val : v)))
+                      }}
+                      className="mt-0.5 w-full rounded-lg border border-slate-200 bg-white px-1 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
+                    />
+                  </label>
+                  <label className="mt-1.5 block text-[10px] text-slate-500 dark:text-slate-400">
+                    Target
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="16"
+                      value={targetHoursInput[idx] ?? '0'}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setTargetHoursInput((prev) => prev.map((v, i) => (i === idx ? val : v)))
+                      }}
+                      className="mt-0.5 w-full rounded-lg border border-slate-200 bg-white px-1 py-1 text-center text-[11px] text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-slate-300"
+                    />
+                  </label>
+                </div>
               ))}
             </div>
-          </div>
+
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={savingHours}
+                className="rounded-xl bg-[#35408e] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] disabled:opacity-60 dark:bg-[#ffd41c] dark:text-[#232b66]"
+              >
+                {savingHours ? 'Saving...' : 'Save Study Hours'}
+              </button>
+            </div>
+          </form>
 
           <div className="space-y-2.5 border-t border-slate-100 pt-4 dark:border-slate-700/70">
             <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
@@ -453,7 +525,7 @@ export default function AdminStudentEditor({
                 type="text"
                 value={newRec}
                 onChange={(e) => setNewRec(e.target.value)}
-                placeholder="e.g. Submit Chapter 4 draft by Friday."
+                placeholder="e.g. Review Finite Mathematics lessons."
                 className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
               />
               <button

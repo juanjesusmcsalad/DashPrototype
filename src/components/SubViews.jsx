@@ -9,7 +9,7 @@ import {
 
 const CARD = 'rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700/70 dark:bg-[#181e38]'
 
-export function AcademicProgressView({ data, searchQuery, onToggleMilestone }) {
+export function AcademicProgressView({ data, searchQuery }) {
   const query = searchQuery.trim().toLowerCase()
   const subjects = data.subjects.filter((s) =>
     query
@@ -27,8 +27,6 @@ export function AcademicProgressView({ data, searchQuery, onToggleMilestone }) {
         ).toFixed(2)
       : '0.00'
   const honors = getHonorsStanding(average)
-  const milestones = data.researchMilestones || []
-  const completedMilestones = milestones.filter((m) => m.completed).length
 
   return (
     <div className="space-y-6">
@@ -47,7 +45,7 @@ export function AcademicProgressView({ data, searchQuery, onToggleMilestone }) {
             </span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-            Track official subject grades, research milestones, and export your summary report.
+            Track official subject grades, completion progress, and export your summary report.
           </p>
         </div>
 
@@ -68,45 +66,6 @@ export function AcademicProgressView({ data, searchQuery, onToggleMilestone }) {
           </button>
         </div>
       </div>
-
-      {/* Research Chapter Milestone Tracker */}
-      {milestones.length > 0 && (
-        <div className={`${CARD} p-5`}>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                Research Milestones (Chapters 1–5)
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {completedMilestones} of {milestones.length} stages completed
-              </p>
-            </div>
-            <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
-              {Math.round((completedMilestones / milestones.length) * 100)}%
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            {milestones.map((step) => (
-              <label
-                key={step.id}
-                className={`flex cursor-pointer items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-xs font-semibold transition ${
-                  step.completed
-                    ? 'border-[#35408e]/40 bg-[#eef0fb] text-[#35408e] dark:border-[#ffd41c]/60 dark:bg-[#232b52] dark:text-[#ffd41c]'
-                    : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-[#35408e]/30 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-300'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={step.completed}
-                  onChange={() => onToggleMilestone?.(step.id)}
-                  className="h-4 w-4 rounded accent-[#35408e] dark:accent-[#ffd41c]"
-                />
-                <span>{step.label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className={`${CARD} p-5`}>

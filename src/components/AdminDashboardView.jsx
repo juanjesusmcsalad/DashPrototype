@@ -179,13 +179,10 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     setSaveMessage(`Removed task from ${target.student?.name}.`)
   }
 
-  const handleToggleStudentMilestone = async (studentId, milestoneId) => {
+  const handleSaveWeeklyEngagement = async (studentId, weeklyEngagement) => {
     const target = students.find((s) => s.id === studentId)
-    if (!target) return
-    const updatedMilestones = (target.researchMilestones || []).map((m) =>
-      m.id === milestoneId ? { ...m, completed: !m.completed } : m
-    )
-    await updateStudentFields(studentId, { researchMilestones: updatedMilestones })
+    await updateStudentFields(studentId, { weeklyEngagement })
+    setSaveMessage(`Updated weekly study hours for ${target?.student?.name || 'student'}.`)
   }
 
   const handleAddRecommendation = async (studentId, text) => {
@@ -514,7 +511,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                   onAddTask={handleAddTaskForStudent}
                   onToggleTask={handleToggleStudentTask}
                   onDeleteTask={handleDeleteStudentTask}
-                  onToggleMilestone={handleToggleStudentMilestone}
+                  onSaveWeeklyEngagement={handleSaveWeeklyEngagement}
                   onAddRecommendation={handleAddRecommendation}
                   onDeleteRecommendation={handleDeleteRecommendation}
                   onPrevStudent={() => {

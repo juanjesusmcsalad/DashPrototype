@@ -31,7 +31,7 @@ function StatCard({ value, label, badge, highlighted = false, onClick }) {
 }
 
 export default function DashboardView({ data, searchQuery, onNavigate }) {
-  const { student, subjects, tasks, recommendations, gradeHistory, researchMilestones = [] } = data
+  const { student, subjects, tasks, recommendations, gradeHistory } = data
 
   const averageGrade =
     subjects.length > 0
@@ -41,7 +41,6 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
 
   const completedTasks = tasks.filter((t) => t.completed).length
   const totalTasks = tasks.length
-  const completedMilestones = researchMilestones.filter((m) => m.completed).length
 
   const query = searchQuery.trim().toLowerCase()
   const filteredSubjects = subjects.filter((s) =>
@@ -77,14 +76,6 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               <StatCard
                 value={`${completedTasks}/${totalTasks}`}
                 label="Tasks Completed"
-                badge={
-                  researchMilestones.length > 0
-                    ? {
-                        label: `Research: ${completedMilestones}/${researchMilestones.length}`,
-                        achieved: completedMilestones === researchMilestones.length,
-                      }
-                    : null
-                }
                 onClick={() => onNavigate('tasks')}
               />
             </div>

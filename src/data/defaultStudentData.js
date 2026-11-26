@@ -1,9 +1,9 @@
 export const ALLOWED_SUBJECTS = [
-  { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 91, progress: 88, teacher: 'Mr. L. Bautista' },
-  { id: 'research', name: 'Research', shortName: 'Research', grade: 93, progress: 92, teacher: 'Mr. R. Villanueva' },
-  { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 90, progress: 85, teacher: 'Ms. K. Mendoza' },
-  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 86, progress: 76, teacher: 'Mr. J. Cruz' },
-  { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 88, progress: 84, teacher: 'Ms. L. Reyes' },
+  { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 91, progress: 88, teacher: 'Sage' },
+  { id: 'research', name: 'Research', shortName: 'Research', grade: 93, progress: 92, teacher: 'Cypher' },
+  { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 90, progress: 85, teacher: 'Sova' },
+  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 86, progress: 76, teacher: 'Viper' },
+  { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 88, progress: 84, teacher: 'Jett' },
 ]
 
 export const DEFAULT_STUDENT_DATA = {
@@ -15,7 +15,7 @@ export const DEFAULT_STUDENT_DATA = {
     section: '12SHS2510',
     strand: 'Grade 12 — Section 12SHS2510',
     email: 'carlos.conde@ctseniorhigh.edu.ph',
-    adviser: 'Ms. Elena Santos',
+    adviser: 'Brimstone',
     studentNumber: 'SHS-2026-0418',
     displayDate: 'December 4, 2026',
     attendanceRate: 96,
@@ -61,12 +61,4 @@ export const DEFAULT_STUDENT_DATA = {
   tasks: [],
   announcements: [],
   schedule: [],
-  researchMilestones: [
-    { id: 'ch-1', label: 'Ch. 1: Problem & Background', completed: true },
-    { id: 'ch-2', label: 'Ch. 2: Review of Literature', completed: true },
-    { id: 'ch-3', label: 'Ch. 3: Methodology', completed: false },
-    { id: 'ch-4', label: 'Ch. 4: Data & Results', completed: false },
-    { id: 'ch-5', label: 'Ch. 5: Summary & Conclusion', completed: false },
-    { id: 'defense', label: 'Final Oral Defense', completed: false },
-  ],
 }

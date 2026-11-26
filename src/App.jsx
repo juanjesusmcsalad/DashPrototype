@@ -93,19 +93,6 @@ export default function App() {
     }
   }
 
-  const handleToggleMilestone = async (milestoneId) => {
-    if (!currentUser) return
-    const updatedMilestones = (data.researchMilestones || []).map((m) =>
-      m.id === milestoneId ? { ...m, completed: !m.completed } : m
-    )
-    setData((prev) => ({ ...prev, researchMilestones: updatedMilestones }))
-    try {
-      await updateStudentFields(currentUser.uid, { researchMilestones: updatedMilestones })
-    } catch (err) {
-      setSyncStatus((prev) => ({ ...prev, error: err.message }))
-    }
-  }
-
   const handleLogStudyHours = async (dayIndex, hoursToAdd) => {
     if (!currentUser) return
     const currentHours = [...(data.weeklyEngagement?.studyHours || [0, 0, 0, 0, 0, 0, 0])]
@@ -168,7 +155,6 @@ export default function App() {
           <AcademicProgressView
             data={data}
             searchQuery={searchQuery}
-            onToggleMilestone={handleToggleMilestone}
           />
         )
       case 'tasks':
