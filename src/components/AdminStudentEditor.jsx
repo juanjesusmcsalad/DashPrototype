@@ -250,10 +250,10 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('grades')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
             editorTab === 'grades'
-              ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
-              : 'bg-[#f5f6fb] text-slate-600 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-300'
+              ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
+              : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
           }`}
         >
           Grades &amp; Info {isDirty ? '•' : ''}
@@ -261,10 +261,10 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('tasks')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
             editorTab === 'tasks'
-              ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
-              : 'bg-[#f5f6fb] text-slate-600 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-300'
+              ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
+              : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
           }`}
         >
           Tasks ({pendingCount} pending)
@@ -272,10 +272,10 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('notes')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
             editorTab === 'notes'
-              ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
-              : 'bg-[#f5f6fb] text-slate-600 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-300'
+              ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
+              : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
           }`}
         >
           Study Hours &amp; Notes

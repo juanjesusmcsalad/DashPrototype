@@ -1,6 +1,6 @@
 export default function WelcomeBanner({ firstName, displayDate }) {
   return (
-    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#424fa6] via-[#35408e] to-[#242c66] px-6 py-6 text-white shadow-lg shadow-[#35408e]/20 sm:px-8 sm:py-7">
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-6 py-6 text-white shadow-lg shadow-[#1b225c]/25 ring-1 ring-white/10 sm:px-8 sm:py-7">
       {/* Soft ambient background shapes */}
       <div className="pointer-events-none absolute -top-12 right-24 h-40 w-40 rounded-full bg-[#ffd41c]/15 blur-2xl" />
       <div className="pointer-events-none absolute -bottom-16 right-8 h-44 w-44 rounded-full bg-[#1a214f]/40 blur-2xl" />

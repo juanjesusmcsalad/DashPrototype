@@ -7,10 +7,10 @@ function StatCard({ value, label, highlighted = false, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-7 text-center transition hover:-translate-y-0.5 dark:bg-[#181e38] ${
+      className={`flex flex-col items-center justify-center rounded-2xl px-4 py-7 text-center transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg ${
         highlighted
-          ? 'border-2 border-[#35408e] shadow-[0_10px_28px_rgba(53,64,142,0.12)] dark:border-[#ffd41c]'
-          : 'border border-slate-100 shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-slate-700/70'
+          ? 'border-2 border-[#35408e] bg-gradient-to-br from-[#f2f4ff] via-white to-[#e4e9ff] shadow-[0_10px_28px_rgba(53,64,142,0.14)] dark:border-[#ffd41c] dark:from-[#232c57] dark:to-[#151b38]'
+          : 'border border-slate-100 bg-gradient-to-br from-white to-[#f6f8ff] shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-slate-700/70 dark:from-[#1b2240] dark:to-[#131830]'
       }`}
     >
       <span className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">{value}</span>
@@ -85,7 +85,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {/* Academic Progress Card */}
-              <div className="flex items-center justify-between rounded-2xl border-2 border-[#35408e]/85 bg-[#eef0fb] p-5 shadow-sm dark:border-[#4c59b5] dark:bg-[#1e2647]">
+              <div className="flex items-center justify-between rounded-2xl border-2 border-[#35408e]/85 bg-gradient-to-br from-[#f2f4ff] via-[#e7ebfd] to-[#d6ddfb] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-[#4c59b5] dark:from-[#26315e] dark:via-[#1e2647] dark:to-[#151b36]">
                 <div>
                   <h3 className="text-sm font-bold leading-snug text-[#35408e] dark:text-white">
                     Academic
@@ -95,7 +95,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                   <button
                     type="button"
                     onClick={() => onNavigate('academic-progress')}
-                    className="mt-4 rounded-full bg-[#35408e] px-6 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#262f6d] dark:bg-[#4c59b5]"
+                    className="mt-4 rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-6 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-[#35408e] hover:to-[#151b45] hover:shadow"
                   >
                     View
                   </button>
@@ -109,7 +109,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               </div>
 
               {/* Engagement Analytics Card */}
-              <div className="flex items-center justify-between rounded-2xl border border-[#ffd41c] bg-[#fff9dc] p-5 shadow-sm dark:border-[#ffd41c]/60 dark:bg-[#272318]">
+              <div className="flex items-center justify-between rounded-2xl border border-[#ffd41c] bg-gradient-to-br from-[#fffce8] via-[#fff7cc] to-[#ffefb0] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-[#ffd41c]/60 dark:from-[#2d2817] dark:to-[#1f1b10]">
                 <div>
                   <h3 className="text-sm font-bold leading-snug text-[#35408e] dark:text-[#ffd41c]">
                     Engagement Analytics
@@ -117,7 +117,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                   <button
                     type="button"
                     onClick={() => onNavigate('engagement-analytics')}
-                    className="mt-5 rounded-full bg-[#ffd41c] px-6 py-1.5 text-xs font-bold text-[#232b66] shadow-sm transition hover:brightness-95"
+                    className="mt-5 rounded-full bg-gradient-to-r from-[#ffd41c] to-[#f2b800] px-6 py-1.5 text-xs font-bold text-[#232b66] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-95"
                   >
                     View
                   </button>
@@ -178,7 +178,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                     </div>
                     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#35408e] to-[#5260bd] transition-all duration-300 dark:from-[#ffd41c] dark:to-[#eab308]"
+                        className="h-full rounded-full bg-gradient-to-r from-[#5565d0] via-[#35408e] to-[#1b225c] transition-all duration-300 dark:from-[#ffd41c] dark:to-[#eab308]"
                         style={{ width: `${Math.min(100, Math.max(0, Number(subject.grade || 0)))}%` }}
                       />
                     </div>

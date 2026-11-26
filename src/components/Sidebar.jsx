@@ -118,7 +118,7 @@ export default function Sidebar({
       )}
 
       <aside
-        className={`fixed inset-y-4 left-4 z-40 flex w-56 flex-col justify-between rounded-3xl bg-gradient-to-b from-[#424fa6] via-[#35408e] to-[#242c66] p-5 text-white shadow-xl shadow-[#35408e]/25 transition-transform duration-200 lg:static lg:inset-auto lg:h-full lg:shrink-0 lg:translate-x-0 ${
+        className={`fixed inset-y-4 left-4 z-40 flex w-56 flex-col justify-between rounded-3xl bg-gradient-to-b from-[#4f5ec4] via-[#35408e] to-[#171e4f] p-5 text-white shadow-xl shadow-[#1b225c]/30 ring-1 ring-white/10 transition-transform duration-200 lg:static lg:inset-auto lg:h-full lg:shrink-0 lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-[120%]'
         }`}
       >
@@ -151,13 +151,15 @@ export default function Sidebar({
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(item.id)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition-all ${
+                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition-all duration-200 ease-out ${
                     isActive
-                      ? 'bg-[#ffd41c] font-bold text-[#232b66] shadow-sm'
-                      : 'font-medium text-white/80 hover:bg-white/10 hover:text-white'
+                      ? 'bg-gradient-to-r from-[#ffd41c] to-[#f5be00] font-bold text-[#232b66] shadow-md shadow-[#151b45]/25'
+                      : 'font-medium text-white/80 hover:translate-x-1 hover:bg-gradient-to-r hover:from-white/18 hover:to-[#4f5ec4]/35 hover:text-white hover:shadow-sm'
                   }`}
                 >
-                  <NavIcon name={item.icon} active={isActive} />
+                  <span className="transition-transform duration-200 ease-out group-hover:scale-110">
+                    <NavIcon name={item.icon} active={isActive} />
+                  </span>
                   <span className="truncate">{item.label}</span>
                 </button>
               )
@@ -168,7 +170,7 @@ export default function Sidebar({
         <button
           type="button"
           onClick={onLogout}
-          className="mt-6 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+          className="group mt-6 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] font-medium text-white/80 transition-all duration-200 ease-out hover:translate-x-1 hover:bg-gradient-to-r hover:from-white/15 hover:to-white/5 hover:text-white"
         >
           <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

@@ -431,10 +431,10 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
           key={sec}
           type="button"
           onClick={() => setSectionFilter(sec)}
-          className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
+          className={`rounded-full px-3.5 py-1 text-xs font-bold transition-all duration-200 ease-out ${
             sectionFilter === sec
-              ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
-              : 'text-slate-600 hover:bg-[#eef0fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:bg-white/10'
+              ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
+              : 'text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:from-white/10 dark:hover:to-white/5'
           }`}
         >
           {sec === 'ALL' ? 'All Sections' : sec}
@@ -1070,7 +1070,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
       default:
         return (
           <div className="space-y-6">
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#424fa6] via-[#35408e] to-[#242c66] px-6 py-6 text-white shadow-lg shadow-[#35408e]/20 sm:px-8">
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-6 py-6 text-white shadow-lg shadow-[#1b225c]/25 ring-1 ring-white/10 sm:px-8">
               <div className="pointer-events-none absolute -top-12 right-24 h-40 w-40 rounded-full bg-[#ffd41c]/15 blur-2xl" />
               <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
                 <div>

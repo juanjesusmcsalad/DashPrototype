@@ -43,7 +43,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
     <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] p-4 transition-colors sm:p-6 dark:bg-[#0f1326]">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-xl shadow-[#35408e]/10 ring-1 ring-slate-100 lg:grid-cols-12 dark:bg-[#181e38] dark:ring-slate-700/70">
         {/* Left Brand Showcase */}
-        <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#424fa6] via-[#35408e] to-[#242c66] p-8 text-white lg:col-span-5">
+        <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] p-8 text-white lg:col-span-5">
           <div className="pointer-events-none absolute -top-16 -right-16 h-52 w-52 rounded-full bg-[#ffd41c]/15 blur-2xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-[#1a214f]/50 blur-2xl" />
 
@@ -93,10 +93,10 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
               <button
                 type="button"
                 onClick={() => switchMode('signin')}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ease-out ${
                   mode === 'signin'
-                    ? 'bg-[#35408e] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#35408e] dark:text-slate-300 dark:hover:text-[#ffd41c]'
+                    ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm'
+                    : 'text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c] dark:hover:text-[#ffd41c]'
                 }`}
               >
                 Sign In
@@ -104,10 +104,10 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
               <button
                 type="button"
                 onClick={() => switchMode('signup')}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ease-out ${
                   mode === 'signup'
-                    ? 'bg-[#35408e] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#35408e] dark:text-slate-300 dark:hover:text-[#ffd41c]'
+                    ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm'
+                    : 'text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c] dark:hover:text-[#ffd41c]'
                 }`}
               >
                 Sign Up
@@ -115,10 +115,10 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
               <button
                 type="button"
                 onClick={() => switchMode('admin')}
-                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition ${
+                className={`rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 ease-out ${
                   mode === 'admin'
-                    ? 'bg-[#ffd41c] text-[#232b66] shadow-sm'
-                    : 'text-slate-600 hover:text-[#35408e] dark:text-slate-300 dark:hover:text-[#ffd41c]'
+                    ? 'bg-gradient-to-r from-[#ffd41c] to-[#f2b800] text-[#232b66] shadow-sm'
+                    : 'text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c] dark:hover:text-[#ffd41c]'
                 }`}
               >
                 Admin Login
@@ -257,10 +257,10 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full rounded-full py-2.5 text-sm font-bold shadow-sm transition disabled:opacity-60 ${
+              className={`w-full rounded-full py-2.5 text-sm font-bold shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60 ${
                 mode === 'admin'
-                  ? 'bg-[#ffd41c] text-[#232b66] hover:brightness-95'
-                  : 'bg-[#35408e] text-white hover:bg-[#262f6d] dark:bg-[#4c59b5]'
+                  ? 'bg-gradient-to-r from-[#ffd41c] to-[#f2b800] text-[#232b66] hover:brightness-95'
+                  : 'bg-gradient-to-r from-[#424fa6] via-[#35408e] to-[#20275e] text-white hover:from-[#35408e] hover:to-[#151b45]'
               }`}
             >
               {loading

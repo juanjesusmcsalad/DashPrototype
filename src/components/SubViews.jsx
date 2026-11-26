@@ -157,10 +157,10 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
               key={tab}
               type="button"
               onClick={() => setFilter(tab)}
-              className={`rounded-full px-3.5 py-1 text-xs font-semibold capitalize transition ${
+              className={`rounded-full px-3.5 py-1 text-xs font-semibold capitalize transition-all duration-200 ease-out ${
                 filter === tab
-                  ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
-                  : 'text-slate-600 hover:bg-[#eef0fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:bg-white/10'
+                  ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
+                  : 'text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:from-white/10 dark:hover:to-white/5'
               }`}
             >
               {tab}
