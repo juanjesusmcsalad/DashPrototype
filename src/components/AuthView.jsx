@@ -18,25 +18,6 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
     setPassword('')
   }
 
-  const fillDemoStudent = (demoSection = '12SHS2510') => {
-    setMode('signin')
-    setSection(demoSection)
-    setEmail(
-      demoSection === '12SHS2509'
-        ? 'maria.santos@ctseniorhigh.edu.ph'
-        : 'carlos.conde@ctseniorhigh.edu.ph'
-    )
-    setPassword('student123')
-    setError('')
-  }
-
-  const fillDemoAdmin = () => {
-    setMode('admin')
-    setEmail('admin@ctseniorhigh.edu.ph')
-    setPassword('admin123')
-    setError('')
-  }
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -207,7 +188,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Carlos Conde"
+                  placeholder="e.g. Juan Dela Cruz"
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                 />
               </div>
@@ -251,8 +232,8 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={
                   mode === 'admin'
-                    ? 'admin@ctseniorhigh.edu.ph'
-                    : 'student@ctseniorhigh.edu.ph'
+                    ? 'admin@gmail.com'
+                    : 'student@gmail.com'
                 }
                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
               />
@@ -291,42 +272,6 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                     : `Sign In (${section})`}
             </button>
           </form>
-
-          {!isFirebaseConfigured && (
-            <div className="mt-6 rounded-2xl border border-[#35408e]/15 bg-[#eef0fb]/60 p-4 dark:border-slate-700 dark:bg-[#11162b]">
-              <p className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">Quick Demo Credentials</p>
-              <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
-                12SHS2510: <code>carlos.conde@ctseniorhigh.edu.ph</code> / <code>student123</code>
-                <br />
-                12SHS2509: <code>maria.santos@ctseniorhigh.edu.ph</code> / <code>student123</code>
-                <br />
-                Admin: <code>admin@ctseniorhigh.edu.ph</code> / <code>admin123</code>
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => fillDemoStudent('12SHS2510')}
-                  className="rounded-full bg-[#35408e] px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-[#262f6d]"
-                >
-                  Demo 12SHS2510
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillDemoStudent('12SHS2509')}
-                  className="rounded-full bg-[#4c59b5] px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-[#35408e]"
-                >
-                  Demo 12SHS2509
-                </button>
-                <button
-                  type="button"
-                  onClick={fillDemoAdmin}
-                  className="rounded-full bg-[#ffd41c] px-3.5 py-1 text-[11px] font-bold text-[#232b66] hover:brightness-95"
-                >
-                  Demo Admin
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

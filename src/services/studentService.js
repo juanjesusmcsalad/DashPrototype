@@ -2,30 +2,7 @@ import { collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firesto
 import { DEFAULT_STUDENT_DATA } from '../data/defaultStudentData'
 import { db, isFirebaseConfigured } from '../firebase'
 
-const DEMO_STUDENTS_KEY = 'dashprototype_demo_students_v4'
-
-function createSecondDemoStudent() {
-  return {
-    ...DEFAULT_STUDENT_DATA,
-    student: {
-      ...DEFAULT_STUDENT_DATA.student,
-      id: 'maria-santos',
-      name: 'Maria Santos',
-      firstName: 'Maria',
-      email: 'maria.santos@ctseniorhigh.edu.ph',
-      section: '12SHS2509',
-      strand: 'Grade 12 — Section 12SHS2509',
-      studentNumber: 'SHS-2026-0419',
-      attendanceRate: 98,
-      presentDays: 98,
-      totalDays: 100,
-    },
-    subjects: DEFAULT_STUDENT_DATA.subjects.map((subj, idx) => ({
-      ...subj,
-      grade: Math.min(98, subj.grade + (idx % 2 === 0 ? 2 : 1)),
-    })),
-  }
-}
+const DEMO_STUDENTS_KEY = 'dashprototype_demo_students_v5'
 
 export function buildInitialStudentRecord(uid, { name, email, section }) {
   const safeName = (name || 'New Student').trim()
@@ -38,7 +15,7 @@ export function buildInitialStudentRecord(uid, { name, email, section }) {
       id: uid,
       name: safeName,
       firstName,
-      email: email || DEFAULT_STUDENT_DATA.student.email,
+      email: email || '',
       section: safeSection,
       strand: `Grade 12 — Section ${safeSection}`,
       studentNumber: `SHS-2026-${String(Math.floor(1000 + Math.random() * 9000))}`,
@@ -57,10 +34,7 @@ function readDemoStudentsMap() {
     // Ignore storage read errors in restricted environments.
   }
 
-  const initial = {
-    'carlos-conde': DEFAULT_STUDENT_DATA,
-    'maria-santos': createSecondDemoStudent(),
-  }
+  const initial = {}
   writeDemoStudentsMap(initial)
   return initial
 }
@@ -172,7 +146,7 @@ export function subscribeToAllStudents(onStudents, onStatusChange) {
       onStatusChange?.({ mode: 'firestore', error: null })
     },
     (err) => {
-      onStudents([{ id: 'carlos-conde', ...DEFAULT_STUDENT_DATA }])
+      onStudents([])
       onStatusChange?.({ mode: 'demo', error: err.message })
     }
   )

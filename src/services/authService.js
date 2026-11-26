@@ -11,31 +11,39 @@ import { buildInitialStudentRecord, ensureDemoStudentRecord } from './studentSer
 
 export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
 
-const DEMO_USERS_KEY = 'dashprototype_demo_users_v3'
-const DEMO_SESSION_KEY = 'dashprototype_demo_session_v3'
+const DEMO_USERS_KEY = 'dashprototype_demo_users_v4'
+const DEMO_SESSION_KEY = 'dashprototype_demo_session_v4'
 
 const DEFAULT_DEMO_USERS = [
   {
-    uid: 'carlos-conde',
-    name: 'Carlos Conde',
-    email: 'carlos.conde@ctseniorhigh.edu.ph',
-    password: 'student123',
-    role: 'student',
-    section: '12SHS2510',
+    uid: 'admin-johann',
+    name: 'Johann Paul Reblando',
+    email: 'johannpaulreblando@gmail.com',
+    password: 'Fortnite2025.12.20-17.39.08.06.DVR',
+    role: 'admin',
+    section: 'Admin',
   },
   {
-    uid: 'maria-santos',
-    name: 'Maria Santos',
-    email: 'maria.santos@ctseniorhigh.edu.ph',
-    password: 'student123',
-    role: 'student',
-    section: '12SHS2509',
+    uid: 'admin-paul',
+    name: 'Paul Vincent Laguardia',
+    email: 'paulvincentlaguardia@gmail.com',
+    password: 'Fortnite2025.12.20-17.39.08.06.DVR',
+    role: 'admin',
+    section: 'Admin',
   },
   {
-    uid: 'admin-ctsh',
-    name: 'Dr. Elena Santos',
-    email: 'admin@ctseniorhigh.edu.ph',
-    password: 'admin123',
+    uid: 'admin-daniel',
+    name: 'Daniel',
+    email: 'danielvn2012@gmail.com',
+    password: 'Fortnite2025.12.20-17.39.08.06.DVR',
+    role: 'admin',
+    section: 'Admin',
+  },
+  {
+    uid: 'admin-carlos',
+    name: 'Carlos Louie Conde',
+    email: 'carloslouieconde@gmail.com',
+    password: 'Fortnite2025.12.20-17.39.08.06.DVR',
     role: 'admin',
     section: 'Admin',
   },
@@ -231,6 +239,9 @@ export async function signInWithRole({ email, password, section, expectedRole = 
     }
     if (expectedRole === 'admin' && match.role !== 'admin') {
       throw new Error('This account does not have administrator privileges.')
+    }
+    if (expectedRole === 'student' && match.role === 'admin') {
+      throw new Error('Please use the Admin Login tab for administrator accounts.')
     }
     if (expectedRole === 'student' && match.role === 'student' && section && match.section !== section) {
       throw new Error(`This account belongs to section ${match.section}, not ${section}.`)

@@ -431,7 +431,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 onChange={(e) => setBulkTaskSubject(e.target.value)}
                 className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
               >
-                {(students[0]?.subjects || []).map((s) => (
+                {ALLOWED_SUBJECTS.map((s) => (
                   <option key={s.id} value={s.shortName}>
                     {s.shortName}
                   </option>
@@ -484,7 +484,12 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 </div>
 
                 <div className="max-h-[540px] space-y-2 overflow-y-auto pr-1">
-                  {filteredStudents.map((entry) => {
+                  {filteredStudents.length === 0 ? (
+                    <p className="rounded-xl bg-[#f5f6fb] p-4 text-center text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
+                      No students registered yet. Students appear here once they sign up.
+                    </p>
+                  ) : (
+                    filteredStudents.map((entry) => {
                     const isSelected = selectedStudent?.id === entry.id
                     const pendingTasks = (entry.tasks || []).filter((t) => !t.completed).length
                     return (
@@ -520,7 +525,8 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                         </span>
                       </button>
                     )
-                  })}
+                  })
+                  )}
                 </div>
               </section>
 

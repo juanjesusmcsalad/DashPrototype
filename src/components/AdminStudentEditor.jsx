@@ -56,7 +56,7 @@ export default function AdminStudentEditor({
   if (!studentRecord) {
     return (
       <div className="rounded-2xl border border-slate-100 bg-white p-6 text-sm text-slate-500 shadow-sm dark:border-slate-700/70 dark:bg-[#181e38] dark:text-slate-400">
-        No students match the selected filter.
+        No students registered yet or none match the selected filter.
       </div>
     )
   }
