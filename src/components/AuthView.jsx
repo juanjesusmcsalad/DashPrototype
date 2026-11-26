@@ -80,25 +80,13 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
             </p>
           </div>
 
-          {/* Updated 3D Models Showcase */}
-          <div className="relative z-10 mt-8 flex items-end justify-center pt-4">
-            <div className="relative h-44 w-64" aria-hidden="true">
-              <img
-                src="/models/scholarcap.png"
-                alt=""
-                className="absolute bottom-0 left-0 h-32 w-32 object-contain drop-shadow-md"
-              />
-              <img
-                src="/models/bulldawg.png"
-                alt=""
-                className="absolute bottom-0 left-1/2 h-44 w-44 -translate-x-1/2 object-contain drop-shadow-xl"
-              />
-              <img
-                src="/models/backpack.png"
-                alt=""
-                className="absolute right-0 bottom-0 h-28 w-28 object-contain drop-shadow-md"
-              />
-            </div>
+          {/* Mascot Showcase */}
+          <div className="relative z-10 mt-8 flex items-center justify-center pt-4" aria-hidden="true">
+            <img
+              src="/models/bulldawg.png"
+              alt=""
+              className="h-48 w-48 object-contain drop-shadow-xl"
+            />
           </div>
         </div>
 
