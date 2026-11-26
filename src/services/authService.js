@@ -275,3 +275,13 @@ export async function signOutUser() {
   }
   await signOut(auth)
 }
+
+export async function updateUserMetadata(uid, updates) {
+  if (!isFirebaseConfigured || !db) {
+    const users = readDemoUsers()
+    const nextUsers = users.map((u) => (u.uid === uid ? { ...u, ...updates } : u))
+    writeDemoUsers(nextUsers)
+    return
+  }
+  await setDoc(doc(db, 'users', uid), updates, { merge: true })
+}

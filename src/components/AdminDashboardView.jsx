@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { isFirebaseConfigured } from '../firebase'
-import { ALLOWED_SECTIONS, subscribeToAllUserAccounts } from '../services/authService'
+import {
+  ALLOWED_SECTIONS,
+  subscribeToAllUserAccounts,
+  updateUserMetadata,
+} from '../services/authService'
 import { subscribeToAllStudents, updateStudentFields } from '../services/studentService'
-import { downloadStudentCsv } from '../utils/academicHelpers'
+import AdminStudentEditor from './AdminStudentEditor'
 import { StudentComparisonBarChart, SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
 import ThemeToggle from './ThemeToggle'
@@ -31,11 +35,15 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [accounts, setAccounts] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [sectionFilter, setSectionFilter] = useState('ALL')
+  const [sortBy, setSortBy] = useState('name')
   const [search, setSearch] = useState('')
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
   const [visiblePasswords, setVisiblePasswords] = useState({})
   const [copiedId, setCopiedId] = useState('')
-  const [newRec, setNewRec] = useState('')
+  const [bulkTaskTitle, setBulkTaskTitle] = useState('')
+  const [bulkTaskSubject, setBulkTaskSubject] = useState('Research')
+  const [bulkTaskDueDate, setBulkTaskDueDate] = useState('Dec 12, 2026')
+  const [bulkTaskTarget, setBulkTaskTarget] = useState('ALL')
   const [announcementTitle, setAnnouncementTitle] = useState('')
   const [announcementBody, setAnnouncementBody] = useState('')
   const [announcementTarget, setAnnouncementTarget] = useState('ALL')
@@ -56,16 +64,25 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
   const query = search.trim().toLowerCase()
 
-  const filteredStudents = students.filter((entry) => {
-    const sec = entry.student?.section || '12SHS2510'
-    const matchesSection = sectionFilter === 'ALL' || sec === sectionFilter
-    const matchesQuery =
-      !query ||
-      entry.student?.name?.toLowerCase().includes(query) ||
-      entry.student?.email?.toLowerCase().includes(query) ||
-      sec.toLowerCase().includes(query)
-    return matchesSection && matchesQuery
-  })
+  const filteredStudents = students
+    .filter((entry) => {
+      const sec = entry.student?.section || '12SHS2510'
+      const matchesSection = sectionFilter === 'ALL' || sec === sectionFilter
+      const matchesQuery =
+        !query ||
+        entry.student?.name?.toLowerCase().includes(query) ||
+        entry.student?.email?.toLowerCase().includes(query) ||
+        sec.toLowerCase().includes(query)
+      return matchesSection && matchesQuery
+    })
+    .sort((a, b) => {
+      if (sortBy === 'grade-asc') return computeAverage(a.subjects) - computeAverage(b.subjects)
+      if (sortBy === 'grade-desc') return computeAverage(b.subjects) - computeAverage(a.subjects)
+      if (sortBy === 'attendance-asc') {
+        return Number(a.student?.attendanceRate || 0) - Number(b.student?.attendanceRate || 0)
+      }
+      return (a.student?.name || '').localeCompare(b.student?.name || '')
+    })
 
   const filteredAccounts = accounts.filter((acc) => {
     const sec = acc.section || '12SHS2510'
@@ -81,9 +98,11 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
   const selectedStudent =
     filteredStudents.find((s) => s.id === selectedId) ||
-    students.find((s) => s.id === selectedId) ||
     filteredStudents[0] ||
+    students.find((s) => s.id === selectedId) ||
     students[0]
+
+  const selectedIndex = filteredStudents.findIndex((s) => s.id === selectedStudent?.id)
 
   const overallAvg =
     students.length > 0
@@ -116,40 +135,109 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     return { section: sec, count: group.length, avg, attendance: att, students: group }
   })
 
-  const handleGradeChange = async (subjectId, nextGrade) => {
-    if (!selectedStudent) return
-    const safeGrade = Math.min(100, Math.max(60, Number.isNaN(nextGrade) ? 60 : nextGrade))
-    const updatedSubjects = selectedStudent.subjects.map((subj) =>
-      subj.id === subjectId ? { ...subj, grade: safeGrade } : subj
+  const handleSaveStudentInfo = async (studentId, payload) => {
+    await updateStudentFields(studentId, payload)
+    if (payload.student) {
+      await updateUserMetadata(studentId, {
+        name: payload.student.name,
+        section: payload.student.section,
+      })
+    }
+    setSaveMessage(`Saved updates for ${payload.student?.name || 'student'}.`)
+  }
+
+  const handleAddTaskForStudent = async (studentId, newTask) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target) return
+    const updatedTasks = [newTask, ...(target.tasks || [])]
+    await updateStudentFields(studentId, { tasks: updatedTasks })
+    setSaveMessage(`Assigned "${newTask.title}" to ${target.student?.name}.`)
+  }
+
+  const handleToggleStudentTask = async (studentId, taskId) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target) return
+    const updatedTasks = (target.tasks || []).map((t) =>
+      t.id === taskId ? { ...t, completed: !t.completed } : t
     )
-    await updateStudentFields(selectedStudent.id, { subjects: updatedSubjects })
-    setSaveMessage(`Updated grade for ${selectedStudent.student.name}.`)
+    await updateStudentFields(studentId, { tasks: updatedTasks })
   }
 
-  const handleAttendanceChange = async (nextRate) => {
-    if (!selectedStudent) return
-    const safeRate = Math.min(100, Math.max(0, Number.isNaN(nextRate) ? 0 : nextRate))
-    await updateStudentFields(selectedStudent.id, {
-      student: { ...selectedStudent.student, attendanceRate: safeRate },
-    })
-    setSaveMessage(`Updated attendance for ${selectedStudent.student.name}.`)
+  const handleDeleteStudentTask = async (studentId, taskId) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target) return
+    const updatedTasks = (target.tasks || []).filter((t) => t.id !== taskId)
+    await updateStudentFields(studentId, { tasks: updatedTasks })
+    setSaveMessage(`Removed task from ${target.student?.name}.`)
   }
 
-  const handleAddRecommendation = async (e) => {
-    e.preventDefault()
-    if (!selectedStudent || !newRec.trim()) return
+  const handleToggleStudentMilestone = async (studentId, milestoneId) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target) return
+    const updatedMilestones = (target.researchMilestones || []).map((m) =>
+      m.id === milestoneId ? { ...m, completed: !m.completed } : m
+    )
+    await updateStudentFields(studentId, { researchMilestones: updatedMilestones })
+  }
+
+  const handleAddRecommendation = async (studentId, text) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target || !text.trim()) return
     const updatedRecs = [
       {
         id: `rec-${Date.now()}`,
-        text: newRec.trim(),
+        text: text.trim(),
         category: 'Admin Note',
         priority: 'High',
       },
-      ...(selectedStudent.recommendations || []),
+      ...(target.recommendations || []),
     ]
-    await updateStudentFields(selectedStudent.id, { recommendations: updatedRecs })
-    setNewRec('')
-    setSaveMessage(`Added recommendation for ${selectedStudent.student.name}.`)
+    await updateStudentFields(studentId, { recommendations: updatedRecs })
+    setSaveMessage(`Added recommendation for ${target.student?.name}.`)
+  }
+
+  const handleDeleteRecommendation = async (studentId, recId) => {
+    const target = students.find((s) => s.id === studentId)
+    if (!target) return
+    const updatedRecs = (target.recommendations || []).filter((r) => r.id !== recId)
+    await updateStudentFields(studentId, { recommendations: updatedRecs })
+  }
+
+  const handleBulkAssignTask = async (e) => {
+    e.preventDefault()
+    if (!bulkTaskTitle.trim()) return
+
+    const targets =
+      bulkTaskTarget === 'ALL'
+        ? students
+        : students.filter((s) => (s.student?.section || '12SHS2510') === bulkTaskTarget)
+
+    if (targets.length === 0) return
+
+    const baseId = Date.now()
+    await Promise.all(
+      targets.map((entry, idx) =>
+        updateStudentFields(entry.id, {
+          tasks: [
+            {
+              id: `t-bulk-${baseId}-${idx}`,
+              title: bulkTaskTitle.trim(),
+              subject: bulkTaskSubject,
+              dueDate: bulkTaskDueDate.trim() || 'Dec 12, 2026',
+              completed: false,
+            },
+            ...(entry.tasks || []),
+          ],
+        })
+      )
+    )
+
+    setBulkTaskTitle('')
+    setSaveMessage(
+      `Assigned "${bulkTaskTitle.trim()}" to ${targets.length} student${
+        targets.length === 1 ? '' : 's'
+      } (${bulkTaskTarget === 'ALL' ? 'All Sections' : bulkTaskTarget}).`
+    )
   }
 
   const handleBroadcastAnnouncement = async (e) => {
@@ -234,20 +322,89 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               <div>
                 <h1 className="text-xl font-bold text-slate-900 dark:text-white">Manage Students</h1>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Edit subject grades, attendance, and personalized recommendations by section.
+                  Bulk-assign tasks to whole sections or step through students to edit grades and tasks.
                 </p>
               </div>
               {renderSectionFilterPills()}
             </div>
 
+            {/* Bulk Assign Task to Section / All Students */}
+            <form
+              onSubmit={handleBulkAssignTask}
+              className={`${CARD} grid grid-cols-1 gap-2.5 p-4 md:grid-cols-12`}
+            >
+              <div className="flex items-center text-xs font-bold text-[#35408e] md:col-span-12 dark:text-[#ffd41c]">
+                Assign Task to Multiple Students (12SHS2510 / 12SHS2509)
+              </div>
+              <input
+                type="text"
+                required
+                value={bulkTaskTitle}
+                onChange={(e) => setBulkTaskTitle(e.target.value)}
+                placeholder="e.g. Submit Chapter 3 Revised Draft"
+                className="rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-4 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+              />
+              <select
+                value={bulkTaskSubject}
+                onChange={(e) => setBulkTaskSubject(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+              >
+                {(students[0]?.subjects || []).map((s) => (
+                  <option key={s.id} value={s.shortName}>
+                    {s.shortName}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={bulkTaskDueDate}
+                onChange={(e) => setBulkTaskDueDate(e.target.value)}
+                placeholder="Due date"
+                className="rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+              />
+              <select
+                value={bulkTaskTarget}
+                onChange={(e) => setBulkTaskTarget(e.target.value)}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+              >
+                <option value="ALL">All Students ({students.length})</option>
+                {ALLOWED_SECTIONS.map((sec) => (
+                  <option key={sec} value={sec}>
+                    {sec} Only
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="rounded-xl bg-[#ffd41c] px-4 py-2 text-xs font-bold text-[#232b66] shadow-sm hover:brightness-95 md:col-span-2"
+              >
+                Assign Bulk Task
+              </button>
+            </form>
+
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
               <section className={`${CARD} p-5 lg:col-span-5`}>
-                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Students ({filteredStudents.length})
-                </h2>
-                <div className="space-y-2">
+                <div className="mb-3 flex items-center justify-between gap-2">
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Students ({filteredStudents.length})
+                  </h2>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    aria-label="Sort students"
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-200"
+                  >
+                    <option value="name">Sort: Name (A–Z)</option>
+                    <option value="grade-asc">Sort: Lowest Grade</option>
+                    <option value="grade-desc">Sort: Highest Grade</option>
+                    <option value="attendance-asc">Sort: Lowest Attendance</option>
+                  </select>
+                </div>
+
+                <div className="max-h-[540px] space-y-2 overflow-y-auto pr-1">
                   {filteredStudents.map((entry) => {
                     const isSelected = selectedStudent?.id === entry.id
+                    const pendingTasks = (entry.tasks || []).filter((t) => !t.completed).length
                     return (
                       <button
                         key={entry.id}
@@ -259,18 +416,19 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                             : 'bg-[#f5f6fb] text-slate-800 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-200 dark:hover:bg-[#232b52]'
                         }`}
                       >
-                        <div>
-                          <p className="text-sm font-bold">{entry.student?.name}</p>
+                        <div className="min-w-0 pr-2">
+                          <p className="truncate text-sm font-bold">{entry.student?.name}</p>
                           <p
-                            className={`text-[11px] ${
+                            className={`truncate text-[11px] ${
                               isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                             }`}
                           >
-                            {entry.student?.section || '12SHS2510'} • {entry.student?.email}
+                            {entry.student?.section || '12SHS2510'} • {entry.student?.attendanceRate ?? 96}% att •{' '}
+                            {pendingTasks} pending
                           </p>
                         </div>
                         <span
-                          className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                          className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
                             isSelected
                               ? 'bg-[#ffd41c] text-[#232b66]'
                               : 'bg-white text-[#35408e] dark:bg-[#181e38] dark:text-[#ffd41c]'
@@ -285,98 +443,27 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </section>
 
               <section className={`${CARD} p-5 lg:col-span-7`}>
-                {selectedStudent ? (
-                  <div className="space-y-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-700/70">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                            {selectedStudent.student?.name}
-                          </h2>
-                          <span className="rounded-full bg-[#ffd41c]/35 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
-                            {selectedStudent.student?.section || '12SHS2510'}
-                          </span>
-                        </div>
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                          {selectedStudent.student?.email} • {selectedStudent.student?.studentNumber}
-                        </p>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          Attendance %:
-                          <input
-                            type="number"
-                            min="0"
-                            max="100"
-                            value={selectedStudent.student?.attendanceRate ?? 96}
-                            onChange={(e) => handleAttendanceChange(Number(e.target.value))}
-                            className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-[#ffd41c]"
-                          />
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => downloadStudentCsv(selectedStudent)}
-                          className="rounded-lg border border-[#35408e]/30 px-2.5 py-1 text-[11px] font-bold text-[#35408e] hover:bg-[#eef0fb] dark:border-slate-700 dark:text-[#ffd41c] dark:hover:bg-[#232b52]"
-                        >
-                          Export CSV
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h3 className="mb-2.5 text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                        Edit Subject Grades
-                      </h3>
-                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-                        {(selectedStudent.subjects || []).map((subj) => (
-                          <div
-                            key={subj.id}
-                            className="flex items-center justify-between rounded-xl bg-[#f5f6fb] px-3.5 py-2.5 dark:bg-[#11162b]"
-                          >
-                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                              {subj.shortName}
-                            </span>
-                            <input
-                              type="number"
-                              min="60"
-                              max="100"
-                              value={subj.grade}
-                              onChange={(e) => handleGradeChange(subj.id, Number(e.target.value))}
-                              className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <form
-                      onSubmit={handleAddRecommendation}
-                      className="space-y-2 border-t border-slate-100 pt-4 dark:border-slate-700/70"
-                    >
-                      <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                        Add Personalized Recommendation
-                      </h3>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newRec}
-                          onChange={(e) => setNewRec(e.target.value)}
-                          placeholder="e.g. Submit Chapter 4 draft by Friday."
-                          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-                        />
-                        <button
-                          type="submit"
-                          className="rounded-xl bg-[#ffd41c] px-4 py-2 text-xs font-bold text-[#232b66] hover:brightness-95"
-                        >
-                          Add Note
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                ) : (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">No students match the selected filter.</p>
-                )}
+                <AdminStudentEditor
+                  key={selectedStudent?.id || 'empty'}
+                  studentRecord={selectedStudent}
+                  onSaveStudentInfo={handleSaveStudentInfo}
+                  onAddTask={handleAddTaskForStudent}
+                  onToggleTask={handleToggleStudentTask}
+                  onDeleteTask={handleDeleteStudentTask}
+                  onToggleMilestone={handleToggleStudentMilestone}
+                  onAddRecommendation={handleAddRecommendation}
+                  onDeleteRecommendation={handleDeleteRecommendation}
+                  onPrevStudent={() => {
+                    if (selectedIndex > 0) setSelectedId(filteredStudents[selectedIndex - 1].id)
+                  }}
+                  onNextStudent={() => {
+                    if (selectedIndex >= 0 && selectedIndex < filteredStudents.length - 1) {
+                      setSelectedId(filteredStudents[selectedIndex + 1].id)
+                    }
+                  }}
+                  hasPrev={selectedIndex > 0}
+                  hasNext={selectedIndex >= 0 && selectedIndex < filteredStudents.length - 1}
+                />
               </section>
             </div>
           </div>
