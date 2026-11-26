@@ -143,23 +143,39 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     return { section: sec, count: group.length, avg, attendance: att, students: group }
   })
 
-  const handleSaveStudentInfo = async (studentId, payload) => {
-    await updateStudentFields(studentId, payload)
-    if (payload.student) {
-      await updateUserMetadata(studentId, {
-        name: payload.student.name,
-        section: payload.student.section,
-      })
+  const runAdminAction = async (fn, successMsg) => {
+    try {
+      await fn()
+      if (successMsg) setSaveMessage(successMsg)
+    } catch (err) {
+      setSaveMessage(`Error: ${err.message || 'Could not save changes.'}`)
     }
-    setSaveMessage(`Saved updates for ${payload.student?.name || 'student'}.`)
+  }
+
+  const handleSaveStudentInfo = async (studentId, payload) => {
+    await runAdminAction(async () => {
+      await updateStudentFields(studentId, payload)
+      if (payload.student) {
+        try {
+          await updateUserMetadata(studentId, {
+            name: payload.student.name,
+            section: payload.student.section,
+          })
+        } catch {
+          // Ignore if owner-only Firestore rules block cross-user metadata writes.
+        }
+      }
+    }, `Saved updates for ${payload.student?.name || 'student'}.`)
   }
 
   const handleAddTaskForStudent = async (studentId, newTask) => {
     const target = students.find((s) => s.id === studentId)
     if (!target) return
     const updatedTasks = [newTask, ...(target.tasks || [])]
-    await updateStudentFields(studentId, { tasks: updatedTasks })
-    setSaveMessage(`Assigned "${newTask.title}" to ${target.student?.name}.`)
+    await runAdminAction(
+      () => updateStudentFields(studentId, { tasks: updatedTasks }),
+      `Assigned "${newTask.title}" to ${target.student?.name}.`
+    )
   }
 
   const handleToggleStudentTask = async (studentId, taskId) => {
@@ -168,21 +184,25 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     const updatedTasks = (target.tasks || []).map((t) =>
       t.id === taskId ? { ...t, completed: !t.completed } : t
     )
-    await updateStudentFields(studentId, { tasks: updatedTasks })
+    await runAdminAction(() => updateStudentFields(studentId, { tasks: updatedTasks }))
   }
 
   const handleDeleteStudentTask = async (studentId, taskId) => {
     const target = students.find((s) => s.id === studentId)
     if (!target) return
     const updatedTasks = (target.tasks || []).filter((t) => t.id !== taskId)
-    await updateStudentFields(studentId, { tasks: updatedTasks })
-    setSaveMessage(`Removed task from ${target.student?.name}.`)
+    await runAdminAction(
+      () => updateStudentFields(studentId, { tasks: updatedTasks }),
+      `Removed task from ${target.student?.name}.`
+    )
   }
 
   const handleSaveWeeklyEngagement = async (studentId, weeklyEngagement) => {
     const target = students.find((s) => s.id === studentId)
-    await updateStudentFields(studentId, { weeklyEngagement })
-    setSaveMessage(`Updated weekly study hours for ${target?.student?.name || 'student'}.`)
+    await runAdminAction(
+      () => updateStudentFields(studentId, { weeklyEngagement }),
+      `Updated weekly study hours for ${target?.student?.name || 'student'}.`
+    )
   }
 
   const handleAddRecommendation = async (studentId, text) => {
@@ -197,15 +217,17 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
       },
       ...(target.recommendations || []),
     ]
-    await updateStudentFields(studentId, { recommendations: updatedRecs })
-    setSaveMessage(`Added recommendation for ${target.student?.name}.`)
+    await runAdminAction(
+      () => updateStudentFields(studentId, { recommendations: updatedRecs }),
+      `Added recommendation for ${target.student?.name}.`
+    )
   }
 
   const handleDeleteRecommendation = async (studentId, recId) => {
     const target = students.find((s) => s.id === studentId)
     if (!target) return
     const updatedRecs = (target.recommendations || []).filter((r) => r.id !== recId)
-    await updateStudentFields(studentId, { recommendations: updatedRecs })
+    await runAdminAction(() => updateStudentFields(studentId, { recommendations: updatedRecs }))
   }
 
   const handleBulkAssignTask = async (e) => {
@@ -220,29 +242,26 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     if (targets.length === 0) return
 
     const baseId = Date.now()
-    await Promise.all(
-      targets.map((entry, idx) =>
-        updateStudentFields(entry.id, {
-          tasks: [
-            {
-              id: `t-bulk-${baseId}-${idx}`,
-              title: bulkTaskTitle.trim(),
-              subject: bulkTaskSubject,
-              dueDate: bulkTaskDueDate.trim() || 'Dec 12, 2026',
-              completed: false,
-            },
-            ...(entry.tasks || []),
-          ],
-        })
+    const titleText = bulkTaskTitle.trim()
+    await runAdminAction(async () => {
+      await Promise.all(
+        targets.map((entry, idx) =>
+          updateStudentFields(entry.id, {
+            tasks: [
+              {
+                id: `t-bulk-${baseId}-${idx}`,
+                title: titleText,
+                subject: bulkTaskSubject,
+                dueDate: bulkTaskDueDate.trim() || 'Dec 12, 2026',
+                completed: false,
+              },
+              ...(entry.tasks || []),
+            ],
+          })
+        )
       )
-    )
-
-    setBulkTaskTitle('')
-    setSaveMessage(
-      `Assigned "${bulkTaskTitle.trim()}" to ${targets.length} student${
-        targets.length === 1 ? '' : 's'
-      } (${bulkTaskTarget === 'ALL' ? 'All Sections' : bulkTaskTarget}).`
-    )
+      setBulkTaskTitle('')
+    }, `Assigned "${titleText}" to ${targets.length} student${targets.length === 1 ? '' : 's'} (${bulkTaskTarget === 'ALL' ? 'All Sections' : bulkTaskTarget}).`)
   }
 
   const handleAddScheduleSlot = async (e) => {
@@ -262,15 +281,15 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         ? students
         : students.filter((s) => (s.student?.section || '12SHS2510') === schedSection)
 
-    await Promise.all(
-      targets.map((entry) =>
-        updateStudentFields(entry.id, {
-          schedule: [...(entry.schedule || []), newSlot],
-        })
-      )
-    )
-
-    setSaveMessage(
+    await runAdminAction(
+      () =>
+        Promise.all(
+          targets.map((entry) =>
+            updateStudentFields(entry.id, {
+              schedule: [...(entry.schedule || []), newSlot],
+            })
+          )
+        ),
       `Added ${schedSubject} (${schedDay}) to ${
         schedSection === 'ALL' ? 'all sections' : schedSection
       }.`
@@ -281,24 +300,30 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     const targets = students.filter(
       (s) => (s.student?.section || '12SHS2510') === targetSection
     )
-    await Promise.all(
-      targets.map((entry) =>
-        updateStudentFields(entry.id, {
-          schedule: (entry.schedule || []).filter((item) => item.id !== slotId),
-        })
-      )
+    await runAdminAction(
+      () =>
+        Promise.all(
+          targets.map((entry) =>
+            updateStudentFields(entry.id, {
+              schedule: (entry.schedule || []).filter((item) => item.id !== slotId),
+            })
+          )
+        ),
+      `Removed schedule entry from ${targetSection}.`
     )
-    setSaveMessage(`Removed schedule entry from ${targetSection}.`)
   }
 
   const handleClearSectionSchedule = async (targetSection) => {
     const targets = students.filter(
       (s) => (s.student?.section || '12SHS2510') === targetSection
     )
-    await Promise.all(
-      targets.map((entry) => updateStudentFields(entry.id, { schedule: [] }))
+    await runAdminAction(
+      () =>
+        Promise.all(
+          targets.map((entry) => updateStudentFields(entry.id, { schedule: [] }))
+        ),
+      `Cleared schedule for ${targetSection}.`
     )
-    setSaveMessage(`Cleared schedule for ${targetSection}.`)
   }
 
   const handleBroadcastAnnouncement = async (e) => {
@@ -322,21 +347,17 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         ? students
         : students.filter((s) => (s.student?.section || '12SHS2510') === announcementTarget)
 
-    await Promise.all(
-      targets.map((entry) =>
-        updateStudentFields(entry.id, {
-          announcements: [newAnn, ...(entry.announcements || [])],
-        })
+    await runAdminAction(async () => {
+      await Promise.all(
+        targets.map((entry) =>
+          updateStudentFields(entry.id, {
+            announcements: [newAnn, ...(entry.announcements || [])],
+          })
+        )
       )
-    )
-
-    setAnnouncementTitle('')
-    setAnnouncementBody('')
-    setSaveMessage(
-      announcementTarget === 'ALL'
-        ? 'Announcement published to all students!'
-        : `Announcement published to section ${announcementTarget}!`
-    )
+      setAnnouncementTitle('')
+      setAnnouncementBody('')
+    }, announcementTarget === 'ALL' ? 'Announcement published to all students!' : `Announcement published to section ${announcementTarget}!`)
   }
 
   const togglePasswordVisibility = (uid) => {
@@ -863,7 +884,16 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
           </div>
         )
 
-      case 'announcements':
+      case 'announcements': {
+        const seenAnnIds = new Set()
+        const allAnnouncements = students
+          .flatMap((s) => s.announcements || [])
+          .filter((ann) => {
+            if (!ann?.id || seenAnnIds.has(ann.id)) return false
+            seenAnnIds.add(ann.id)
+            return true
+          })
+
         return (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <section className={`${CARD} p-5 lg:col-span-5`}>
@@ -882,7 +912,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                     onChange={(e) => setAnnouncementTarget(e.target.value)}
                     className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                   >
-                    <option value="ALL">All Sections (12SHS2510 & 12SHS2509)</option>
+                    <option value="ALL">All Sections (12SHS2510 &amp; 12SHS2509)</option>
                     {ALLOWED_SECTIONS.map((sec) => (
                       <option key={sec} value={sec}>
                         {sec} Only
@@ -918,22 +948,29 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
             <section className="space-y-3 lg:col-span-7">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Notices</h2>
-              {(selectedStudent?.announcements || []).map((ann) => (
-                <article key={ann.id} className={`${CARD} p-5`}>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-[#ffd41c]/35 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
-                      {ann.tag}
-                    </span>
-                    <span className="text-xs text-slate-400">{ann.date}</span>
-                  </div>
-                  <h3 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{ann.title}</h3>
-                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{ann.body}</p>
-                  <p className="mt-2 text-[11px] text-slate-400">Posted by {ann.author}</p>
-                </article>
-              ))}
+              {allAnnouncements.length === 0 ? (
+                <div className={`${CARD} p-6 text-center text-xs text-slate-500 dark:text-slate-400`}>
+                  No announcements published yet.
+                </div>
+              ) : (
+                allAnnouncements.map((ann) => (
+                  <article key={ann.id} className={`${CARD} p-5`}>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="rounded-full bg-[#ffd41c]/35 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
+                        {ann.tag}
+                      </span>
+                      <span className="text-xs text-slate-400">{ann.date}</span>
+                    </div>
+                    <h3 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{ann.title}</h3>
+                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{ann.body}</p>
+                    <p className="mt-2 text-[11px] text-slate-400">Posted by {ann.author}</p>
+                  </article>
+                ))
+              )}
             </section>
           </div>
         )
+      }
 
       case 'admin-profile':
         return (

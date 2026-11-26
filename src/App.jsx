@@ -95,11 +95,13 @@ export default function App() {
 
   const handleLogStudyHours = async (dayIndex, hoursToAdd) => {
     if (!currentUser) return
-    const currentHours = [...(data.weeklyEngagement?.studyHours || [0, 0, 0, 0, 0, 0, 0])]
+    const baseEngagement = data.weeklyEngagement || DEFAULT_STUDENT_DATA.weeklyEngagement
+    const currentHours = [...(baseEngagement.studyHours || [0, 0, 0, 0, 0, 0, 0])]
     const nextVal = Number((Number(currentHours[dayIndex] || 0) + Number(hoursToAdd || 0)).toFixed(1))
     currentHours[dayIndex] = Math.min(16, Math.max(0, nextVal))
     const updatedEngagement = {
-      ...data.weeklyEngagement,
+      labels: baseEngagement.labels || DEFAULT_STUDENT_DATA.weeklyEngagement.labels,
+      targetHours: baseEngagement.targetHours || DEFAULT_STUDENT_DATA.weeklyEngagement.targetHours,
       studyHours: currentHours,
     }
     setData((prev) => ({ ...prev, weeklyEngagement: updatedEngagement }))

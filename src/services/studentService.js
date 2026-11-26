@@ -77,7 +77,17 @@ function writeDemoStudentsMap(map) {
 export function ensureDemoStudentRecord(uid, profile) {
   const map = readDemoStudentsMap()
   if (!map[uid]) {
-    map[uid] = buildInitialStudentRecord(uid, profile)
+    const newRecord = buildInitialStudentRecord(uid, profile)
+    const sectionPeer = Object.values(map).find(
+      (entry) => entry?.student?.section === newRecord.student.section
+    )
+    if (sectionPeer) {
+      newRecord.schedule = sectionPeer.schedule || []
+      newRecord.announcements = (sectionPeer.announcements || []).filter(
+        (ann) => ann.tag === 'All Sections' || ann.tag === newRecord.student.section
+      )
+    }
+    map[uid] = newRecord
     writeDemoStudentsMap(map)
   }
   return map[uid]

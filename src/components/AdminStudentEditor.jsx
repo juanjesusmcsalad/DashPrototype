@@ -92,15 +92,27 @@ export default function AdminStudentEditor({
     try {
       const cleanName = name.trim() || studentRecord.student?.name || 'Student'
       const firstName = cleanName.split(/\s+/)[0] || 'Student'
-      const parsedAttendance = Math.min(
-        100,
-        Math.max(0, Math.round(Number(attendanceRate) || 0))
-      )
-      const cleanedSubjects = subjects.map(({ gradeInput, progressInput, ...rest }) => ({
-        ...rest,
-        grade: Math.min(100, Math.max(60, Number(gradeInput) || rest.grade || 75)),
-        progress: Math.min(100, Math.max(0, Math.round(Number(progressInput) || rest.progress || 0))),
-      }))
+      const rawAtt = Number(attendanceRate)
+      const parsedAttendance =
+        attendanceRate.trim() === '' || Number.isNaN(rawAtt)
+          ? Number(studentRecord.student?.attendanceRate ?? 96)
+          : Math.min(100, Math.max(0, Math.round(rawAtt)))
+
+      const cleanedSubjects = subjects.map(({ gradeInput, progressInput, ...rest }) => {
+        const rawGrade = Number(gradeInput)
+        const rawProg = Number(progressInput)
+        return {
+          ...rest,
+          grade:
+            gradeInput.trim() === '' || Number.isNaN(rawGrade)
+              ? Number(rest.grade ?? 75)
+              : Math.min(100, Math.max(60, rawGrade)),
+          progress:
+            progressInput.trim() === '' || Number.isNaN(rawProg)
+              ? Number(rest.progress ?? 0)
+              : Math.min(100, Math.max(0, Math.round(rawProg))),
+        }
+      })
 
       await onSaveStudentInfo(studentRecord.id, {
         student: {
@@ -322,31 +334,35 @@ export default function AdminStudentEditor({
               {subjects.map((subj) => (
                 <div
                   key={subj.id}
-                  className="flex items-center justify-between gap-2 rounded-xl bg-[#f5f6fb] px-3 py-2 dark:bg-[#11162b]"
+                  className="flex items-center justify-between gap-2 rounded-xl bg-[#f5f6fb] px-3 py-2.5 dark:bg-[#11162b]"
                 >
                   <span className="truncate text-xs font-semibold text-slate-800 dark:text-slate-200">
                     {subj.shortName}
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      title="Progress %"
-                      value={subj.progressInput}
-                      onChange={(e) => handleProgressInputChange(subj.id, e.target.value)}
-                      className="w-14 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-slate-300"
-                    />
-                    <input
-                      type="number"
-                      min="60"
-                      max="100"
-                      step="0.5"
-                      title="Grade"
-                      value={subj.gradeInput}
-                      onChange={(e) => handleGradeInputChange(subj.id, e.target.value)}
-                      className="w-16 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
-                    />
+                  <div className="flex items-center gap-2">
+                    <label className="flex flex-col items-center text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                      <span>Prog %</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={subj.progressInput}
+                        onChange={(e) => handleProgressInputChange(subj.id, e.target.value)}
+                        className="mt-0.5 w-14 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-slate-300"
+                      />
+                    </label>
+                    <label className="flex flex-col items-center text-[10px] font-semibold text-[#35408e] dark:text-[#ffd41c]">
+                      <span>Grade</span>
+                      <input
+                        type="number"
+                        min="60"
+                        max="100"
+                        step="0.5"
+                        value={subj.gradeInput}
+                        onChange={(e) => handleGradeInputChange(subj.id, e.target.value)}
+                        className="mt-0.5 w-16 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
+                      />
+                    </label>
                   </div>
                 </div>
               ))}
