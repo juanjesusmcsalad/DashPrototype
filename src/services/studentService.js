@@ -13,7 +13,8 @@ function createSecondDemoStudent() {
       name: 'Maria Santos',
       firstName: 'Maria',
       email: 'maria.santos@ctseniorhigh.edu.ph',
-      strand: 'Grade 12 — STEM / Research Track',
+      section: '12SHS2509',
+      strand: 'Grade 12 — Section 12SHS2509',
       studentNumber: 'SHS-2026-0419',
       attendanceRate: 98,
       presentDays: 98,
@@ -26,9 +27,10 @@ function createSecondDemoStudent() {
   }
 }
 
-export function buildInitialStudentRecord(uid, { name, email, strand }) {
+export function buildInitialStudentRecord(uid, { name, email, section }) {
   const safeName = (name || 'New Student').trim()
   const firstName = safeName.split(/\s+/)[0] || 'Student'
+  const safeSection = section === '12SHS2509' ? '12SHS2509' : '12SHS2510'
   return {
     ...DEFAULT_STUDENT_DATA,
     student: {
@@ -37,7 +39,8 @@ export function buildInitialStudentRecord(uid, { name, email, strand }) {
       name: safeName,
       firstName,
       email: email || DEFAULT_STUDENT_DATA.student.email,
-      strand: strand || 'Grade 12 — Senior High Track',
+      section: safeSection,
+      strand: `Grade 12 — Section ${safeSection}`,
       studentNumber: `SHS-2026-${String(Math.floor(1000 + Math.random() * 9000))}`,
     },
   }

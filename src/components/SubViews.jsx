@@ -400,8 +400,10 @@ export function ProfileView({ data, syncStatus, onSeedFirestore, seedingMessage 
             <p className="text-sm font-bold text-slate-900">{student.school}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Strand / Track</p>
-            <p className="text-sm font-semibold text-slate-800">{student.strand}</p>
+            <p className="text-xs text-slate-400">Section</p>
+            <p className="text-sm font-semibold text-slate-800">
+              {student.section || '12SHS2510'}
+            </p>
           </div>
           <div>
             <p className="text-xs text-slate-400">Student ID</p>

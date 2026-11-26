@@ -90,7 +90,7 @@ export default function Header({
           <div className="leading-tight">
             <p className="text-xs font-bold text-slate-900 sm:text-sm">{student.name}</p>
             <p className="text-[10px] font-medium tracking-wide text-slate-500 uppercase">
-              {student.school}
+              {student.section ? `${student.section} • ${student.school}` : student.school}
             </p>
           </div>
         </button>

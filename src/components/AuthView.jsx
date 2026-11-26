@@ -1,19 +1,11 @@
 import { useState } from 'react'
 import { isFirebaseConfigured } from '../firebase'
-import { signInWithRole, signUpStudent } from '../services/authService'
-
-const STRAND_OPTIONS = [
-  'Grade 12 — HUMSS / Research Track',
-  'Grade 12 — STEM / Research Track',
-  'Grade 12 — ABM / Business Track',
-  'Grade 12 — GAS Track',
-  'Grade 12 — TVL / ICT Track',
-]
+import { ALLOWED_SECTIONS, signInWithRole, signUpStudent } from '../services/authService'
 
 export default function AuthView() {
   const [mode, setMode] = useState('signin') // 'signin' | 'signup' | 'admin'
   const [name, setName] = useState('')
-  const [strand, setStrand] = useState(STRAND_OPTIONS[0])
+  const [section, setSection] = useState(ALLOWED_SECTIONS[0])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -25,9 +17,14 @@ export default function AuthView() {
     setPassword('')
   }
 
-  const fillDemoStudent = () => {
+  const fillDemoStudent = (demoSection = '12SHS2510') => {
     setMode('signin')
-    setEmail('carlos.conde@ctseniorhigh.edu.ph')
+    setSection(demoSection)
+    setEmail(
+      demoSection === '12SHS2509'
+        ? 'maria.santos@ctseniorhigh.edu.ph'
+        : 'carlos.conde@ctseniorhigh.edu.ph'
+    )
     setPassword('student123')
     setError('')
   }
@@ -46,11 +43,11 @@ export default function AuthView() {
 
     try {
       if (mode === 'signup') {
-        await signUpStudent({ name, email, password, strand })
+        await signUpStudent({ name, email, password, section })
       } else if (mode === 'admin') {
         await signInWithRole({ email, password, expectedRole: 'admin' })
       } else {
-        await signInWithRole({ email, password, expectedRole: 'student' })
+        await signInWithRole({ email, password, section, expectedRole: 'student' })
       }
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.')
@@ -70,11 +67,15 @@ export default function AuthView() {
           <div className="relative z-10">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#242c66]/80 ring-1 ring-[#ffd41c]/50">
-                <img
-                  src="/models/graduation-cap.png"
-                  alt="CT Senior High"
-                  className="h-8 w-8 object-contain"
-                />
+                <svg className="h-7 w-7" viewBox="0 0 64 64" fill="none">
+                  <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" fill="#FFD41C" />
+                  <path
+                    d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z"
+                    fill="#FFFFFF"
+                    opacity="0.95"
+                  />
+                  <rect x="18" y="49" width="28" height="6" rx="3" fill="#FFD41C" />
+                </svg>
               </div>
               <div>
                 <p className="text-xs font-bold tracking-wider text-[#ffd41c] uppercase">
@@ -91,8 +92,8 @@ export default function AuthView() {
             </h1>
             <p className="mt-2.5 text-xs leading-relaxed text-white/80 sm:text-sm">
               {mode === 'admin'
-                ? 'Review student performance, update grades and attendance, and publish school-wide announcements.'
-                : 'View grades, monitor attendance, complete research tasks, and explore personalized insights.'}
+                ? 'Manage sections 12SHS2510 & 12SHS2509, inspect user credentials, edit grades, and publish announcements.'
+                : 'Access sections 12SHS2510 and 12SHS2509 to monitor grades, attendance, tasks, and insights.'}
             </p>
           </div>
 
@@ -178,10 +179,10 @@ export default function AuthView() {
             </h2>
             <p className="mt-1 text-xs text-slate-500">
               {mode === 'signup'
-                ? 'Sign up to create your personal student dashboard profile.'
+                ? 'Select your section (12SHS2510 or 12SHS2509) to create your dashboard account.'
                 : mode === 'admin'
                   ? 'Authorized faculty and administrators only.'
-                  : 'Sign in with your student email and password.'}
+                  : 'Select your section and sign in with your email and password.'}
             </p>
           </div>
 
@@ -193,38 +194,46 @@ export default function AuthView() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
-              <>
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Carlos Conde"
-                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15"
-                  />
-                </div>
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Carlos Conde"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15"
+                />
+              </div>
+            )}
 
-                <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">
-                    Grade & Strand
-                  </label>
-                  <select
-                    value={strand}
-                    onChange={(e) => setStrand(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15"
-                  >
-                    {STRAND_OPTIONS.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
-                      </option>
-                    ))}
-                  </select>
+            {mode !== 'admin' && (
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-700">
+                  Section
+                </label>
+                <div className="grid grid-cols-2 gap-2.5">
+                  {ALLOWED_SECTIONS.map((sec) => {
+                    const selected = section === sec
+                    return (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setSection(sec)}
+                        className={`rounded-xl border px-3.5 py-2.5 text-sm font-bold transition ${
+                          selected
+                            ? 'border-[#35408e] bg-[#eef0fb] text-[#35408e] ring-2 ring-[#35408e]/15'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-[#35408e]/40'
+                        }`}
+                      >
+                        {sec}
+                      </button>
+                    )
+                  })}
                 </div>
-              </>
+              </div>
             )}
 
             <div>
@@ -275,7 +284,7 @@ export default function AuthView() {
                   ? 'Create Student Account'
                   : mode === 'admin'
                     ? 'Sign In as Administrator'
-                    : 'Sign In to Dashboard'}
+                    : `Sign In (${section})`}
             </button>
           </form>
 
@@ -283,24 +292,33 @@ export default function AuthView() {
             <div className="mt-6 rounded-2xl border border-[#35408e]/15 bg-[#eef0fb]/60 p-4">
               <p className="text-xs font-bold text-[#35408e]">Quick Demo Credentials</p>
               <p className="mt-1 text-[11px] text-slate-600">
-                Student: <code>carlos.conde@ctseniorhigh.edu.ph</code> / <code>student123</code>
+                12SHS2510: <code>carlos.conde@ctseniorhigh.edu.ph</code> / <code>student123</code>
+                <br />
+                12SHS2509: <code>maria.santos@ctseniorhigh.edu.ph</code> / <code>student123</code>
                 <br />
                 Admin: <code>admin@ctseniorhigh.edu.ph</code> / <code>admin123</code>
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={fillDemoStudent}
+                  onClick={() => fillDemoStudent('12SHS2510')}
                   className="rounded-full bg-[#35408e] px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-[#262f6d]"
                 >
-                  Fill Demo Student
+                  Demo 12SHS2510
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemoStudent('12SHS2509')}
+                  className="rounded-full bg-[#4c59b5] px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-[#35408e]"
+                >
+                  Demo 12SHS2509
                 </button>
                 <button
                   type="button"
                   onClick={fillDemoAdmin}
                   className="rounded-full bg-[#ffd41c] px-3.5 py-1 text-[11px] font-bold text-[#232b66] hover:brightness-95"
                 >
-                  Fill Demo Admin
+                  Demo Admin
                 </button>
               </div>
             </div>

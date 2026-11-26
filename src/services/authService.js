@@ -5,12 +5,14 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { auth, db, isFirebaseConfigured } from '../firebase'
 import { buildInitialStudentRecord, ensureDemoStudentRecord } from './studentService'
 
-const DEMO_USERS_KEY = 'dashprototype_demo_users_v1'
-const DEMO_SESSION_KEY = 'dashprototype_demo_session_v1'
+export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
+
+const DEMO_USERS_KEY = 'dashprototype_demo_users_v2'
+const DEMO_SESSION_KEY = 'dashprototype_demo_session_v2'
 
 const DEFAULT_DEMO_USERS = [
   {
@@ -19,7 +21,15 @@ const DEFAULT_DEMO_USERS = [
     email: 'carlos.conde@ctseniorhigh.edu.ph',
     password: 'student123',
     role: 'student',
-    strand: 'Grade 12 — HUMSS / Research Track',
+    section: '12SHS2510',
+  },
+  {
+    uid: 'maria-santos',
+    name: 'Maria Santos',
+    email: 'maria.santos@ctseniorhigh.edu.ph',
+    password: 'student123',
+    role: 'student',
+    section: '12SHS2509',
   },
   {
     uid: 'admin-ctsh',
@@ -27,7 +37,7 @@ const DEFAULT_DEMO_USERS = [
     email: 'admin@ctseniorhigh.edu.ph',
     password: 'admin123',
     role: 'admin',
-    strand: 'School Administrator',
+    section: 'Admin',
   },
 ]
 
@@ -56,6 +66,7 @@ function readDemoUsers() {
 function writeDemoUsers(users) {
   try {
     localStorage.setItem(DEMO_USERS_KEY, JSON.stringify(users))
+    window.dispatchEvent(new CustomEvent('dashprototype-users-updated'))
   } catch {
     // Ignore storage write errors.
   }
@@ -88,7 +99,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
   const emailLower = (firebaseUser.email || '').toLowerCase()
   let role = adminEmails.includes(emailLower) ? 'admin' : 'student'
   let name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student'
-  let strand = 'Grade 12 — Senior High Track'
+  let section = '12SHS2510'
 
   if (db) {
     try {
@@ -97,7 +108,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
         const userData = userSnap.data()
         role = userData.role || role
         name = userData.name || name
-        strand = userData.strand || strand
+        section = userData.section || section
       }
     } catch {
       // Keep default resolved metadata if user profile doc is unreadable.
@@ -109,7 +120,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
     email: firebaseUser.email,
     name,
     role,
-    strand,
+    section,
   }
 }
 
@@ -131,9 +142,37 @@ export function subscribeToAuthState(callback) {
   })
 }
 
-export async function signUpStudent({ name, email, password, strand }) {
+/**
+ * Subscribe to all registered user accounts (for Administrator view).
+ */
+export function subscribeToAllUserAccounts(callback) {
+  if (!isFirebaseConfigured || !db) {
+    const load = () => callback(readDemoUsers())
+    load()
+    window.addEventListener('dashprototype-users-updated', load)
+    return () => window.removeEventListener('dashprototype-users-updated', load)
+  }
+
+  const colRef = collection(db, 'users')
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const list = snapshot.docs.map((d) => ({
+        uid: d.id,
+        ...d.data(),
+      }))
+      callback(list)
+    },
+    () => {
+      callback([])
+    }
+  )
+}
+
+export async function signUpStudent({ name, email, password, section }) {
   const cleanEmail = email.trim().toLowerCase()
   const cleanName = name.trim()
+  const safeSection = ALLOWED_SECTIONS.includes(section) ? section : '12SHS2510'
 
   if (!cleanName) throw new Error('Please enter your full name.')
   if (!cleanEmail) throw new Error('Please enter a valid email address.')
@@ -151,7 +190,7 @@ export async function signUpStudent({ name, email, password, strand }) {
       email: cleanEmail,
       password,
       role: 'student',
-      strand: strand || 'Grade 12 — Senior High Track',
+      section: safeSection,
     }
     writeDemoUsers([...users, newUser])
     ensureDemoStudentRecord(uid, newUser)
@@ -160,7 +199,7 @@ export async function signUpStudent({ name, email, password, strand }) {
       name: newUser.name,
       email: newUser.email,
       role: newUser.role,
-      strand: newUser.strand,
+      section: newUser.section,
     }
     writeDemoSession(sessionUser)
     return sessionUser
@@ -173,9 +212,10 @@ export async function signUpStudent({ name, email, password, strand }) {
     uid: cred.user.uid,
     name: cleanName,
     email: cleanEmail,
+    passwordNote: password,
     role: 'student',
     school: 'CT SENIOR HIGH',
-    strand: strand || 'Grade 12 — Senior High Track',
+    section: safeSection,
     createdAt: new Date().toISOString(),
   }
 
@@ -188,7 +228,7 @@ export async function signUpStudent({ name, email, password, strand }) {
   return userProfile
 }
 
-export async function signInWithRole({ email, password, expectedRole = 'student' }) {
+export async function signInWithRole({ email, password, section, expectedRole = 'student' }) {
   const cleanEmail = email.trim().toLowerCase()
   if (!cleanEmail || !password) {
     throw new Error('Please enter both your email and password.')
@@ -205,12 +245,15 @@ export async function signInWithRole({ email, password, expectedRole = 'student'
     if (expectedRole === 'admin' && match.role !== 'admin') {
       throw new Error('This account does not have administrator privileges.')
     }
+    if (expectedRole === 'student' && match.role === 'student' && section && match.section !== section) {
+      throw new Error(`This account belongs to section ${match.section}, not ${section}.`)
+    }
     const sessionUser = {
       uid: match.uid,
       name: match.name,
       email: match.email,
       role: match.role,
-      strand: match.strand,
+      section: match.section,
     }
     writeDemoSession(sessionUser)
     return sessionUser
@@ -222,6 +265,17 @@ export async function signInWithRole({ email, password, expectedRole = 'student'
   if (expectedRole === 'admin' && profile.role !== 'admin') {
     await signOut(auth)
     throw new Error('This account does not have administrator privileges.')
+  }
+
+  if (
+    expectedRole === 'student' &&
+    profile.role === 'student' &&
+    section &&
+    profile.section &&
+    profile.section !== section
+  ) {
+    await signOut(auth)
+    throw new Error(`This account belongs to section ${profile.section}, not ${section}.`)
   }
 
   return profile

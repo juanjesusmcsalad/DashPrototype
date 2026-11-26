@@ -1,4 +1,4 @@
-const NAV_ITEMS = [
+const DEFAULT_NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'grid' },
   { id: 'academic-progress', label: 'Academic Progress', icon: 'book' },
   { id: 'tasks', label: 'Tasks', icon: 'pencil' },
@@ -65,19 +65,43 @@ function NavIcon({ name, active }) {
           <path d="M16 2v4M8 2v4M3 10h18" />
         </svg>
       )
+    case 'users':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" strokeWidth="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      )
+    case 'key':
+      return (
+        <svg className={common} viewBox="0 0 24 24" fill="none" strokeWidth="2">
+          <circle cx="7.5" cy="15.5" r="4.5" />
+          <path d="m21 2-9.6 9.6" />
+          <path d="m15.5 7.5 3 3L22 7l-3-3" />
+        </svg>
+      )
     case 'user':
+    default:
       return (
         <svg className={common} viewBox="0 0 24 24" fill="none" strokeWidth="2">
           <circle cx="12" cy="8" r="4" />
           <path d="M4 20c0-3.3 3.6-6 8-6s8 2.7 8 6" />
         </svg>
       )
-    default:
-      return null
   }
 }
 
-export default function Sidebar({ activeTab, onSelectTab, onLogout, mobileOpen, onCloseMobile }) {
+export default function Sidebar({
+  activeTab,
+  onSelectTab,
+  onLogout,
+  mobileOpen,
+  onCloseMobile,
+  navItems = DEFAULT_NAV_ITEMS,
+  badgeText = '',
+}) {
   const handleSelect = (id) => {
     onSelectTab(id)
     onCloseMobile?.()
@@ -99,19 +123,28 @@ export default function Sidebar({ activeTab, onSelectTab, onLogout, mobileOpen, 
         }`}
       >
         <div>
-          {/* Top graduation emblem from Figma */}
-          <div className="mb-8 flex items-center justify-center pt-1">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 shadow-inner ring-1 ring-[#ffd41c]/40">
-              <img
-                src="/models/graduation-cap.png"
-                alt="CT Senior High"
-                className="h-12 w-12 object-contain"
-              />
+          {/* Clean transparent graduation emblem (no purple box) */}
+          <div className="mb-7 flex flex-col items-center justify-center pt-1">
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 shadow-inner ring-1 ring-[#ffd41c]/45">
+              <svg className="h-11 w-11" viewBox="0 0 64 64" fill="none">
+                <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" fill="#FFD41C" />
+                <path
+                  d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z"
+                  fill="#FFFFFF"
+                  opacity="0.95"
+                />
+                <rect x="18" y="49" width="28" height="6" rx="3" fill="#FFD41C" />
+              </svg>
             </div>
+            {badgeText && (
+              <span className="mt-2.5 rounded-full bg-[#ffd41c] px-3 py-0.5 text-[10px] font-bold tracking-wider text-[#232b66] uppercase">
+                {badgeText}
+              </span>
+            )}
           </div>
 
           <nav className="space-y-1.5" aria-label="Primary Navigation">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const isActive = activeTab === item.id
               return (
                 <button
