@@ -109,7 +109,9 @@ export default function Header({
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm6-6v-5a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
           </svg>
-          <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#ffd41c] ring-2 ring-white dark:ring-[#1e2647]" />
+          {announcements.length > 0 && (
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#ffd41c] ring-2 ring-white dark:ring-[#1e2647]" />
+          )}
         </button>
 
         {showNotifications && (
@@ -128,12 +130,18 @@ export default function Header({
               </button>
             </div>
             <div className="space-y-2.5">
-              {announcements.slice(0, 3).map((item) => (
-                <div key={item.id} className="rounded-xl bg-slate-50 p-2.5 dark:bg-[#11162b]">
-                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{item.title}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{item.date}</p>
-                </div>
-              ))}
+              {announcements.length === 0 ? (
+                <p className="rounded-xl bg-slate-50 p-2.5 text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
+                  No announcements yet.
+                </p>
+              ) : (
+                announcements.slice(0, 3).map((item) => (
+                  <div key={item.id} className="rounded-xl bg-slate-50 p-2.5 dark:bg-[#11162b]">
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-100">{item.title}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">{item.date}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}

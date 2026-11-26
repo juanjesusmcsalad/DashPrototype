@@ -1,3 +1,11 @@
+export const ALLOWED_SUBJECTS = [
+  { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 91, progress: 88, teacher: 'Mr. L. Bautista' },
+  { id: 'research', name: 'Research', shortName: 'Research', grade: 93, progress: 92, teacher: 'Mr. R. Villanueva' },
+  { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 90, progress: 85, teacher: 'Ms. K. Mendoza' },
+  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 86, progress: 76, teacher: 'Mr. J. Cruz' },
+  { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 88, progress: 84, teacher: 'Ms. L. Reyes' },
+]
+
 export const DEFAULT_STUDENT_DATA = {
   student: {
     id: 'carlos-conde',
@@ -14,17 +22,10 @@ export const DEFAULT_STUDENT_DATA = {
     presentDays: 96,
     totalDays: 100,
   },
-  subjects: [
-    { id: 'research', name: 'Practical Research 2', shortName: 'Research', grade: 93, progress: 92, teacher: 'Mr. R. Villanueva' },
-    { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 91, progress: 88, teacher: 'Ms. L. Reyes' },
-    { id: 'statistics', name: 'Statistics & Probability', shortName: 'Statistics', grade: 87, progress: 78, teacher: 'Mr. J. Mendoza' },
-    { id: 'english', name: 'English for Academic Purposes', shortName: 'English', grade: 86, progress: 74, teacher: 'Ms. A. Cruz' },
-    { id: 'entrepreneurship', name: 'Entrepreneurship', shortName: 'Entrepreneurship', grade: 91, progress: 89, teacher: 'Mr. D. Torres' },
-    { id: 'mil', name: 'Media & Information Literacy', shortName: 'Media Literacy', grade: 90, progress: 85, teacher: 'Ms. K. Bautista' },
-  ],
+  subjects: ALLOWED_SUBJECTS,
   gradeHistory: {
     labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    values: [86.5, 87.8, 88.4, 89.1, 89.67],
+    values: [86.5, 87.8, 88.4, 89.1, 89.6],
   },
   weeklyEngagement: {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
@@ -34,19 +35,19 @@ export const DEFAULT_STUDENT_DATA = {
   recommendations: [
     {
       id: 'rec-1',
-      text: 'Improve English performance.',
+      text: 'Review Finite Mathematics lessons.',
       category: 'Academics',
       priority: 'High',
     },
     {
       id: 'rec-2',
-      text: 'Review Statistics lessons.',
+      text: 'Practice Database Management queries.',
       category: 'Study Plan',
       priority: 'Medium',
     },
     {
       id: 'rec-3',
-      text: 'Submit Chapter 3 before Nov 28.',
+      text: 'Submit Research Chapter 3 draft.',
       category: 'Research',
       priority: 'High',
     },
@@ -57,57 +58,9 @@ export const DEFAULT_STUDENT_DATA = {
       priority: 'Normal',
     },
   ],
-  tasks: [
-    { id: 't-1', title: 'Submit Chapter 3 before Nov 28', subject: 'Research', dueDate: 'Nov 28, 2026', completed: false },
-    { id: 't-2', title: 'Complete Statistics Hypothesis Worksheet', subject: 'Statistics', dueDate: 'Dec 5, 2026', completed: false },
-    { id: 't-3', title: 'Revise English Critique Paper Draft', subject: 'English', dueDate: 'Dec 7, 2026', completed: false },
-    { id: 't-4', title: 'Finalize Survey Questionnaire (20 respondents)', subject: 'Research', dueDate: 'Nov 20, 2026', completed: true },
-    { id: 't-5', title: 'Creative Industries Portfolio Pitch Deck', subject: 'Creative Industries', dueDate: 'Nov 22, 2026', completed: true },
-    { id: 't-6', title: 'Entrepreneurship Break-Even Analysis', subject: 'Entrepreneurship', dueDate: 'Nov 24, 2026', completed: true },
-    { id: 't-7', title: 'Read Chapter 4 Sampling Techniques', subject: 'Statistics', dueDate: 'Nov 19, 2026', completed: true },
-    { id: 't-8', title: 'Oral Defense Peer Review Notes', subject: 'Research', dueDate: 'Nov 18, 2026', completed: true },
-    ...Array.from({ length: 22 }, (_, idx) => ({
-      id: `t-done-${idx + 9}`,
-      title: `Completed Module Activity #${idx + 9}`,
-      subject: ['Research', 'Creative Industries', 'Statistics', 'English', 'Entrepreneurship'][idx % 5],
-      dueDate: 'Nov 2026',
-      completed: true,
-    })),
-  ],
-  announcements: [
-    {
-      id: 'ann-1',
-      title: 'Research Chapter 3 Submission Window',
-      date: 'Nov 25, 2026',
-      author: 'Mr. R. Villanueva',
-      body: 'Please upload your updated Methodology (Chapter 3) PDF before November 28 for adviser review.',
-      tag: 'Research',
-    },
-    {
-      id: 'ann-2',
-      title: '2nd Quarter Academic Consultation Day',
-      date: 'Dec 2, 2026',
-      author: 'CT Senior High Guidance',
-      body: 'Parents and students may check midterm grade averages and attendance records this Friday.',
-      tag: 'General',
-    },
-    {
-      id: 'ann-3',
-      title: 'Creative Industries Exhibit Prep',
-      date: 'Dec 3, 2026',
-      author: 'Ms. L. Reyes',
-      body: 'Booth layouts and digital prototype demos are due next Wednesday in Room 304.',
-      tag: 'Creative Industries',
-    },
-  ],
-  schedule: [
-    { id: 'sch-1', day: 'Monday', time: '08:00 AM - 09:30 AM', subject: 'Practical Research 2', room: 'Room 204' },
-    { id: 'sch-2', day: 'Monday', time: '10:00 AM - 11:30 AM', subject: 'Statistics & Probability', room: 'Room 208' },
-    { id: 'sch-3', day: 'Tuesday', time: '08:30 AM - 10:00 AM', subject: 'Creative Industries', room: 'Studio B' },
-    { id: 'sch-4', day: 'Wednesday', time: '09:00 AM - 10:30 AM', subject: 'English for Academic Purposes', room: 'Room 112' },
-    { id: 'sch-5', day: 'Thursday', time: '01:00 PM - 02:30 PM', subject: 'Entrepreneurship', room: 'Room 301' },
-    { id: 'sch-6', day: 'Friday', time: '10:00 AM - 12:00 PM', subject: 'Research Consultation & Lab', room: 'Library Hub' },
-  ],
+  tasks: [],
+  announcements: [],
+  schedule: [],
   researchMilestones: [
     { id: 'ch-1', label: 'Ch. 1: Problem & Background', completed: true },
     { id: 'ch-2', label: 'Ch. 2: Review of Literature', completed: true },

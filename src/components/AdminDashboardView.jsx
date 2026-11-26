@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ALLOWED_SUBJECTS } from '../data/defaultStudentData'
 import { isFirebaseConfigured } from '../firebase'
 import {
   ALLOWED_SECTIONS,
@@ -14,12 +15,14 @@ import ThemeToggle from './ThemeToggle'
 const ADMIN_NAV_ITEMS = [
   { id: 'overview', label: 'Admin Overview', icon: 'grid' },
   { id: 'students', label: 'Manage Students', icon: 'users' },
+  { id: 'schedule', label: 'Class Schedule', icon: 'calendar' },
   { id: 'accounts', label: 'User Credentials', icon: 'key' },
   { id: 'analytics', label: 'Section Analytics', icon: 'chart' },
   { id: 'announcements', label: 'Announcements', icon: 'megaphone' },
   { id: 'admin-profile', label: 'Admin Profile', icon: 'user' },
 ]
 
+const DAYS_OF_WEEK = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 const CARD = 'rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700/70 dark:bg-[#181e38]'
 
 function computeAverage(subjects = []) {
@@ -41,9 +44,14 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [visiblePasswords, setVisiblePasswords] = useState({})
   const [copiedId, setCopiedId] = useState('')
   const [bulkTaskTitle, setBulkTaskTitle] = useState('')
-  const [bulkTaskSubject, setBulkTaskSubject] = useState('Research')
+  const [bulkTaskSubject, setBulkTaskSubject] = useState(ALLOWED_SUBJECTS[1].shortName)
   const [bulkTaskDueDate, setBulkTaskDueDate] = useState('Dec 12, 2026')
   const [bulkTaskTarget, setBulkTaskTarget] = useState('ALL')
+  const [schedSection, setSchedSection] = useState(ALLOWED_SECTIONS[0])
+  const [schedDay, setSchedDay] = useState('Monday')
+  const [schedSubject, setSchedSubject] = useState(ALLOWED_SUBJECTS[0].name)
+  const [schedTime, setSchedTime] = useState('08:00 AM - 09:30 AM')
+  const [schedRoom, setSchedRoom] = useState('Room 204')
   const [announcementTitle, setAnnouncementTitle] = useState('')
   const [announcementBody, setAnnouncementBody] = useState('')
   const [announcementTarget, setAnnouncementTarget] = useState('ALL')
@@ -238,6 +246,62 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         targets.length === 1 ? '' : 's'
       } (${bulkTaskTarget === 'ALL' ? 'All Sections' : bulkTaskTarget}).`
     )
+  }
+
+  const handleAddScheduleSlot = async (e) => {
+    e.preventDefault()
+    if (!schedTime.trim() || !schedRoom.trim()) return
+
+    const newSlot = {
+      id: `sch-${Date.now()}`,
+      day: schedDay,
+      subject: schedSubject,
+      time: schedTime.trim(),
+      room: schedRoom.trim(),
+    }
+
+    const targets =
+      schedSection === 'ALL'
+        ? students
+        : students.filter((s) => (s.student?.section || '12SHS2510') === schedSection)
+
+    await Promise.all(
+      targets.map((entry) =>
+        updateStudentFields(entry.id, {
+          schedule: [...(entry.schedule || []), newSlot],
+        })
+      )
+    )
+
+    setSaveMessage(
+      `Added ${schedSubject} (${schedDay}) to ${
+        schedSection === 'ALL' ? 'all sections' : schedSection
+      }.`
+    )
+  }
+
+  const handleRemoveScheduleSlot = async (targetSection, slotId) => {
+    const targets = students.filter(
+      (s) => (s.student?.section || '12SHS2510') === targetSection
+    )
+    await Promise.all(
+      targets.map((entry) =>
+        updateStudentFields(entry.id, {
+          schedule: (entry.schedule || []).filter((item) => item.id !== slotId),
+        })
+      )
+    )
+    setSaveMessage(`Removed schedule entry from ${targetSection}.`)
+  }
+
+  const handleClearSectionSchedule = async (targetSection) => {
+    const targets = students.filter(
+      (s) => (s.student?.section || '12SHS2510') === targetSection
+    )
+    await Promise.all(
+      targets.map((entry) => updateStudentFields(entry.id, { schedule: [] }))
+    )
+    setSaveMessage(`Cleared schedule for ${targetSection}.`)
   }
 
   const handleBroadcastAnnouncement = async (e) => {
@@ -468,6 +532,188 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
             </div>
           </div>
         )
+
+      case 'schedule': {
+        const previewSection = schedSection === 'ALL' ? ALLOWED_SECTIONS[0] : schedSection
+        const sampleStudent = students.find(
+          (s) => (s.student?.section || '12SHS2510') === previewSection
+        )
+        const currentSlots = sampleStudent?.schedule || []
+
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+                Configure Class Schedule
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Add or remove class timetable slots for sections 12SHS2510 and 12SHS2509.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+              <form
+                onSubmit={handleAddScheduleSlot}
+                className={`${CARD} space-y-3 p-5 lg:col-span-5`}
+              >
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Add Schedule Slot
+                </h2>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Target Section
+                  </label>
+                  <select
+                    value={schedSection}
+                    onChange={(e) => setSchedSection(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                  >
+                    {ALLOWED_SECTIONS.map((sec) => (
+                      <option key={sec} value={sec}>
+                        {sec}
+                      </option>
+                    ))}
+                    <option value="ALL">Both Sections (12SHS2510 &amp; 12SHS2509)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Subject
+                  </label>
+                  <select
+                    value={schedSubject}
+                    onChange={(e) => setSchedSubject(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                  >
+                    {ALLOWED_SUBJECTS.map((subj) => (
+                      <option key={subj.id} value={subj.name}>
+                        {subj.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Day
+                    </label>
+                    <select
+                      value={schedDay}
+                      onChange={(e) => setSchedDay(e.target.value)}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                    >
+                      {DAYS_OF_WEEK.map((day) => (
+                        <option key={day} value={day}>
+                          {day}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      Room
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={schedRoom}
+                      onChange={(e) => setSchedRoom(e.target.value)}
+                      placeholder="e.g. Room 204"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={schedTime}
+                    onChange={(e) => setSchedTime(e.target.value)}
+                    placeholder="e.g. 08:00 AM - 09:30 AM"
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-[#35408e] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
+                >
+                  Add to Schedule
+                </button>
+              </form>
+
+              <section className={`${CARD} p-5 lg:col-span-7`}>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {previewSection} Timetable ({currentSlots.length} slots)
+                    </h2>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Switch target section on the left to preview or edit each section.
+                    </p>
+                  </div>
+                  {currentSlots.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => handleClearSectionSchedule(previewSection)}
+                      className="rounded-lg border border-rose-200 px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-950/50"
+                    >
+                      Clear {previewSection}
+                    </button>
+                  )}
+                </div>
+
+                {currentSlots.length === 0 ? (
+                  <p className="rounded-xl bg-[#f5f6fb] p-6 text-center text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
+                    No schedule slots configured for {previewSection} yet.
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                    {currentSlots.map((slot) => (
+                      <div
+                        key={slot.id}
+                        className="flex items-start justify-between gap-2 rounded-xl bg-[#f5f6fb] p-3.5 dark:bg-[#11162b]"
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] font-bold text-[#35408e] uppercase dark:text-[#ffd41c]">
+                              {slot.day}
+                            </span>
+                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-[#181e38] dark:text-slate-300">
+                              {slot.room}
+                            </span>
+                          </div>
+                          <p className="mt-1 text-xs font-bold text-slate-900 dark:text-white">
+                            {slot.subject}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                            {slot.time}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveScheduleSlot(previewSection, slot.id)}
+                          aria-label="Remove slot"
+                          className="rounded-lg px-2 py-0.5 text-xs font-bold text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </div>
+          </div>
+        )
+      }
 
       case 'accounts':
         return (

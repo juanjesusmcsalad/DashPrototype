@@ -190,7 +190,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               {filteredSubjects.length === 0 ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400">No subjects match "{searchQuery}".</p>
               ) : (
-                filteredSubjects.slice(0, 4).map((subject) => (
+                filteredSubjects.map((subject) => (
                   <div key={subject.id}>
                     <div className="mb-1 flex items-center justify-between text-xs font-bold text-slate-800 dark:text-slate-100">
                       <span>{subject.shortName}</span>

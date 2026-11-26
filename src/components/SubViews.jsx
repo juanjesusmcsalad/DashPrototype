@@ -245,44 +245,50 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
       </form>
 
       <div className={`${CARD} divide-y divide-slate-100 dark:divide-slate-700/60`}>
-        {filteredTasks.map((task) => (
-          <label
-            key={task.id}
-            className="flex cursor-pointer items-center justify-between gap-4 px-5 py-3.5 transition hover:bg-[#eef0fb]/50 dark:hover:bg-white/5"
-          >
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={task.completed}
-                onChange={() => onToggleTask(task.id)}
-                className="h-4 w-4 rounded accent-[#35408e] dark:accent-[#ffd41c]"
-              />
-              <div>
-                <p
-                  className={`text-sm font-medium ${
-                    task.completed
-                      ? 'text-slate-400 line-through dark:text-slate-500'
-                      : 'text-slate-900 dark:text-slate-100'
-                  }`}
-                >
-                  {task.title}
-                </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  {task.subject} • Due {task.dueDate}
-                </p>
-              </div>
-            </div>
-            <span
-              className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                task.completed
-                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
-                  : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
-              }`}
+        {filteredTasks.length === 0 ? (
+          <p className="px-5 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+            No tasks assigned yet. Add one above or wait for your administrator to assign tasks.
+          </p>
+        ) : (
+          filteredTasks.map((task) => (
+            <label
+              key={task.id}
+              className="flex cursor-pointer items-center justify-between gap-4 px-5 py-3.5 transition hover:bg-[#eef0fb]/50 dark:hover:bg-white/5"
             >
-              {task.completed ? 'Done' : 'Pending'}
-            </span>
-          </label>
-        ))}
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={task.completed}
+                  onChange={() => onToggleTask(task.id)}
+                  className="h-4 w-4 rounded accent-[#35408e] dark:accent-[#ffd41c]"
+                />
+                <div>
+                  <p
+                    className={`text-sm font-medium ${
+                      task.completed
+                        ? 'text-slate-400 line-through dark:text-slate-500'
+                        : 'text-slate-900 dark:text-slate-100'
+                    }`}
+                  >
+                    {task.title}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {task.subject} • Due {task.dueDate}
+                  </p>
+                </div>
+              </div>
+              <span
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                  task.completed
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300'
+                    : 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300'
+                }`}
+              >
+                {task.completed ? 'Done' : 'Pending'}
+              </span>
+            </label>
+          ))
+        )}
       </div>
     </div>
   )
@@ -447,19 +453,25 @@ export function AnnouncementsView({ data, searchQuery }) {
         <p className="text-xs text-slate-500 dark:text-slate-400">Updates from your CT Senior High advisers and teachers.</p>
       </div>
       <div className="space-y-3">
-        {items.map((item) => (
-          <article key={item.id} className={`${CARD} p-5`}>
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="rounded-full bg-[#ffd41c]/30 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
-                {item.tag}
-              </span>
-              <span className="text-xs text-slate-400">{item.date}</span>
-            </div>
-            <h2 className="mt-2 text-base font-bold text-slate-900 dark:text-white">{item.title}</h2>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{item.body}</p>
-            <p className="mt-3 text-xs font-medium text-slate-400">Posted by {item.author}</p>
-          </article>
-        ))}
+        {items.length === 0 ? (
+          <div className={`${CARD} p-6 text-center text-xs text-slate-500 dark:text-slate-400`}>
+            No announcements posted yet.
+          </div>
+        ) : (
+          items.map((item) => (
+            <article key={item.id} className={`${CARD} p-5`}>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="rounded-full bg-[#ffd41c]/30 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
+                  {item.tag}
+                </span>
+                <span className="text-xs text-slate-400">{item.date}</span>
+              </div>
+              <h2 className="mt-2 text-base font-bold text-slate-900 dark:text-white">{item.title}</h2>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{item.body}</p>
+              <p className="mt-3 text-xs font-medium text-slate-400">Posted by {item.author}</p>
+            </article>
+          ))
+        )}
       </div>
     </div>
   )
@@ -472,22 +484,28 @@ export function ScheduleView({ data }) {
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Class Schedule</h1>
         <p className="text-xs text-slate-500 dark:text-slate-400">Weekly Senior High School timetable.</p>
       </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {data.schedule.map((slot) => (
-          <div key={slot.id} className={`${CARD} p-4`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold tracking-wide text-[#35408e] uppercase dark:text-[#ffd41c]">
-                {slot.day}
-              </span>
-              <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-semibold text-[#35408e] dark:text-[#ffd41c]">
-                {slot.room}
-              </span>
+      {data.schedule.length === 0 ? (
+        <div className={`${CARD} p-6 text-center text-xs text-slate-500 dark:text-slate-400`}>
+          No class schedule configured yet. Your administrator can set up your section timetable.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {data.schedule.map((slot) => (
+            <div key={slot.id} className={`${CARD} p-4`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold tracking-wide text-[#35408e] uppercase dark:text-[#ffd41c]">
+                  {slot.day}
+                </span>
+                <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-semibold text-[#35408e] dark:text-[#ffd41c]">
+                  {slot.room}
+                </span>
+              </div>
+              <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{slot.subject}</p>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{slot.time}</p>
             </div>
-            <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{slot.subject}</p>
-            <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{slot.time}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firesto
 import { DEFAULT_STUDENT_DATA } from '../data/defaultStudentData'
 import { db, isFirebaseConfigured } from '../firebase'
 
-const DEMO_STUDENTS_KEY = 'dashprototype_demo_students_v1'
+const DEMO_STUDENTS_KEY = 'dashprototype_demo_students_v2'
 
 function createSecondDemoStudent() {
   return {
