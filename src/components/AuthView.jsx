@@ -189,7 +189,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Juan Dela Cruz"
+                  placeholder="e.g. Mateo Armendáriz De la Fuente"
                   className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                 />
               </div>

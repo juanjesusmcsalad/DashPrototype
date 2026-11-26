@@ -459,9 +459,11 @@ export function ScheduleView({ data }) {
                 <span className="text-xs font-bold tracking-wide text-[#35408e] uppercase dark:text-[#ffd41c]">
                   {slot.day}
                 </span>
-                <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-semibold text-[#35408e] dark:text-[#ffd41c]">
-                  {slot.room}
-                </span>
+                {slot.room && (
+                  <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-xs font-semibold text-[#35408e] dark:text-[#ffd41c]">
+                    {slot.room}
+                  </span>
+                )}
               </div>
               <p className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{slot.subject}</p>
               <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{slot.time}</p>

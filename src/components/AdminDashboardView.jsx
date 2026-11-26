@@ -58,7 +58,6 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [schedDay, setSchedDay] = useState('Monday')
   const [schedSubject, setSchedSubject] = useState(ALLOWED_SUBJECTS[0].name)
   const [schedTime, setSchedTime] = useState('08:00 AM - 09:30 AM')
-  const [schedRoom, setSchedRoom] = useState('Room 204')
   const [announcementTitle, setAnnouncementTitle] = useState('')
   const [announcementBody, setAnnouncementBody] = useState('')
   const [announcementTarget, setAnnouncementTarget] = useState('ALL')
@@ -275,14 +274,13 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
   const handleAddScheduleSlot = async (e) => {
     e.preventDefault()
-    if (!schedTime.trim() || !schedRoom.trim()) return
+    if (!schedTime.trim()) return
 
     const newSlot = {
       id: `sch-${Date.now()}`,
       day: schedDay,
       subject: schedSubject,
       time: schedTime.trim(),
-      room: schedRoom.trim(),
     }
 
     const sectionsToUpdate = schedSection === 'ALL' ? ALLOWED_SECTIONS : [schedSection]
@@ -665,36 +663,21 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                   </select>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Day
-                    </label>
-                    <select
-                      value={schedDay}
-                      onChange={(e) => setSchedDay(e.target.value)}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-                    >
-                      {DAYS_OF_WEEK.map((day) => (
-                        <option key={day} value={day}>
-                          {day}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      Room
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={schedRoom}
-                      onChange={(e) => setSchedRoom(e.target.value)}
-                      placeholder="e.g. Room 204"
-                      className="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-                    />
-                  </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                    Day
+                  </label>
+                  <select
+                    value={schedDay}
+                    onChange={(e) => setSchedDay(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                  >
+                    {DAYS_OF_WEEK.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -756,9 +739,11 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                             <span className="text-[11px] font-bold text-[#35408e] uppercase dark:text-[#ffd41c]">
                               {slot.day}
                             </span>
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-[#181e38] dark:text-slate-300">
-                              {slot.room}
-                            </span>
+                            {slot.room && (
+                              <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 dark:bg-[#181e38] dark:text-slate-300">
+                                {slot.room}
+                              </span>
+                            )}
                           </div>
                           <p className="mt-1 text-xs font-bold text-slate-900 dark:text-white">
                             {slot.subject}
