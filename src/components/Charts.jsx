@@ -10,6 +10,7 @@ import {
   PointElement,
   Tooltip,
 } from 'chart.js'
+import { useEffect, useState } from 'react'
 import { Bar, Doughnut, Line } from 'react-chartjs-2'
 
 ChartJS.register(
@@ -29,17 +30,38 @@ const BASE_FONT = {
   size: 11,
 }
 
+function useIsDarkTheme() {
+  const [isDark, setIsDark] = useState(() =>
+    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+  )
+
+  useEffect(() => {
+    const root = document.documentElement
+    const observer = new MutationObserver(() => {
+      setIsDark(root.classList.contains('dark'))
+    })
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return isDark
+}
+
 export function GradeTrendLineChart({ gradeHistory }) {
+  const isDark = useIsDarkTheme()
+  const tickColor = isDark ? '#cbd5e1' : '#64748b'
+  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
+
   const data = {
     labels: gradeHistory.labels,
     datasets: [
       {
         label: 'Grade Average',
         data: gradeHistory.values,
-        borderColor: '#35408e',
-        backgroundColor: 'rgba(53, 64, 142, 0.14)',
-        pointBackgroundColor: '#ffd41c',
-        pointBorderColor: '#35408e',
+        borderColor: isDark ? '#ffd41c' : '#35408e',
+        backgroundColor: isDark ? 'rgba(255, 212, 28, 0.14)' : 'rgba(53, 64, 142, 0.14)',
+        pointBackgroundColor: isDark ? '#35408e' : '#ffd41c',
+        pointBorderColor: isDark ? '#ffd41c' : '#35408e',
         pointBorderWidth: 2,
         pointRadius: 4,
         tension: 0.35,
@@ -62,13 +84,13 @@ export function GradeTrendLineChart({ gradeHistory }) {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
         min: 80,
         max: 100,
-        grid: { color: 'rgba(148, 163, 184, 0.15)' },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
     },
   }
@@ -81,6 +103,10 @@ export function GradeTrendLineChart({ gradeHistory }) {
 }
 
 export function SubjectBarChart({ subjects }) {
+  const isDark = useIsDarkTheme()
+  const tickColor = isDark ? '#cbd5e1' : '#64748b'
+  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
+
   const data = {
     labels: subjects.map((s) => s.shortName),
     datasets: [
@@ -88,7 +114,7 @@ export function SubjectBarChart({ subjects }) {
         label: 'Current Grade',
         data: subjects.map((s) => s.grade),
         backgroundColor: subjects.map((s) =>
-          s.grade >= 90 ? '#35408e' : '#ffd41c'
+          s.grade >= 90 ? (isDark ? '#6070d4' : '#35408e') : '#ffd41c'
         ),
         borderRadius: 8,
         barThickness: 28,
@@ -105,13 +131,13 @@ export function SubjectBarChart({ subjects }) {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
         min: 70,
         max: 100,
-        grid: { color: 'rgba(148, 163, 184, 0.15)' },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
     },
   }
@@ -124,13 +150,17 @@ export function SubjectBarChart({ subjects }) {
 }
 
 export function WeeklyEngagementBarChart({ weeklyEngagement }) {
+  const isDark = useIsDarkTheme()
+  const tickColor = isDark ? '#cbd5e1' : '#64748b'
+  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
+
   const data = {
     labels: weeklyEngagement.labels,
     datasets: [
       {
         label: 'Study Hours',
         data: weeklyEngagement.studyHours,
-        backgroundColor: '#35408e',
+        backgroundColor: isDark ? '#6070d4' : '#35408e',
         borderRadius: 8,
       },
       {
@@ -149,18 +179,18 @@ export function WeeklyEngagementBarChart({ weeklyEngagement }) {
       legend: {
         position: 'top',
         align: 'end',
-        labels: { boxWidth: 10, usePointStyle: true, font: BASE_FONT },
+        labels: { boxWidth: 10, usePointStyle: true, color: tickColor, font: BASE_FONT },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
         beginAtZero: true,
-        grid: { color: 'rgba(148, 163, 184, 0.15)' },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
     },
   }
@@ -173,13 +203,16 @@ export function WeeklyEngagementBarChart({ weeklyEngagement }) {
 }
 
 export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
+  const isDark = useIsDarkTheme()
+  const tickColor = isDark ? '#cbd5e1' : '#64748b'
+
   const data = {
     labels: ['Completed', 'Pending'],
     datasets: [
       {
         data: [completedCount, pendingCount],
-        backgroundColor: ['#35408e', '#ffd41c'],
-        borderColor: ['#242c66', '#e6bd0e'],
+        backgroundColor: [isDark ? '#6070d4' : '#35408e', '#ffd41c'],
+        borderColor: [isDark ? '#424fa6' : '#242c66', '#e6bd0e'],
         borderWidth: 1,
       },
     ],
@@ -192,7 +225,7 @@ export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
     plugins: {
       legend: {
         position: 'bottom',
-        labels: { boxWidth: 12, usePointStyle: true, font: BASE_FONT },
+        labels: { boxWidth: 12, usePointStyle: true, color: tickColor, font: BASE_FONT },
       },
     },
   }
@@ -205,13 +238,17 @@ export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
 }
 
 export function StudentComparisonBarChart({ labels, averages, attendanceRates }) {
+  const isDark = useIsDarkTheme()
+  const tickColor = isDark ? '#cbd5e1' : '#64748b'
+  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
+
   const data = {
     labels,
     datasets: [
       {
         label: 'Grade Average',
         data: averages,
-        backgroundColor: '#35408e',
+        backgroundColor: isDark ? '#6070d4' : '#35408e',
         borderRadius: 8,
       },
       {
@@ -230,19 +267,19 @@ export function StudentComparisonBarChart({ labels, averages, attendanceRates })
       legend: {
         position: 'top',
         align: 'end',
-        labels: { boxWidth: 10, usePointStyle: true, font: BASE_FONT },
+        labels: { boxWidth: 10, usePointStyle: true, color: tickColor, font: BASE_FONT },
       },
     },
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
       y: {
         min: 60,
         max: 100,
-        grid: { color: 'rgba(148, 163, 184, 0.15)' },
-        ticks: { color: '#64748b', font: BASE_FONT },
+        grid: { color: gridColor },
+        ticks: { color: tickColor, font: BASE_FONT },
       },
     },
   }

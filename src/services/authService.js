@@ -10,9 +10,10 @@ import { auth, db, isFirebaseConfigured } from '../firebase'
 import { buildInitialStudentRecord, ensureDemoStudentRecord } from './studentService'
 
 export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
+export const isDevDemoAdminEnabled = Boolean(import.meta.env.DEV && !isFirebaseConfigured)
 
-const DEMO_USERS_KEY = 'dashprototype_demo_users_v2'
-const DEMO_SESSION_KEY = 'dashprototype_demo_session_v2'
+const DEMO_USERS_KEY = 'dashprototype_demo_users_v3'
+const DEMO_SESSION_KEY = 'dashprototype_demo_session_v3'
 
 const DEFAULT_DEMO_USERS = [
   {
@@ -31,23 +32,7 @@ const DEFAULT_DEMO_USERS = [
     role: 'student',
     section: '12SHS2509',
   },
-  {
-    uid: 'admin-ctsh',
-    name: 'Dr. Elena Santos',
-    email: 'admin@ctseniorhigh.edu.ph',
-    password: 'admin123',
-    role: 'admin',
-    section: 'Admin',
-  },
 ]
-
-function getConfiguredAdminEmails() {
-  const raw = import.meta.env.VITE_ADMIN_EMAILS || ''
-  return raw
-    .split(',')
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean)
-}
 
 function readDemoUsers() {
   try {
@@ -95,9 +80,7 @@ function writeDemoSession(sessionUser) {
 }
 
 async function resolveFirebaseUserProfile(firebaseUser) {
-  const adminEmails = getConfiguredAdminEmails()
-  const emailLower = (firebaseUser.email || '').toLowerCase()
-  let role = adminEmails.includes(emailLower) ? 'admin' : 'student'
+  let role = 'student'
   let name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student'
   let section = '12SHS2510'
 
@@ -106,12 +89,12 @@ async function resolveFirebaseUserProfile(firebaseUser) {
       const userSnap = await getDoc(doc(db, 'users', firebaseUser.uid))
       if (userSnap.exists()) {
         const userData = userSnap.data()
-        role = userData.role || role
+        role = userData.role === 'admin' ? 'admin' : 'student'
         name = userData.name || name
         section = userData.section || section
       }
     } catch {
-      // Keep default resolved metadata if user profile doc is unreadable.
+      // Default to least-privilege 'student' role if profile lookup fails.
     }
   }
 
@@ -142,9 +125,6 @@ export function subscribeToAuthState(callback) {
   })
 }
 
-/**
- * Subscribe to all registered user accounts (for Administrator view).
- */
 export function subscribeToAllUserAccounts(callback) {
   if (!isFirebaseConfigured || !db) {
     const load = () => callback(readDemoUsers())
@@ -208,11 +188,11 @@ export async function signUpStudent({ name, email, password, section }) {
   const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password)
   await updateProfile(cred.user, { displayName: cleanName })
 
+  // Never store plaintext passwords in Firestore.
   const userProfile = {
     uid: cred.user.uid,
     name: cleanName,
     email: cleanEmail,
-    passwordNote: password,
     role: 'student',
     school: 'CT SENIOR HIGH',
     section: safeSection,
@@ -235,6 +215,29 @@ export async function signInWithRole({ email, password, section, expectedRole = 
   }
 
   if (!isFirebaseConfigured || !auth) {
+    if (expectedRole === 'admin') {
+      // Admin demo access is disabled in production builds without Firebase Auth.
+      if (!isDevDemoAdminEnabled) {
+        throw new Error(
+          'Administrator login is locked until Firebase Authentication is configured.'
+        )
+      }
+      const devAdminEmail = (import.meta.env.VITE_DEV_ADMIN_EMAIL || 'admin@ctseniorhigh.edu.ph').toLowerCase()
+      const devAdminPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || 'admin123'
+      if (cleanEmail !== devAdminEmail || password !== devAdminPass) {
+        throw new Error('Invalid administrator credentials.')
+      }
+      const adminSession = {
+        uid: 'admin-ctsh',
+        name: 'Dr. Elena Santos',
+        email: devAdminEmail,
+        role: 'admin',
+        section: 'Admin',
+      }
+      writeDemoSession(adminSession)
+      return adminSession
+    }
+
     const users = readDemoUsers()
     const match = users.find(
       (u) => u.email.toLowerCase() === cleanEmail && u.password === password
@@ -242,10 +245,7 @@ export async function signInWithRole({ email, password, section, expectedRole = 
     if (!match) {
       throw new Error('Invalid email or password.')
     }
-    if (expectedRole === 'admin' && match.role !== 'admin') {
-      throw new Error('This account does not have administrator privileges.')
-    }
-    if (expectedRole === 'student' && match.role === 'student' && section && match.section !== section) {
+    if (section && match.section !== section) {
       throw new Error(`This account belongs to section ${match.section}, not ${section}.`)
     }
     const sessionUser = {

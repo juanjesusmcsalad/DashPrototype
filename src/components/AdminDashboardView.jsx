@@ -1,9 +1,15 @@
 import { useEffect, useState } from 'react'
 import { isFirebaseConfigured } from '../firebase'
-import { ALLOWED_SECTIONS, subscribeToAllUserAccounts } from '../services/authService'
+import {
+  ALLOWED_SECTIONS,
+  isDevDemoAdminEnabled,
+  subscribeToAllUserAccounts,
+} from '../services/authService'
 import { subscribeToAllStudents, updateStudentFields } from '../services/studentService'
+import { downloadStudentCsv } from '../utils/academicHelpers'
 import { StudentComparisonBarChart, SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
+import ThemeToggle from './ThemeToggle'
 
 const ADMIN_NAV_ITEMS = [
   { id: 'overview', label: 'Admin Overview', icon: 'grid' },
@@ -14,13 +20,15 @@ const ADMIN_NAV_ITEMS = [
   { id: 'admin-profile', label: 'Admin Profile', icon: 'user' },
 ]
 
+const CARD = 'rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700/70 dark:bg-[#181e38]'
+
 function computeAverage(subjects = []) {
   if (subjects.length === 0) return 0
   const total = subjects.reduce((sum, s) => sum + Number(s.grade || 0), 0)
   return Number((total / subjects.length).toFixed(2))
 }
 
-export default function AdminDashboardView({ currentUser, onLogout }) {
+export default function AdminDashboardView({ currentUser, onLogout, darkMode, onToggleDarkMode }) {
   const [activeTab, setActiveTab] = useState('overview')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [students, setStudents] = useState([])
@@ -191,7 +199,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
   }
 
   const copyCredentials = async (acc) => {
-    const text = `Email: ${acc.email} | Password: ${acc.password || acc.passwordNote || '(Managed by Firebase Auth)'}`
+    const pw = isDevDemoAdminEnabled && acc.password ? acc.password : '(Protected by Firebase Auth)'
+    const text = `Email: ${acc.email} | Password: ${pw}`
     try {
       await navigator.clipboard.writeText(text)
       setCopiedId(acc.uid)
@@ -202,7 +211,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
   }
 
   const renderSectionFilterPills = () => (
-    <div className="flex flex-wrap gap-1.5 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-100">
+    <div className="flex flex-wrap gap-1.5 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-100 dark:bg-[#181e38] dark:ring-slate-700">
       {['ALL', ...ALLOWED_SECTIONS].map((sec) => (
         <button
           key={sec}
@@ -210,8 +219,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
           onClick={() => setSectionFilter(sec)}
           className={`rounded-full px-3.5 py-1 text-xs font-bold transition ${
             sectionFilter === sec
-              ? 'bg-[#35408e] text-white'
-              : 'text-slate-600 hover:bg-[#eef0fb] hover:text-[#35408e]'
+              ? 'bg-[#35408e] text-white dark:bg-[#ffd41c] dark:text-[#232b66]'
+              : 'text-slate-600 hover:bg-[#eef0fb] hover:text-[#35408e] dark:text-slate-300 dark:hover:bg-white/10'
           }`}
         >
           {sec === 'ALL' ? 'All Sections' : sec}
@@ -227,8 +236,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">Manage Students</h1>
-                <p className="text-xs text-slate-500">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">Manage Students</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Edit subject grades, attendance, and personalized recommendations by section.
                 </p>
               </div>
@@ -236,8 +245,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-5">
-                <h2 className="mb-3 text-sm font-bold text-slate-900">
+              <section className={`${CARD} p-5 lg:col-span-5`}>
+                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
                   Students ({filteredStudents.length})
                 </h2>
                 <div className="space-y-2">
@@ -251,14 +260,14 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                         className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition ${
                           isSelected
                             ? 'bg-[#35408e] text-white shadow-sm'
-                            : 'bg-[#f5f6fb] text-slate-800 hover:bg-[#eef0fb]'
+                            : 'bg-[#f5f6fb] text-slate-800 hover:bg-[#eef0fb] dark:bg-[#11162b] dark:text-slate-200 dark:hover:bg-[#232b52]'
                         }`}
                       >
                         <div>
                           <p className="text-sm font-bold">{entry.student?.name}</p>
                           <p
                             className={`text-[11px] ${
-                              isSelected ? 'text-white/80' : 'text-slate-500'
+                              isSelected ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                             }`}
                           >
                             {entry.student?.section || '12SHS2510'} • {entry.student?.email}
@@ -268,7 +277,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                           className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
                             isSelected
                               ? 'bg-[#ffd41c] text-[#232b66]'
-                              : 'bg-white text-[#35408e]'
+                              : 'bg-white text-[#35408e] dark:bg-[#181e38] dark:text-[#ffd41c]'
                           }`}
                         >
                           {computeAverage(entry.subjects)}
@@ -279,48 +288,57 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-7">
+              <section className={`${CARD} p-5 lg:col-span-7`}>
                 {selectedStudent ? (
                   <div className="space-y-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4 dark:border-slate-700/70">
                       <div>
                         <div className="flex items-center gap-2">
-                          <h2 className="text-base font-bold text-slate-900">
+                          <h2 className="text-base font-bold text-slate-900 dark:text-white">
                             {selectedStudent.student?.name}
                           </h2>
-                          <span className="rounded-full bg-[#ffd41c]/35 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e]">
+                          <span className="rounded-full bg-[#ffd41c]/35 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
                             {selectedStudent.student?.section || '12SHS2510'}
                           </span>
                         </div>
-                        <p className="mt-0.5 text-xs text-slate-500">
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                           {selectedStudent.student?.email} • {selectedStudent.student?.studentNumber}
                         </p>
                       </div>
 
-                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-700">
-                        Attendance %:
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={selectedStudent.student?.attendanceRate ?? 96}
-                          onChange={(e) => handleAttendanceChange(Number(e.target.value))}
-                          className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center font-bold text-[#35408e] outline-none focus:border-[#35408e]"
-                        />
-                      </label>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                          Attendance %:
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={selectedStudent.student?.attendanceRate ?? 96}
+                            onChange={(e) => handleAttendanceChange(Number(e.target.value))}
+                            className="w-16 rounded-lg border border-slate-200 px-2 py-1 text-center font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-[#ffd41c]"
+                          />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => downloadStudentCsv(selectedStudent)}
+                          className="rounded-lg border border-[#35408e]/30 px-2.5 py-1 text-[11px] font-bold text-[#35408e] hover:bg-[#eef0fb] dark:border-slate-700 dark:text-[#ffd41c] dark:hover:bg-[#232b52]"
+                        >
+                          Export CSV
+                        </button>
+                      </div>
                     </div>
 
                     <div>
-                      <h3 className="mb-2.5 text-xs font-bold tracking-wide text-slate-500 uppercase">
+                      <h3 className="mb-2.5 text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                         Edit Subject Grades
                       </h3>
                       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         {(selectedStudent.subjects || []).map((subj) => (
                           <div
                             key={subj.id}
-                            className="flex items-center justify-between rounded-xl bg-[#f5f6fb] px-3.5 py-2.5"
+                            className="flex items-center justify-between rounded-xl bg-[#f5f6fb] px-3.5 py-2.5 dark:bg-[#11162b]"
                           >
-                            <span className="text-xs font-semibold text-slate-800">
+                            <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
                               {subj.shortName}
                             </span>
                             <input
@@ -329,7 +347,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                               max="100"
                               value={subj.grade}
                               onChange={(e) => handleGradeChange(subj.id, Number(e.target.value))}
-                              className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e]"
+                              className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
                             />
                           </div>
                         ))}
@@ -338,9 +356,9 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
 
                     <form
                       onSubmit={handleAddRecommendation}
-                      className="space-y-2 border-t border-slate-100 pt-4"
+                      className="space-y-2 border-t border-slate-100 pt-4 dark:border-slate-700/70"
                     >
-                      <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase">
+                      <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
                         Add Personalized Recommendation
                       </h3>
                       <div className="flex gap-2">
@@ -349,7 +367,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                           value={newRec}
                           onChange={(e) => setNewRec(e.target.value)}
                           placeholder="e.g. Submit Chapter 4 draft by Friday."
-                          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e]"
+                          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                         />
                         <button
                           type="submit"
@@ -361,7 +379,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                     </form>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-500">No students match the selected filter.</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">No students match the selected filter.</p>
                 )}
               </section>
             </div>
@@ -373,8 +391,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="text-xl font-bold text-slate-900">User Credentials</h1>
-                <p className="text-xs text-slate-500">
+                <h1 className="text-xl font-bold text-slate-900 dark:text-white">User Credentials</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   View registered emails, sections, roles, and passwords across all accounts.
                 </p>
               </div>
@@ -382,16 +400,16 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
             </div>
 
             {isFirebaseConfigured && (
-              <div className="rounded-2xl border border-[#ffd41c] bg-[#fff9dc] px-4 py-3 text-xs text-[#35408e]">
+              <div className="rounded-2xl border border-[#ffd41c] bg-[#fff9dc] px-4 py-3 text-xs text-[#35408e] dark:border-[#ffd41c]/50 dark:bg-[#272318] dark:text-[#ffd41c]">
                 <strong>Note:</strong> When connected to Firebase Auth, Firebase securely hashes
                 passwords on Google servers, so only accounts signed up via this portal store a
                 reference note in Firestore.
               </div>
             )}
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm">
+            <div className={`${CARD} overflow-x-auto`}>
               <table className="w-full min-w-[680px] text-left text-xs">
-                <thead className="border-b border-slate-100 bg-[#f5f6fb] text-[11px] font-bold tracking-wide text-slate-500 uppercase">
+                <thead className="border-b border-slate-100 bg-[#f5f6fb] text-[11px] font-bold tracking-wide text-slate-500 uppercase dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-400">
                   <tr>
                     <th className="px-5 py-3.5">Name</th>
                     <th className="px-5 py-3.5">Section</th>
@@ -401,15 +419,15 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                     <th className="px-5 py-3.5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
                   {filteredAccounts.map((acc) => {
-                    const rawPassword = acc.password || acc.passwordNote || ''
+                    const rawPassword = isDevDemoAdminEnabled ? (acc.password || '') : ''
                     const isShown = Boolean(visiblePasswords[acc.uid])
                     return (
-                      <tr key={acc.uid} className="hover:bg-[#f5f6fb]/60">
-                        <td className="px-5 py-3.5 font-bold text-slate-900">{acc.name}</td>
+                      <tr key={acc.uid} className="hover:bg-[#f5f6fb]/60 dark:hover:bg-white/5">
+                        <td className="px-5 py-3.5 font-bold text-slate-900 dark:text-white">{acc.name}</td>
                         <td className="px-5 py-3.5">
-                          <span className="rounded-full bg-[#eef0fb] px-2.5 py-0.5 font-bold text-[#35408e]">
+                          <span className="rounded-full bg-[#eef0fb] px-2.5 py-0.5 font-bold text-[#35408e] dark:bg-[#232b52] dark:text-[#ffd41c]">
                             {acc.section || '12SHS2510'}
                           </span>
                         </td>
@@ -418,18 +436,20 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                             className={`rounded-full px-2.5 py-0.5 font-bold capitalize ${
                               acc.role === 'admin'
                                 ? 'bg-[#ffd41c] text-[#232b66]'
-                                : 'bg-slate-100 text-slate-700'
+                                : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
                             }`}
                           >
                             {acc.role}
                           </span>
                         </td>
-                        <td className="px-5 py-3.5 font-mono text-slate-700">{acc.email}</td>
-                        <td className="px-5 py-3.5 font-mono text-slate-800">
+                        <td className="px-5 py-3.5 font-mono text-slate-700 dark:text-slate-300">{acc.email}</td>
+                        <td className="px-5 py-3.5 font-mono text-slate-800 dark:text-slate-200">
                           {rawPassword ? (
                             isShown ? rawPassword : '••••••••'
                           ) : (
-                            <span className="font-sans text-slate-400">Managed by Firebase</span>
+                            <span className="font-sans text-emerald-600 dark:text-emerald-400">
+                              Protected by Firebase Auth
+                            </span>
                           )}
                         </td>
                         <td className="px-5 py-3.5 text-right">
@@ -438,7 +458,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                               <button
                                 type="button"
                                 onClick={() => togglePasswordVisibility(acc.uid)}
-                                className="rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#35408e] hover:text-[#35408e]"
+                                className="rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#35408e] hover:text-[#35408e] dark:border-slate-700 dark:text-slate-200 dark:hover:border-[#ffd41c] dark:hover:text-[#ffd41c]"
                               >
                                 {isShown ? 'Hide' : 'Show'}
                               </button>
@@ -446,7 +466,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                             <button
                               type="button"
                               onClick={() => copyCredentials(acc)}
-                              className="rounded-lg bg-[#35408e] px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#262f6d]"
+                              className="rounded-lg bg-[#35408e] px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
                             >
                               {copiedId === acc.uid ? 'Copied!' : 'Copy'}
                             </button>
@@ -465,34 +485,31 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-xl font-bold text-slate-900">Section Analytics</h1>
-              <p className="text-xs text-slate-500">
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Section Analytics</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Compare performance across sections 12SHS2510 and 12SHS2509.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {sectionStats.map((stat) => (
-                <div
-                  key={stat.section}
-                  className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-                >
+                <div key={stat.section} className={`${CARD} p-5`}>
                   <div className="flex items-center justify-between">
                     <span className="rounded-full bg-[#35408e] px-3 py-1 text-xs font-bold text-white">
                       {stat.section}
                     </span>
-                    <span className="text-xs font-semibold text-slate-500">
+                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                       {stat.count} student{stat.count === 1 ? '' : 's'}
                     </span>
                   </div>
                   <div className="mt-4 grid grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs text-slate-500">Grade Average</p>
-                      <p className="text-2xl font-bold text-slate-900">{stat.avg}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Grade Average</p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.avg}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500">Attendance</p>
-                      <p className="text-2xl font-bold text-[#35408e]">{stat.attendance}%</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Attendance</p>
+                      <p className="text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{stat.attendance}%</p>
                     </div>
                   </div>
                 </div>
@@ -500,8 +517,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-sm font-bold text-slate-900">
+              <div className={`${CARD} p-5`}>
+                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
                   All Students: Grade vs Attendance
                 </h2>
                 <StudentComparisonBarChart
@@ -510,8 +527,8 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                   attendanceRates={students.map((s) => s.student?.attendanceRate || 0)}
                 />
               </div>
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <h2 className="mb-3 text-sm font-bold text-slate-900">
+              <div className={`${CARD} p-5`}>
+                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
                   Selected Student Subjects ({selectedStudent?.student?.name || '—'})
                 </h2>
                 <SubjectBarChart subjects={selectedStudent?.subjects || []} />
@@ -523,21 +540,21 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
       case 'announcements':
         return (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-5">
-              <h1 className="text-lg font-bold text-slate-900">Publish Announcement</h1>
-              <p className="mt-1 text-xs text-slate-500">
+            <section className={`${CARD} p-5 lg:col-span-5`}>
+              <h1 className="text-lg font-bold text-slate-900 dark:text-white">Publish Announcement</h1>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Send updates to all students or a specific section.
               </p>
 
               <form onSubmit={handleBroadcastAnnouncement} className="mt-4 space-y-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-700">
+                  <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-300">
                     Target Section
                   </label>
                   <select
                     value={announcementTarget}
                     onChange={(e) => setAnnouncementTarget(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-[#35408e]"
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                   >
                     <option value="ALL">All Sections (12SHS2510 & 12SHS2509)</option>
                     {ALLOWED_SECTIONS.map((sec) => (
@@ -554,7 +571,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                   value={announcementTitle}
                   onChange={(e) => setAnnouncementTitle(e.target.value)}
                   placeholder="Announcement title"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                 />
                 <textarea
                   rows={4}
@@ -562,11 +579,11 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                   value={announcementBody}
                   onChange={(e) => setAnnouncementBody(e.target.value)}
                   placeholder="Write a notice for students..."
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e]"
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
                 />
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-[#35408e] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d]"
+                  className="w-full rounded-xl bg-[#35408e] py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
                 >
                   Publish Announcement
                 </button>
@@ -574,20 +591,17 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
             </section>
 
             <section className="space-y-3 lg:col-span-7">
-              <h2 className="text-lg font-bold text-slate-900">Recent Notices</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Notices</h2>
               {(selectedStudent?.announcements || []).map((ann) => (
-                <article
-                  key={ann.id}
-                  className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
-                >
+                <article key={ann.id} className={`${CARD} p-5`}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-[#ffd41c]/35 px-3 py-0.5 text-xs font-bold text-[#35408e]">
+                    <span className="rounded-full bg-[#ffd41c]/35 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
                       {ann.tag}
                     </span>
                     <span className="text-xs text-slate-400">{ann.date}</span>
                   </div>
-                  <h3 className="mt-2 text-sm font-bold text-slate-900">{ann.title}</h3>
-                  <p className="mt-1 text-xs text-slate-600">{ann.body}</p>
+                  <h3 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{ann.title}</h3>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{ann.body}</p>
                   <p className="mt-2 text-[11px] text-slate-400">Posted by {ann.author}</p>
                 </article>
               ))}
@@ -599,28 +613,45 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
         return (
           <div className="space-y-6">
             <div>
-              <h1 className="text-xl font-bold text-slate-900">Administrator Profile</h1>
-              <p className="text-xs text-slate-500">Account details and portal sync status.</p>
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Administrator Profile</h1>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Account details and portal sync status.</p>
             </div>
-            <div className="grid grid-cols-1 gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:grid-cols-2">
+            <div className={`${CARD} grid grid-cols-1 gap-4 p-6 sm:grid-cols-2`}>
               <div>
                 <p className="text-xs text-slate-400">Administrator Name</p>
-                <p className="text-sm font-bold text-slate-900">{currentUser.name}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-white">{currentUser.name}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400">Email</p>
-                <p className="text-sm font-semibold text-slate-800">{currentUser.email}</p>
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{currentUser.email}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400">Role</p>
-                <p className="text-sm font-bold text-[#35408e] uppercase">{currentUser.role}</p>
+                <p className="text-sm font-bold text-[#35408e] uppercase dark:text-[#ffd41c]">{currentUser.role}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400">Backend Mode</p>
-                <p className="text-sm font-semibold text-slate-800">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {syncStatus.mode === 'firestore' ? 'Firebase Firestore Live' : 'Local Demo Mode'}
                 </p>
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#35408e]/25 bg-[#eef0fb]/70 p-5 dark:border-slate-700 dark:bg-[#181e38]">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Administrator Security Checklist
+              </h2>
+              <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
+                <li>
+                  1. Deploy <code>firestore.rules</code> in Firebase Console → Firestore Database → Rules so students can never set <code>role: &quot;admin&quot;</code> or edit official grades.
+                </li>
+                <li>
+                  2. Create your real Admin user in Firebase Console → Authentication, then set their document in <code>users/&#123;uid&#125;</code> with <code>role: &quot;admin&quot;</code>.
+                </li>
+                <li>
+                  3. Demo admin credentials are automatically disabled in production builds (<code>vite build</code>).
+                </li>
+              </ul>
             </div>
           </div>
         )
@@ -663,34 +694,34 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
             </section>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs text-slate-500">Registered Students</p>
-                <p className="mt-1 text-2xl font-bold text-[#35408e]">{students.length}</p>
+              <div className={`${CARD} p-5`}>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Registered Students</p>
+                <p className="mt-1 text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{students.length}</p>
               </div>
-              <div className="rounded-2xl border-2 border-[#35408e] bg-white p-5 shadow-sm">
-                <p className="text-xs text-slate-500">Overall Grade Average</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">{overallAvg}</p>
+              <div className="rounded-2xl border-2 border-[#35408e] bg-white p-5 shadow-sm dark:border-[#ffd41c] dark:bg-[#181e38]">
+                <p className="text-xs text-slate-500 dark:text-slate-400">Overall Grade Average</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{overallAvg}</p>
               </div>
-              <div className="rounded-2xl border border-[#ffd41c] bg-[#fff9dc] p-5 shadow-sm">
-                <p className="text-xs text-[#35408e]">Average Attendance</p>
-                <p className="mt-1 text-2xl font-bold text-[#35408e]">{avgAttendance}%</p>
+              <div className="rounded-2xl border border-[#ffd41c] bg-[#fff9dc] p-5 shadow-sm dark:border-[#ffd41c]/60 dark:bg-[#272318]">
+                <p className="text-xs text-[#35408e] dark:text-[#ffd41c]">Average Attendance</p>
+                <p className="mt-1 text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{avgAttendance}%</p>
               </div>
-              <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-                <p className="text-xs text-slate-500">Total Accounts</p>
-                <p className="mt-1 text-2xl font-bold text-slate-900">{accounts.length}</p>
+              <div className={`${CARD} p-5`}>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Total Accounts</p>
+                <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{accounts.length}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-              <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-8">
+              <section className={`${CARD} p-5 lg:col-span-8`}>
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-sm font-bold text-slate-900">
+                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
                     Student Grades vs Attendance
                   </h2>
                   <button
                     type="button"
                     onClick={() => setActiveTab('analytics')}
-                    className="text-xs font-semibold text-[#35408e] hover:text-[#242c66]"
+                    className="text-xs font-semibold text-[#35408e] hover:text-[#242c66] dark:text-[#ffd41c]"
                   >
                     Section analytics
                   </button>
@@ -702,19 +733,19 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                 />
               </section>
 
-              <section className="space-y-3 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm lg:col-span-4">
-                <h2 className="text-sm font-bold text-slate-900">Sections Summary</h2>
+              <section className={`${CARD} space-y-3 p-5 lg:col-span-4`}>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Sections Summary</h2>
                 {sectionStats.map((stat) => (
-                  <div key={stat.section} className="rounded-xl bg-[#f5f6fb] p-4">
+                  <div key={stat.section} className="rounded-xl bg-[#f5f6fb] p-4 dark:bg-[#11162b]">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#35408e]">{stat.section}</span>
+                      <span className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">{stat.section}</span>
                       <span className="rounded-full bg-[#ffd41c] px-2.5 py-0.5 text-[11px] font-bold text-[#232b66]">
                         {stat.count} students
                       </span>
                     </div>
-                    <p className="mt-2 text-xs text-slate-600">
-                      Avg Grade: <strong className="text-slate-900">{stat.avg}</strong> • Attendance:{' '}
-                      <strong className="text-slate-900">{stat.attendance}%</strong>
+                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+                      Avg Grade: <strong className="text-slate-900 dark:text-white">{stat.avg}</strong> • Attendance:{' '}
+                      <strong className="text-slate-900 dark:text-white">{stat.attendance}%</strong>
                     </p>
                   </div>
                 ))}
@@ -726,7 +757,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f6fb] p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
+    <div className="min-h-screen bg-[#f5f6fb] p-3 transition-colors sm:p-5 lg:h-screen lg:overflow-hidden dark:bg-[#0f1326]">
       <div className="mx-auto flex h-full max-w-[1380px] gap-6">
         <Sidebar
           activeTab={activeTab}
@@ -744,7 +775,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden"
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden dark:bg-[#181e38] dark:text-slate-200 dark:ring-slate-700"
                 aria-label="Open navigation menu"
               >
                 <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -768,7 +799,7 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search students or accounts"
-                  className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e]"
+                  className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
                 />
               </div>
             </div>
@@ -777,29 +808,31 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
               <span
                 className={`hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline-flex ${
                   syncStatus.mode === 'firestore'
-                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200'
-                    : 'bg-[#ffd41c]/20 text-[#35408e] ring-1 ring-[#ffd41c]'
+                    ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-700'
+                    : 'bg-[#ffd41c]/20 text-[#35408e] ring-1 ring-[#ffd41c] dark:bg-[#ffd41c]/15 dark:text-[#ffd41c]'
                 }`}
               >
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
-                    syncStatus.mode === 'firestore' ? 'bg-emerald-500' : 'bg-[#35408e]'
+                    syncStatus.mode === 'firestore' ? 'bg-emerald-500' : 'bg-[#35408e] dark:bg-[#ffd41c]'
                   }`}
                 />
                 {syncStatus.mode === 'firestore' ? 'Firestore Live' : 'Demo Mode'}
               </span>
 
+              <ThemeToggle darkMode={darkMode} onToggle={onToggleDarkMode} />
+
               <button
                 type="button"
                 onClick={() => setActiveTab('admin-profile')}
-                className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70"
+                className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70 dark:hover:bg-white/10"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#35408e] text-xs font-bold text-[#ffd41c] shadow-sm ring-2 ring-[#ffd41c]">
                   AD
                 </div>
                 <div className="leading-tight">
-                  <p className="text-xs font-bold text-slate-900 sm:text-sm">{currentUser.name}</p>
-                  <p className="text-[10px] font-semibold tracking-wide text-[#35408e] uppercase">
+                  <p className="text-xs font-bold text-slate-900 sm:text-sm dark:text-slate-100">{currentUser.name}</p>
+                  <p className="text-[10px] font-semibold tracking-wide text-[#35408e] uppercase dark:text-[#ffd41c]">
                     Administrator
                   </p>
                 </div>
@@ -808,12 +841,12 @@ export default function AdminDashboardView({ currentUser, onLogout }) {
           </header>
 
           {saveMessage && (
-            <div className="flex items-center justify-between rounded-2xl border border-[#35408e]/20 bg-[#eef0fb] px-4 py-2.5 text-xs font-semibold text-[#35408e]">
+            <div className="flex items-center justify-between rounded-2xl border border-[#35408e]/20 bg-[#eef0fb] px-4 py-2.5 text-xs font-semibold text-[#35408e] dark:border-slate-700 dark:bg-[#1e2647] dark:text-[#ffd41c]">
               <span>{saveMessage}</span>
               <button
                 type="button"
                 onClick={() => setSaveMessage('')}
-                className="text-slate-500 hover:text-slate-800"
+                className="text-slate-500 hover:text-slate-800 dark:text-slate-300"
               >
                 Dismiss
               </button>

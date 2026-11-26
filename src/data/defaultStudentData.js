@@ -108,4 +108,12 @@ export const DEFAULT_STUDENT_DATA = {
     { id: 'sch-5', day: 'Thursday', time: '01:00 PM - 02:30 PM', subject: 'Entrepreneurship', room: 'Room 301' },
     { id: 'sch-6', day: 'Friday', time: '10:00 AM - 12:00 PM', subject: 'Research Consultation & Lab', room: 'Library Hub' },
   ],
+  researchMilestones: [
+    { id: 'ch-1', label: 'Ch. 1: Problem & Background', completed: true },
+    { id: 'ch-2', label: 'Ch. 2: Review of Literature', completed: true },
+    { id: 'ch-3', label: 'Ch. 3: Methodology', completed: false },
+    { id: 'ch-4', label: 'Ch. 4: Data & Results', completed: false },
+    { id: 'ch-5', label: 'Ch. 5: Summary & Conclusion', completed: false },
+    { id: 'defense', label: 'Final Oral Defense', completed: false },
+  ],
 }

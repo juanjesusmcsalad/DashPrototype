@@ -29,6 +29,25 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
   const [seedingMessage, setSeedingMessage] = useState('')
+  const [darkMode, setDarkMode] = useState(() => {
+    try {
+      return localStorage.getItem('dashprototype_theme') === 'dark'
+    } catch {
+      return false
+    }
+  })
+
+  useEffect(() => {
+    const root = document.documentElement
+    root.classList.toggle('dark', darkMode)
+    try {
+      localStorage.setItem('dashprototype_theme', darkMode ? 'dark' : 'light')
+    } catch {
+      // Ignore storage write errors.
+    }
+  }, [darkMode])
+
+  const toggleDarkMode = () => setDarkMode((prev) => !prev)
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthState((user) => {
@@ -74,15 +93,31 @@ export default function App() {
     }
   }
 
-  const handleUpdateGrade = async (subjectId, newGrade) => {
+  const handleToggleMilestone = async (milestoneId) => {
     if (!currentUser) return
-    const safeGrade = Math.min(100, Math.max(60, Number.isNaN(newGrade) ? 60 : newGrade))
-    const updatedSubjects = data.subjects.map((subj) =>
-      subj.id === subjectId ? { ...subj, grade: safeGrade } : subj
+    const updatedMilestones = (data.researchMilestones || []).map((m) =>
+      m.id === milestoneId ? { ...m, completed: !m.completed } : m
     )
-    setData((prev) => ({ ...prev, subjects: updatedSubjects }))
+    setData((prev) => ({ ...prev, researchMilestones: updatedMilestones }))
     try {
-      await updateStudentFields(currentUser.uid, { subjects: updatedSubjects })
+      await updateStudentFields(currentUser.uid, { researchMilestones: updatedMilestones })
+    } catch (err) {
+      setSyncStatus((prev) => ({ ...prev, error: err.message }))
+    }
+  }
+
+  const handleLogStudyHours = async (dayIndex, hoursToAdd) => {
+    if (!currentUser) return
+    const currentHours = [...(data.weeklyEngagement?.studyHours || [0, 0, 0, 0, 0, 0, 0])]
+    const nextVal = Number((Number(currentHours[dayIndex] || 0) + Number(hoursToAdd || 0)).toFixed(1))
+    currentHours[dayIndex] = Math.min(16, Math.max(0, nextVal))
+    const updatedEngagement = {
+      ...data.weeklyEngagement,
+      studyHours: currentHours,
+    }
+    setData((prev) => ({ ...prev, weeklyEngagement: updatedEngagement }))
+    try {
+      await updateStudentFields(currentUser.uid, { weeklyEngagement: updatedEngagement })
     } catch (err) {
       setSyncStatus((prev) => ({ ...prev, error: err.message }))
     }
@@ -105,18 +140,25 @@ export default function App() {
 
   if (currentUser === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] text-sm font-semibold text-[#35408e]">
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] text-sm font-semibold text-[#35408e] dark:bg-[#0f1326] dark:text-[#ffd41c]">
         Loading portal...
       </div>
     )
   }
 
   if (!currentUser) {
-    return <AuthView />
+    return <AuthView darkMode={darkMode} onToggleDarkMode={toggleDarkMode} />
   }
 
   if (currentUser.role === 'admin') {
-    return <AdminDashboardView currentUser={currentUser} onLogout={handleLogout} />
+    return (
+      <AdminDashboardView
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        darkMode={darkMode}
+        onToggleDarkMode={toggleDarkMode}
+      />
+    )
   }
 
   const renderContent = () => {
@@ -126,7 +168,7 @@ export default function App() {
           <AcademicProgressView
             data={data}
             searchQuery={searchQuery}
-            onUpdateGrade={handleUpdateGrade}
+            onToggleMilestone={handleToggleMilestone}
           />
         )
       case 'tasks':
@@ -141,7 +183,12 @@ export default function App() {
       case 'performance-insights':
         return <PerformanceInsightsView data={data} />
       case 'engagement-analytics':
-        return <EngagementAnalyticsView data={data} />
+        return (
+          <EngagementAnalyticsView
+            data={data}
+            onLogStudyHours={handleLogStudyHours}
+          />
+        )
       case 'announcements':
         return <AnnouncementsView data={data} searchQuery={searchQuery} />
       case 'schedule':
@@ -168,7 +215,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f6fb] p-3 sm:p-5 lg:h-screen lg:overflow-hidden">
+    <div className="min-h-screen bg-[#f5f6fb] p-3 transition-colors sm:p-5 lg:h-screen lg:overflow-hidden dark:bg-[#0f1326]">
       <div className="mx-auto flex h-full max-w-[1380px] gap-6">
         <Sidebar
           activeTab={activeTab}
@@ -187,6 +234,8 @@ export default function App() {
             announcements={data.announcements}
             syncStatus={syncStatus}
             onNavigate={setActiveTab}
+            darkMode={darkMode}
+            onToggleDarkMode={toggleDarkMode}
           />
 
           <div className="pb-4">{renderContent()}</div>
