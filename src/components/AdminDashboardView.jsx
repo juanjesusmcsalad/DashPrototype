@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isFirebaseConfigured } from '../firebase'
-import {
-  ALLOWED_SECTIONS,
-  isDevDemoAdminEnabled,
-  subscribeToAllUserAccounts,
-} from '../services/authService'
+import { ALLOWED_SECTIONS, subscribeToAllUserAccounts } from '../services/authService'
 import { subscribeToAllStudents, updateStudentFields } from '../services/studentService'
 import { downloadStudentCsv } from '../utils/academicHelpers'
 import { StudentComparisonBarChart, SubjectBarChart } from './Charts'
@@ -199,7 +195,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   }
 
   const copyCredentials = async (acc) => {
-    const pw = isDevDemoAdminEnabled && acc.password ? acc.password : '(Protected by Firebase Auth)'
+    const pw = !isFirebaseConfigured && acc.password ? acc.password : '(Protected by Firebase Auth)'
     const text = `Email: ${acc.email} | Password: ${pw}`
     try {
       await navigator.clipboard.writeText(text)
@@ -421,7 +417,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60">
                   {filteredAccounts.map((acc) => {
-                    const rawPassword = isDevDemoAdminEnabled ? (acc.password || '') : ''
+                    const rawPassword = !isFirebaseConfigured ? (acc.password || '') : ''
                     const isShown = Boolean(visiblePasswords[acc.uid])
                     return (
                       <tr key={acc.uid} className="hover:bg-[#f5f6fb]/60 dark:hover:bg-white/5">

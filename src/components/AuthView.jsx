@@ -1,11 +1,6 @@
 import { useState } from 'react'
 import { isFirebaseConfigured } from '../firebase'
-import {
-  ALLOWED_SECTIONS,
-  isDevDemoAdminEnabled,
-  signInWithRole,
-  signUpStudent,
-} from '../services/authService'
+import { ALLOWED_SECTIONS, signInWithRole, signUpStudent } from '../services/authService'
 import ThemeToggle from './ThemeToggle'
 
 export default function AuthView({ darkMode, onToggleDarkMode }) {
@@ -32,6 +27,13 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
         : 'carlos.conde@ctseniorhigh.edu.ph'
     )
     setPassword('student123')
+    setError('')
+  }
+
+  const fillDemoAdmin = () => {
+    setMode('admin')
+    setEmail('admin@ctseniorhigh.edu.ph')
+    setPassword('admin123')
     setError('')
   }
 
@@ -194,13 +196,6 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
             </div>
           )}
 
-          {mode === 'admin' && !isFirebaseConfigured && !isDevDemoAdminEnabled && (
-            <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200">
-              <strong>Security Lock:</strong> Administrator login is disabled on production builds
-              until Firebase Authentication &amp; Firestore Security Rules are configured.
-            </div>
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <div>
@@ -280,7 +275,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
 
             <button
               type="submit"
-              disabled={loading || (mode === 'admin' && !isFirebaseConfigured && !isDevDemoAdminEnabled)}
+              disabled={loading}
               className={`w-full rounded-full py-2.5 text-sm font-bold shadow-sm transition disabled:opacity-60 ${
                 mode === 'admin'
                   ? 'bg-[#ffd41c] text-[#232b66] hover:brightness-95'
@@ -297,13 +292,15 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
             </button>
           </form>
 
-          {!isFirebaseConfigured && mode !== 'admin' && (
+          {!isFirebaseConfigured && (
             <div className="mt-6 rounded-2xl border border-[#35408e]/15 bg-[#eef0fb]/60 p-4 dark:border-slate-700 dark:bg-[#11162b]">
-              <p className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">Quick Student Demo Accounts</p>
+              <p className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">Quick Demo Credentials</p>
               <p className="mt-1 text-[11px] text-slate-600 dark:text-slate-300">
                 12SHS2510: <code>carlos.conde@ctseniorhigh.edu.ph</code> / <code>student123</code>
                 <br />
                 12SHS2509: <code>maria.santos@ctseniorhigh.edu.ph</code> / <code>student123</code>
+                <br />
+                Admin: <code>admin@ctseniorhigh.edu.ph</code> / <code>admin123</code>
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -319,6 +316,13 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                   className="rounded-full bg-[#4c59b5] px-3.5 py-1 text-[11px] font-semibold text-white hover:bg-[#35408e]"
                 >
                   Demo 12SHS2509
+                </button>
+                <button
+                  type="button"
+                  onClick={fillDemoAdmin}
+                  className="rounded-full bg-[#ffd41c] px-3.5 py-1 text-[11px] font-bold text-[#232b66] hover:brightness-95"
+                >
+                  Demo Admin
                 </button>
               </div>
             </div>

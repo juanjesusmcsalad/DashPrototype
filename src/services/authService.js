@@ -10,7 +10,6 @@ import { auth, db, isFirebaseConfigured } from '../firebase'
 import { buildInitialStudentRecord, ensureDemoStudentRecord } from './studentService'
 
 export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
-export const isDevDemoAdminEnabled = Boolean(import.meta.env.DEV && !isFirebaseConfigured)
 
 const DEMO_USERS_KEY = 'dashprototype_demo_users_v3'
 const DEMO_SESSION_KEY = 'dashprototype_demo_session_v3'
@@ -31,6 +30,14 @@ const DEFAULT_DEMO_USERS = [
     password: 'student123',
     role: 'student',
     section: '12SHS2509',
+  },
+  {
+    uid: 'admin-ctsh',
+    name: 'Dr. Elena Santos',
+    email: 'admin@ctseniorhigh.edu.ph',
+    password: 'admin123',
+    role: 'admin',
+    section: 'Admin',
   },
 ]
 
@@ -215,29 +222,6 @@ export async function signInWithRole({ email, password, section, expectedRole = 
   }
 
   if (!isFirebaseConfigured || !auth) {
-    if (expectedRole === 'admin') {
-      // Admin demo access is disabled in production builds without Firebase Auth.
-      if (!isDevDemoAdminEnabled) {
-        throw new Error(
-          'Administrator login is locked until Firebase Authentication is configured.'
-        )
-      }
-      const devAdminEmail = (import.meta.env.VITE_DEV_ADMIN_EMAIL || 'admin@ctseniorhigh.edu.ph').toLowerCase()
-      const devAdminPass = import.meta.env.VITE_DEV_ADMIN_PASSWORD || 'admin123'
-      if (cleanEmail !== devAdminEmail || password !== devAdminPass) {
-        throw new Error('Invalid administrator credentials.')
-      }
-      const adminSession = {
-        uid: 'admin-ctsh',
-        name: 'Dr. Elena Santos',
-        email: devAdminEmail,
-        role: 'admin',
-        section: 'Admin',
-      }
-      writeDemoSession(adminSession)
-      return adminSession
-    }
-
     const users = readDemoUsers()
     const match = users.find(
       (u) => u.email.toLowerCase() === cleanEmail && u.password === password
@@ -245,7 +229,10 @@ export async function signInWithRole({ email, password, section, expectedRole = 
     if (!match) {
       throw new Error('Invalid email or password.')
     }
-    if (section && match.section !== section) {
+    if (expectedRole === 'admin' && match.role !== 'admin') {
+      throw new Error('This account does not have administrator privileges.')
+    }
+    if (expectedRole === 'student' && match.role === 'student' && section && match.section !== section) {
       throw new Error(`This account belongs to section ${match.section}, not ${section}.`)
     }
     const sessionUser = {
