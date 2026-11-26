@@ -24,8 +24,8 @@ export function downloadStudentCsv(data) {
     ['Attendance Rate', `${student.attendanceRate}%`],
     ['Tasks Completed', `${completedTasks}/${tasks.length}`],
     [],
-    ['Subject', 'Teacher', 'Progress %', 'Grade'],
-    ...subjects.map((s) => [s.name, s.teacher, `${s.progress}%`, s.grade]),
+    ['Subject', 'Teacher', 'Grade'],
+    ...subjects.map((s) => [s.name, s.teacher, s.grade]),
   ]
 
   const csvContent = rows.map((row) => row.map(escapeCsv).join(',')).join('\n')

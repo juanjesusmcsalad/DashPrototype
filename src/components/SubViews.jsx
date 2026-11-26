@@ -86,16 +86,12 @@ export function AcademicProgressView({ data, searchQuery }) {
                 <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{subject.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{subject.teacher}</p>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="w-32">
-                  <div className="mb-1 flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                    <span>Module Progress</span>
-                    <span>{subject.progress}%</span>
-                  </div>
+              <div className="flex items-center gap-3">
+                <div className="hidden w-28 sm:block">
                   <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
                     <div
                       className="h-full rounded-full bg-[#35408e] dark:bg-[#ffd41c]"
-                      style={{ width: `${subject.progress}%` }}
+                      style={{ width: `${Math.min(100, Math.max(0, Number(subject.grade || 0)))}%` }}
                     />
                   </div>
                 </div>

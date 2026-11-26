@@ -176,7 +176,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                     <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-[#35408e] to-[#5260bd] transition-all duration-300 dark:from-[#ffd41c] dark:to-[#eab308]"
-                        style={{ width: `${Math.min(100, Math.max(0, subject.progress))}%` }}
+                        style={{ width: `${Math.min(100, Math.max(0, Number(subject.grade || 0)))}%` }}
                       />
                     </div>
                   </div>

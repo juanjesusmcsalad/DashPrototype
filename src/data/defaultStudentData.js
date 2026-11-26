@@ -1,9 +1,9 @@
 export const ALLOWED_SUBJECTS = [
-  { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 91, progress: 88, teacher: 'Sage' },
-  { id: 'research', name: 'Research', shortName: 'Research', grade: 93, progress: 92, teacher: 'Cypher' },
-  { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 90, progress: 85, teacher: 'Sova' },
-  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 86, progress: 76, teacher: 'Viper' },
-  { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 88, progress: 84, teacher: 'Jett' },
+  { id: 'philippine-governance', name: 'Philippine Governance', shortName: 'Philippine Governance', grade: 91, teacher: 'Sage' },
+  { id: 'research', name: 'Research', shortName: 'Research', grade: 93, teacher: 'Cypher' },
+  { id: 'database-management', name: 'Database Management', shortName: 'Database Management', grade: 90, teacher: 'Sova' },
+  { id: 'finite-mathematics', name: 'Finite Mathematics', shortName: 'Finite Mathematics', grade: 86, teacher: 'Viper' },
+  { id: 'creative-industries', name: 'Creative Industries', shortName: 'Creative Industries', grade: 88, teacher: 'Jett' },
 ]
 
 export const DEFAULT_STUDENT_DATA = {

@@ -26,7 +26,6 @@ export default function AdminStudentEditor({
     (studentRecord?.subjects || []).map((s) => ({
       ...s,
       gradeInput: String(s.grade ?? 85),
-      progressInput: String(s.progress ?? 80),
     }))
   )
   const [isDirty, setIsDirty] = useState(false)
@@ -79,13 +78,6 @@ export default function AdminStudentEditor({
     setIsDirty(true)
   }
 
-  const handleProgressInputChange = (subjectId, value) => {
-    setSubjects((prev) =>
-      prev.map((s) => (s.id === subjectId ? { ...s, progressInput: value } : s))
-    )
-    setIsDirty(true)
-  }
-
   const handleSaveInfo = async (e) => {
     e.preventDefault()
     setSaving(true)
@@ -98,19 +90,14 @@ export default function AdminStudentEditor({
           ? Number(studentRecord.student?.attendanceRate ?? 96)
           : Math.min(100, Math.max(0, Math.round(rawAtt)))
 
-      const cleanedSubjects = subjects.map(({ gradeInput, progressInput, ...rest }) => {
+      const cleanedSubjects = subjects.map(({ gradeInput, ...rest }) => {
         const rawGrade = Number(gradeInput)
-        const rawProg = Number(progressInput)
         return {
           ...rest,
           grade:
             gradeInput.trim() === '' || Number.isNaN(rawGrade)
               ? Number(rest.grade ?? 75)
               : Math.min(100, Math.max(60, rawGrade)),
-          progress:
-            progressInput.trim() === '' || Number.isNaN(rawProg)
-              ? Number(rest.progress ?? 0)
-              : Math.min(100, Math.max(0, Math.round(rawProg))),
         }
       })
 
@@ -323,7 +310,7 @@ export default function AdminStudentEditor({
           <div>
             <div className="mb-2 flex items-center justify-between">
               <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                Subject Grades &amp; Progress
+                Subject Grades
               </h3>
               <span className="text-[11px] text-slate-400">
                 Tab through fields, then click Save
@@ -334,36 +321,21 @@ export default function AdminStudentEditor({
               {subjects.map((subj) => (
                 <div
                   key={subj.id}
-                  className="flex items-center justify-between gap-2 rounded-xl bg-[#f5f6fb] px-3 py-2.5 dark:bg-[#11162b]"
+                  className="flex items-center justify-between gap-2 rounded-xl bg-[#f5f6fb] px-3.5 py-2.5 dark:bg-[#11162b]"
                 >
                   <span className="truncate text-xs font-semibold text-slate-800 dark:text-slate-200">
                     {subj.shortName}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <label className="flex flex-col items-center text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                      <span>Prog %</span>
-                      <input
-                        type="number"
-                        min="0"
-                        max="100"
-                        value={subj.progressInput}
-                        onChange={(e) => handleProgressInputChange(subj.id, e.target.value)}
-                        className="mt-0.5 w-14 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-[11px] text-slate-600 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-slate-300"
-                      />
-                    </label>
-                    <label className="flex flex-col items-center text-[10px] font-semibold text-[#35408e] dark:text-[#ffd41c]">
-                      <span>Grade</span>
-                      <input
-                        type="number"
-                        min="60"
-                        max="100"
-                        step="0.5"
-                        value={subj.gradeInput}
-                        onChange={(e) => handleGradeInputChange(subj.id, e.target.value)}
-                        className="mt-0.5 w-16 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
-                      />
-                    </label>
-                  </div>
+                  <input
+                    type="number"
+                    min="60"
+                    max="100"
+                    step="0.5"
+                    aria-label={`${subj.shortName} grade`}
+                    value={subj.gradeInput}
+                    onChange={(e) => handleGradeInputChange(subj.id, e.target.value)}
+                    className="w-16 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
+                  />
                 </div>
               ))}
             </div>
