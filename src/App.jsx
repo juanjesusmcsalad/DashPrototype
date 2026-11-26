@@ -16,7 +16,6 @@ import {
 import { DEFAULT_STUDENT_DATA } from './data/defaultStudentData'
 import { signOutUser, subscribeToAuthState } from './services/authService'
 import {
-  seedDemoStudentData,
   subscribeToStudentData,
   updateStudentFields,
 } from './services/studentService'
@@ -28,7 +27,6 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
-  const [seedingMessage, setSeedingMessage] = useState('')
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('dashprototype_theme') === 'dark'
@@ -112,17 +110,6 @@ export default function App() {
     }
   }
 
-  const handleSeedFirestore = async () => {
-    if (!currentUser) return
-    setSeedingMessage('Syncing...')
-    try {
-      await seedDemoStudentData(currentUser.uid, currentUser)
-      setSeedingMessage('Demo data saved!')
-    } catch (err) {
-      setSeedingMessage(err.message)
-    }
-  }
-
   const handleLogout = async () => {
     await signOutUser()
   }
@@ -182,14 +169,7 @@ export default function App() {
       case 'schedule':
         return <ScheduleView data={data} />
       case 'profile':
-        return (
-          <ProfileView
-            data={data}
-            syncStatus={syncStatus}
-            onSeedFirestore={handleSeedFirestore}
-            seedingMessage={seedingMessage}
-          />
-        )
+        return <ProfileView data={data} />
       case 'dashboard':
       default:
         return (

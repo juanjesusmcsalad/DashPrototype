@@ -487,14 +487,14 @@ export function ScheduleView({ data }) {
   )
 }
 
-export function ProfileView({ data, syncStatus, onSeedFirestore, seedingMessage }) {
+export function ProfileView({ data }) {
   const { student } = data
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Student Profile</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Student details and Firebase Firestore connection status.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">Your student account details.</p>
       </div>
 
       <div className={`${CARD} p-6`}>
@@ -514,46 +514,9 @@ export function ProfileView({ data, syncStatus, onSeedFirestore, seedingMessage 
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Student ID</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{student.studentNumber}</p>
-          </div>
-          <div>
             <p className="text-xs text-slate-400">Email</p>
             <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{student.email}</p>
           </div>
-          <div>
-            <p className="text-xs text-slate-400">Class Adviser</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{student.adviser}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-2xl border border-[#35408e]/25 bg-[#eef0fb]/70 p-5 dark:border-slate-700 dark:bg-[#181e38]">
-        <h2 className="text-sm font-bold text-slate-900 dark:text-white">Firebase Firestore Status</h2>
-        <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
-          Current mode:{' '}
-          <span className="font-bold text-[#35408e] dark:text-[#ffd41c]">
-            {syncStatus.mode === 'firestore' ? 'Connected to Firestore (Live)' : 'Local Demo Mode'}
-          </span>
-        </p>
-        {syncStatus.error && (
-          <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">Note: {syncStatus.error}</p>
-        )}
-        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          Add your <code className="rounded bg-white px-1 py-0.5 dark:bg-[#11162b]">VITE_FIREBASE_*</code> keys in{' '}
-          <code className="rounded bg-white px-1 py-0.5 dark:bg-[#11162b]">.env</code> (locally) or Vercel Environment
-          Variables (production) to enable live Firestore sync.
-        </p>
-
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={onSeedFirestore}
-            className="rounded-xl bg-[#35408e] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
-          >
-            Seed / Reset Demo Data in Firestore
-          </button>
-          {seedingMessage && <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{seedingMessage}</span>}
         </div>
       </div>
     </div>
