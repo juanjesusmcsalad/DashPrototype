@@ -136,9 +136,13 @@ export default function Sidebar({
                 <rect x="18" y="49" width="28" height="6" rx="3" fill="#FFD41C" />
               </svg>
             </div>
-            {badgeText && (
+            {badgeText ? (
               <span className="mt-2.5 rounded-full bg-[#ffd41c] px-3 py-0.5 text-[10px] font-bold tracking-wider text-[#232b66] uppercase">
                 {badgeText}
+              </span>
+            ) : (
+              <span className="mt-2.5 text-[11px] font-bold tracking-wide text-white/90">
+                Trackable Dash
               </span>
             )}
           </div>

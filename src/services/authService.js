@@ -201,7 +201,7 @@ export async function signUpStudent({ name, email, password, section }) {
     name: cleanName,
     email: cleanEmail,
     role: 'student',
-    school: 'CT SENIOR HIGH',
+    school: 'NU MOA • CT Senior High',
     section: safeSection,
     createdAt: new Date().toISOString(),
   }

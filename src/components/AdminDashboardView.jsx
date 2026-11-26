@@ -315,7 +315,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         day: 'numeric',
         year: 'numeric',
       }),
-      author: currentUser.name || 'CT Senior High Admin',
+      author: currentUser.name || 'NU MOA CT Admin',
       body: announcementBody.trim(),
       tag: announcementTarget === 'ALL' ? 'All Sections' : announcementTarget,
     }
@@ -994,13 +994,13 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <span className="inline-block rounded-full bg-[#ffd41c] px-3 py-0.5 text-[11px] font-bold text-[#232b66] uppercase">
-                    Administrator Portal
+                    Trackable Dash • Admin Portal
                   </span>
                   <h1 className="mt-3 text-2xl font-bold sm:text-3xl">
                     Welcome back, {currentUser.name}!
                   </h1>
                   <p className="mt-1 text-xs text-white/85 sm:text-sm">
-                    Manage sections 12SHS2510 & 12SHS2509, student records, and credentials.
+                    Manage NU MOA CT sections 12SHS2510 &amp; 12SHS2509, student records, and credentials.
                   </p>
                 </div>
                 <div className="flex gap-2">

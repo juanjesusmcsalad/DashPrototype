@@ -11,7 +11,7 @@ export const DEFAULT_STUDENT_DATA = {
     id: 'carlos-conde',
     name: 'Carlos Conde',
     firstName: 'Carlos',
-    school: 'CT SENIOR HIGH',
+    school: 'NU MOA • CT Senior High',
     section: '12SHS2510',
     strand: 'Grade 12 — Section 12SHS2510',
     email: 'carlos.conde@ctseniorhigh.edu.ph',

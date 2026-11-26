@@ -80,9 +80,9 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
               </div>
               <div>
                 <p className="text-xs font-bold tracking-wider text-[#ffd41c] uppercase">
-                  CT Senior High
+                  NU MOA • CT Senior High
                 </p>
-                <p className="text-sm font-semibold text-white">Student Progress Portal</p>
+                <p className="text-sm font-semibold text-white">Trackable Dash</p>
               </div>
             </div>
 

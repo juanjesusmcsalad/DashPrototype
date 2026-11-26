@@ -31,7 +31,7 @@ export function downloadStudentCsv(data) {
   const completedTasks = tasks.filter((t) => t.completed).length
 
   const rows = [
-    ['CT Senior High - Student Academic Report'],
+    ['Trackable Dash (NU MOA CT Senior High) - Student Academic Report'],
     ['Name', student.name],
     ['Section', student.section || '12SHS2510'],
     ['Student ID', student.studentNumber],
