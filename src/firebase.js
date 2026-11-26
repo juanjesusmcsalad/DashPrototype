@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app'
+import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -19,10 +20,12 @@ export const isFirebaseConfigured = Boolean(
 
 let app = null
 let db = null
+let auth = null
 
 if (isFirebaseConfigured) {
   app = initializeApp(firebaseConfig)
   db = getFirestore(app)
+  auth = getAuth(app)
 }
 
-export { app, db }
+export { app, auth, db }

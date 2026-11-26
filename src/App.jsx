@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import AdminDashboardView from './components/AdminDashboardView'
+import AuthView from './components/AuthView'
 import DashboardView from './components/DashboardView'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
@@ -12,6 +14,7 @@ import {
   TasksView,
 } from './components/SubViews'
 import { DEFAULT_STUDENT_DATA } from './data/defaultStudentData'
+import { signOutUser, subscribeToAuthState } from './services/authService'
 import {
   seedDemoStudentData,
   subscribeToStudentData,
@@ -19,88 +22,101 @@ import {
 } from './services/studentService'
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState(undefined) // undefined = checking auth
   const [data, setData] = useState(DEFAULT_STUDENT_DATA)
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
   const [seedingMessage, setSeedingMessage] = useState('')
-  const [loggedOut, setLoggedOut] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = subscribeToStudentData(setData, setSyncStatus)
+    const unsubscribe = subscribeToAuthState((user) => {
+      setCurrentUser(user)
+      setActiveTab('dashboard')
+      setSearchQuery('')
+    })
     return () => unsubscribe()
   }, [])
 
+  useEffect(() => {
+    if (!currentUser || currentUser.role === 'admin') return undefined
+    const unsubscribe = subscribeToStudentData(
+      currentUser.uid,
+      currentUser,
+      setData,
+      setSyncStatus
+    )
+    return () => unsubscribe()
+  }, [currentUser])
+
   const handleToggleTask = async (taskId) => {
+    if (!currentUser) return
     const updatedTasks = data.tasks.map((task) =>
       task.id === taskId ? { ...task, completed: !task.completed } : task
     )
     setData((prev) => ({ ...prev, tasks: updatedTasks }))
     try {
-      await updateStudentFields({ tasks: updatedTasks })
+      await updateStudentFields(currentUser.uid, { tasks: updatedTasks })
     } catch (err) {
       setSyncStatus((prev) => ({ ...prev, error: err.message }))
     }
   }
 
   const handleAddTask = async (newTask) => {
+    if (!currentUser) return
     const updatedTasks = [newTask, ...data.tasks]
     setData((prev) => ({ ...prev, tasks: updatedTasks }))
     try {
-      await updateStudentFields({ tasks: updatedTasks })
+      await updateStudentFields(currentUser.uid, { tasks: updatedTasks })
     } catch (err) {
       setSyncStatus((prev) => ({ ...prev, error: err.message }))
     }
   }
 
   const handleUpdateGrade = async (subjectId, newGrade) => {
+    if (!currentUser) return
     const safeGrade = Math.min(100, Math.max(60, Number.isNaN(newGrade) ? 60 : newGrade))
     const updatedSubjects = data.subjects.map((subj) =>
       subj.id === subjectId ? { ...subj, grade: safeGrade } : subj
     )
     setData((prev) => ({ ...prev, subjects: updatedSubjects }))
     try {
-      await updateStudentFields({ subjects: updatedSubjects })
+      await updateStudentFields(currentUser.uid, { subjects: updatedSubjects })
     } catch (err) {
       setSyncStatus((prev) => ({ ...prev, error: err.message }))
     }
   }
 
   const handleSeedFirestore = async () => {
+    if (!currentUser) return
     setSeedingMessage('Syncing...')
     try {
-      await seedDemoStudentData()
-      setSeedingMessage('Demo data saved to Firestore!')
+      await seedDemoStudentData(currentUser.uid, currentUser)
+      setSeedingMessage('Demo data saved!')
     } catch (err) {
       setSeedingMessage(err.message)
     }
   }
 
-  if (loggedOut) {
+  const handleLogout = async () => {
+    await signOutUser()
+  }
+
+  if (currentUser === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] p-6">
-        <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-xl ring-1 ring-[#35408e]/15">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#4754ab] to-[#35408e] text-[#ffd41c]">
-            <svg className="h-7 w-7" viewBox="0 0 64 64" fill="currentColor">
-              <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" />
-              <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" />
-            </svg>
-          </div>
-          <h1 className="text-lg font-bold text-slate-900">Signed Out</h1>
-          <p className="mt-1 text-xs text-slate-500">
-            Demo session ended for {data.student.name} ({data.student.school}).
-          </p>
-          <button
-            type="button"
-            onClick={() => setLoggedOut(false)}
-            className="mt-6 w-full rounded-full bg-gradient-to-r from-[#4754ab] to-[#35408e] py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95"
-          >
-            Sign Back In
-          </button>
-        </div>
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] text-sm font-semibold text-[#35408e]">
+        Loading portal...
       </div>
     )
+  }
+
+  if (!currentUser) {
+    return <AuthView />
+  }
+
+  if (currentUser.role === 'admin') {
+    return <AdminDashboardView currentUser={currentUser} onLogout={handleLogout} />
   }
 
   const renderContent = () => {
@@ -157,7 +173,7 @@ export default function App() {
         <Sidebar
           activeTab={activeTab}
           onSelectTab={setActiveTab}
-          onLogout={() => setLoggedOut(true)}
+          onLogout={handleLogout}
           mobileOpen={mobileMenuOpen}
           onCloseMobile={() => setMobileMenuOpen(false)}
         />

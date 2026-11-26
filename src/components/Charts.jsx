@@ -203,3 +203,53 @@ export function TaskCompletionDoughnut({ completedCount, pendingCount }) {
     </div>
   )
 }
+
+export function StudentComparisonBarChart({ labels, averages, attendanceRates }) {
+  const data = {
+    labels,
+    datasets: [
+      {
+        label: 'Grade Average',
+        data: averages,
+        backgroundColor: '#35408e',
+        borderRadius: 8,
+      },
+      {
+        label: 'Attendance %',
+        data: attendanceRates,
+        backgroundColor: '#ffd41c',
+        borderRadius: 8,
+      },
+    ],
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        align: 'end',
+        labels: { boxWidth: 10, usePointStyle: true, font: BASE_FONT },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        ticks: { color: '#64748b', font: BASE_FONT },
+      },
+      y: {
+        min: 60,
+        max: 100,
+        grid: { color: 'rgba(148, 163, 184, 0.15)' },
+        ticks: { color: '#64748b', font: BASE_FONT },
+      },
+    },
+  }
+
+  return (
+    <div className="h-64 w-full">
+      <Bar data={data} options={options} />
+    </div>
+  )
+}
