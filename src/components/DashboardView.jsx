@@ -1,31 +1,19 @@
-import { getHonorsStanding } from '../utils/academicHelpers'
 import { GradeTrendLineChart } from './Charts'
 import WelcomeBanner from './WelcomeBanner'
 
-function StatCard({ value, label, badge, highlighted = false, onClick }) {
+function StatCard({ value, label, highlighted = false, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-6 text-center transition hover:-translate-y-0.5 dark:bg-[#181e38] ${
+      className={`flex flex-col items-center justify-center rounded-2xl bg-white px-4 py-7 text-center transition hover:-translate-y-0.5 dark:bg-[#181e38] ${
         highlighted
           ? 'border-2 border-[#35408e] shadow-[0_10px_28px_rgba(53,64,142,0.12)] dark:border-[#ffd41c]'
           : 'border border-slate-100 shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-slate-700/70'
       }`}
     >
       <span className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl dark:text-white">{value}</span>
-      <span className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">{label}</span>
-      {badge && (
-        <span
-          className={`mt-2 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-            badge.achieved
-              ? 'bg-[#ffd41c] text-[#232b66]'
-              : 'bg-[#eef0fb] text-[#35408e] dark:bg-[#232b52] dark:text-[#ffd41c]'
-          }`}
-        >
-          {badge.label}
-        </span>
-      )}
+      <span className="mt-1.5 text-xs font-medium text-slate-500 dark:text-slate-400">{label}</span>
     </button>
   )
 }
@@ -37,7 +25,6 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
     subjects.length > 0
       ? (subjects.reduce((sum, s) => sum + Number(s.grade || 0), 0) / subjects.length).toFixed(2)
       : '0.00'
-  const honorsStanding = getHonorsStanding(averageGrade)
 
   const completedTasks = tasks.filter((t) => t.completed).length
   const totalTasks = tasks.length
@@ -64,7 +51,6 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               <StatCard
                 value={averageGrade}
                 label="Current Grade Average"
-                badge={honorsStanding}
                 onClick={() => onNavigate('academic-progress')}
               />
               <StatCard

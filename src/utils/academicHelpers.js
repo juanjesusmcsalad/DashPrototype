@@ -1,18 +1,3 @@
-export function getHonorsStanding(average) {
-  const num = Number(average || 0)
-  if (num >= 98) {
-    return { label: 'With Highest Honors', achieved: true }
-  }
-  if (num >= 95) {
-    return { label: 'With High Honors', achieved: true }
-  }
-  if (num >= 90) {
-    return { label: 'With Honors', achieved: true }
-  }
-  const gap = Math.max(0.01, 90 - num).toFixed(2)
-  return { label: `${gap} pts to Honors`, achieved: false }
-}
-
 function escapeCsv(value) {
   const text = String(value ?? '')
   if (text.includes(',') || text.includes('"') || text.includes('\n')) {
@@ -27,7 +12,6 @@ export function downloadStudentCsv(data) {
     subjects.length > 0
       ? (subjects.reduce((sum, s) => sum + Number(s.grade || 0), 0) / subjects.length).toFixed(2)
       : '0.00'
-  const honors = getHonorsStanding(average)
   const completedTasks = tasks.filter((t) => t.completed).length
 
   const rows = [
@@ -37,7 +21,6 @@ export function downloadStudentCsv(data) {
     ['Student ID', student.studentNumber],
     ['Email', student.email],
     ['Grade Average', average],
-    ['Academic Standing', honors.label],
     ['Attendance Rate', `${student.attendanceRate}%`],
     ['Tasks Completed', `${completedTasks}/${tasks.length}`],
     [],

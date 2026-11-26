@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ALLOWED_SECTIONS } from '../services/authService'
-import { downloadStudentCsv, getHonorsStanding } from '../utils/academicHelpers'
+import { downloadStudentCsv } from '../utils/academicHelpers'
 
 export default function AdminStudentEditor({
   studentRecord,
@@ -71,7 +71,6 @@ export default function AdminStudentEditor({
           }, 0) / subjects.length
         ).toFixed(2)
       : '0.00'
-  const honors = getHonorsStanding(avg)
 
   const handleGradeInputChange = (subjectId, value) => {
     setSubjects((prev) =>
@@ -180,7 +179,7 @@ export default function AdminStudentEditor({
               {studentRecord.student?.section || '12SHS2510'}
             </span>
             <span className="rounded-full bg-[#eef0fb] px-2.5 py-0.5 text-[11px] font-semibold text-[#35408e] dark:bg-[#232b52] dark:text-slate-200">
-              {avg} • {honors.label}
+              Avg: {avg}
             </span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">

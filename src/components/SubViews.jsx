@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { downloadStudentCsv, getHonorsStanding } from '../utils/academicHelpers'
+import { downloadStudentCsv } from '../utils/academicHelpers'
 import {
   GradeTrendLineChart,
   SubjectBarChart,
@@ -26,7 +26,6 @@ export function AcademicProgressView({ data, searchQuery }) {
           data.subjects.length
         ).toFixed(2)
       : '0.00'
-  const honors = getHonorsStanding(average)
 
   return (
     <div className="space-y-6">
@@ -34,14 +33,8 @@ export function AcademicProgressView({ data, searchQuery }) {
         <div>
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-xl font-bold text-slate-900 dark:text-white">Academic Progress</h1>
-            <span
-              className={`rounded-full px-3 py-0.5 text-xs font-bold ${
-                honors.achieved
-                  ? 'bg-[#ffd41c] text-[#232b66]'
-                  : 'bg-[#eef0fb] text-[#35408e] dark:bg-[#232b52] dark:text-[#ffd41c]'
-              }`}
-            >
-              {average} • {honors.label}
+            <span className="rounded-full bg-[#eef0fb] px-3 py-0.5 text-xs font-bold text-[#35408e] dark:bg-[#232b52] dark:text-[#ffd41c]">
+              Average: {average}
             </span>
           </div>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
