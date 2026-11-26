@@ -9,6 +9,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
   const [section, setSection] = useState(ALLOWED_SECTIONS[0])
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [staySignedIn, setStaySignedIn] = useState(true)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -25,11 +26,11 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
 
     try {
       if (mode === 'signup') {
-        await signUpStudent({ name, email, password, section })
+        await signUpStudent({ name, email, password, section, staySignedIn })
       } else if (mode === 'admin') {
-        await signInWithRole({ email, password, expectedRole: 'admin' })
+        await signInWithRole({ email, password, expectedRole: 'admin', staySignedIn })
       } else {
-        await signInWithRole({ email, password, section, expectedRole: 'student' })
+        await signInWithRole({ email, password, section, expectedRole: 'student', staySignedIn })
       }
     } catch (err) {
       setError(err.message || 'Authentication failed. Please try again.')
@@ -88,7 +89,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                 className="absolute bottom-0 left-0 h-32 w-32 object-contain drop-shadow-md"
               />
               <img
-                src="/models/college-student.png"
+                src="/models/bulldawg.png"
                 alt=""
                 className="absolute bottom-0 left-1/2 h-44 w-44 -translate-x-1/2 object-contain drop-shadow-xl"
               />
@@ -253,6 +254,21 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                 className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-[#35408e] focus:ring-2 focus:ring-[#35408e]/15 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
               />
             </div>
+
+            <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-xs dark:border-slate-700/80 dark:bg-[#11162b]/70">
+              <span className="flex items-center gap-2.5 font-semibold text-slate-700 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={staySignedIn}
+                  onChange={(e) => setStaySignedIn(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-[#35408e] accent-[#35408e] focus:ring-[#35408e]/25 dark:border-slate-600 dark:accent-[#ffd41c]"
+                />
+                Stay signed in
+              </span>
+              <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                {staySignedIn ? 'Remember on this device' : 'This session only'}
+              </span>
+            </label>
 
             <button
               type="submit"

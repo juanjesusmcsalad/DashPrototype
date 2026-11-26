@@ -1,6 +1,9 @@
 import {
+  browserLocalPersistence,
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signOut,
   updateProfile,
@@ -74,19 +77,21 @@ function writeDemoUsers(users) {
 
 function readDemoSession() {
   try {
-    const raw = localStorage.getItem(DEMO_SESSION_KEY)
+    const raw =
+      sessionStorage.getItem(DEMO_SESSION_KEY) ?? localStorage.getItem(DEMO_SESSION_KEY)
     return raw ? JSON.parse(raw) : null
   } catch {
     return null
   }
 }
 
-function writeDemoSession(sessionUser) {
+function writeDemoSession(sessionUser, staySignedIn = true) {
   try {
+    localStorage.removeItem(DEMO_SESSION_KEY)
+    sessionStorage.removeItem(DEMO_SESSION_KEY)
     if (sessionUser) {
-      localStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(sessionUser))
-    } else {
-      localStorage.removeItem(DEMO_SESSION_KEY)
+      const storage = staySignedIn ? localStorage : sessionStorage
+      storage.setItem(DEMO_SESSION_KEY, JSON.stringify(sessionUser))
     }
     window.dispatchEvent(new CustomEvent('dashprototype-auth-changed'))
   } catch {
@@ -164,7 +169,7 @@ export function subscribeToAllUserAccounts(callback) {
   )
 }
 
-export async function signUpStudent({ name, email, password, section }) {
+export async function signUpStudent({ name, email, password, section, staySignedIn = true }) {
   const cleanEmail = email.trim().toLowerCase()
   const cleanName = name.trim()
   const safeSection = ALLOWED_SECTIONS.includes(section) ? section : '12SHS2510'
@@ -196,10 +201,14 @@ export async function signUpStudent({ name, email, password, section }) {
       role: newUser.role,
       section: newUser.section,
     }
-    writeDemoSession(sessionUser)
+    writeDemoSession(sessionUser, staySignedIn)
     return sessionUser
   }
 
+  await setPersistence(
+    auth,
+    staySignedIn ? browserLocalPersistence : browserSessionPersistence
+  )
   const cred = await createUserWithEmailAndPassword(auth, cleanEmail, password)
   await updateProfile(cred.user, { displayName: cleanName })
 
@@ -223,7 +232,13 @@ export async function signUpStudent({ name, email, password, section }) {
   return userProfile
 }
 
-export async function signInWithRole({ email, password, section, expectedRole = 'student' }) {
+export async function signInWithRole({
+  email,
+  password,
+  section,
+  expectedRole = 'student',
+  staySignedIn = true,
+}) {
   const cleanEmail = email.trim().toLowerCase()
   if (!cleanEmail || !password) {
     throw new Error('Please enter both your email and password.')
@@ -253,10 +268,14 @@ export async function signInWithRole({ email, password, section, expectedRole = 
       role: match.role,
       section: match.section,
     }
-    writeDemoSession(sessionUser)
+    writeDemoSession(sessionUser, staySignedIn)
     return sessionUser
   }
 
+  await setPersistence(
+    auth,
+    staySignedIn ? browserLocalPersistence : browserSessionPersistence
+  )
   const cred = await signInWithEmailAndPassword(auth, cleanEmail, password)
   const profile = await resolveFirebaseUserProfile(cred.user)
 
