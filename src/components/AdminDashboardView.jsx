@@ -6,7 +6,13 @@ import {
   subscribeToAllUserAccounts,
   updateUserMetadata,
 } from '../services/authService'
-import { subscribeToAllStudents, updateStudentFields } from '../services/studentService'
+import {
+  readSchoolConfig,
+  saveSchoolConfig,
+  subscribeToAllStudents,
+  subscribeToSchoolConfig,
+  updateStudentFields,
+} from '../services/studentService'
 import AdminStudentEditor from './AdminStudentEditor'
 import { StudentComparisonBarChart, SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
@@ -36,6 +42,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [students, setStudents] = useState([])
   const [accounts, setAccounts] = useState([])
+  const [schoolConfig, setSchoolConfig] = useState(() => readSchoolConfig())
   const [selectedId, setSelectedId] = useState('')
   const [sectionFilter, setSectionFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('name')
@@ -64,9 +71,11 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     }, setSyncStatus)
 
     const unsubAccounts = subscribeToAllUserAccounts(setAccounts)
+    const unsubSchool = subscribeToSchoolConfig(setSchoolConfig)
     return () => {
       unsubStudents()
       unsubAccounts()
+      unsubSchool()
     }
   }, [])
 
@@ -276,20 +285,30 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
       room: schedRoom.trim(),
     }
 
+    const sectionsToUpdate = schedSection === 'ALL' ? ALLOWED_SECTIONS : [schedSection]
+    const nextSchedules = { ...schoolConfig.schedules }
+    sectionsToUpdate.forEach((sec) => {
+      nextSchedules[sec] = [...(nextSchedules[sec] || []), newSlot]
+    })
+    const nextSchool = { ...schoolConfig, schedules: nextSchedules }
+
     const targets =
       schedSection === 'ALL'
         ? students
         : students.filter((s) => (s.student?.section || '12SHS2510') === schedSection)
 
     await runAdminAction(
-      () =>
-        Promise.all(
+      async () => {
+        await saveSchoolConfig(nextSchool)
+        setSchoolConfig(nextSchool)
+        await Promise.all(
           targets.map((entry) =>
             updateStudentFields(entry.id, {
-              schedule: [...(entry.schedule || []), newSlot],
+              schedule: nextSchedules[entry.student?.section || '12SHS2510'] || [],
             })
           )
-        ),
+        )
+      },
       `Added ${schedSubject} (${schedDay}) to ${
         schedSection === 'ALL' ? 'all sections' : schedSection
       }.`
@@ -297,33 +316,40 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   }
 
   const handleRemoveScheduleSlot = async (targetSection, slotId) => {
+    const nextSlots = (schoolConfig.schedules[targetSection] || []).filter(
+      (item) => item.id !== slotId
+    )
+    const nextSchool = {
+      ...schoolConfig,
+      schedules: { ...schoolConfig.schedules, [targetSection]: nextSlots },
+    }
     const targets = students.filter(
       (s) => (s.student?.section || '12SHS2510') === targetSection
     )
-    await runAdminAction(
-      () =>
-        Promise.all(
-          targets.map((entry) =>
-            updateStudentFields(entry.id, {
-              schedule: (entry.schedule || []).filter((item) => item.id !== slotId),
-            })
-          )
-        ),
-      `Removed schedule entry from ${targetSection}.`
-    )
+    await runAdminAction(async () => {
+      await saveSchoolConfig(nextSchool)
+      setSchoolConfig(nextSchool)
+      await Promise.all(
+        targets.map((entry) => updateStudentFields(entry.id, { schedule: nextSlots }))
+      )
+    }, `Removed schedule entry from ${targetSection}.`)
   }
 
   const handleClearSectionSchedule = async (targetSection) => {
+    const nextSchool = {
+      ...schoolConfig,
+      schedules: { ...schoolConfig.schedules, [targetSection]: [] },
+    }
     const targets = students.filter(
       (s) => (s.student?.section || '12SHS2510') === targetSection
     )
-    await runAdminAction(
-      () =>
-        Promise.all(
-          targets.map((entry) => updateStudentFields(entry.id, { schedule: [] }))
-        ),
-      `Cleared schedule for ${targetSection}.`
-    )
+    await runAdminAction(async () => {
+      await saveSchoolConfig(nextSchool)
+      setSchoolConfig(nextSchool)
+      await Promise.all(
+        targets.map((entry) => updateStudentFields(entry.id, { schedule: [] }))
+      )
+    }, `Cleared schedule for ${targetSection}.`)
   }
 
   const handleBroadcastAnnouncement = async (e) => {
@@ -342,12 +368,19 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
       tag: announcementTarget === 'ALL' ? 'All Sections' : announcementTarget,
     }
 
+    const nextSchool = {
+      ...schoolConfig,
+      announcements: [newAnn, ...(schoolConfig.announcements || [])],
+    }
+
     const targets =
       announcementTarget === 'ALL'
         ? students
         : students.filter((s) => (s.student?.section || '12SHS2510') === announcementTarget)
 
     await runAdminAction(async () => {
+      await saveSchoolConfig(nextSchool)
+      setSchoolConfig(nextSchool)
       await Promise.all(
         targets.map((entry) =>
           updateStudentFields(entry.id, {
@@ -358,6 +391,22 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
       setAnnouncementTitle('')
       setAnnouncementBody('')
     }, announcementTarget === 'ALL' ? 'Announcement published to all students!' : `Announcement published to section ${announcementTarget}!`)
+  }
+
+  const handleDeleteAnnouncement = async (annId) => {
+    const nextAnnouncements = (schoolConfig.announcements || []).filter((a) => a.id !== annId)
+    const nextSchool = { ...schoolConfig, announcements: nextAnnouncements }
+    await runAdminAction(async () => {
+      await saveSchoolConfig(nextSchool)
+      setSchoolConfig(nextSchool)
+      await Promise.all(
+        students.map((entry) =>
+          updateStudentFields(entry.id, {
+            announcements: (entry.announcements || []).filter((a) => a.id !== annId),
+          })
+        )
+      )
+    }, 'Announcement removed.')
   }
 
   const togglePasswordVisibility = (uid) => {
@@ -559,10 +608,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
       case 'schedule': {
         const previewSection = schedSection === 'ALL' ? ALLOWED_SECTIONS[0] : schedSection
-        const sampleStudent = students.find(
-          (s) => (s.student?.section || '12SHS2510') === previewSection
-        )
-        const currentSlots = sampleStudent?.schedule || []
+        const currentSlots = schoolConfig.schedules?.[previewSection] || []
 
         return (
           <div className="space-y-6">
@@ -891,14 +937,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         )
 
       case 'announcements': {
-        const seenAnnIds = new Set()
-        const allAnnouncements = students
-          .flatMap((s) => s.announcements || [])
-          .filter((ann) => {
-            if (!ann?.id || seenAnnIds.has(ann.id)) return false
-            seenAnnIds.add(ann.id)
-            return true
-          })
+        const allAnnouncements = schoolConfig.announcements || []
 
         return (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
@@ -965,7 +1004,17 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                       <span className="rounded-full bg-[#ffd41c]/35 px-3 py-0.5 text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">
                         {ann.tag}
                       </span>
-                      <span className="text-xs text-slate-400">{ann.date}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400">{ann.date}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAnnouncement(ann.id)}
+                          aria-label="Delete announcement"
+                          className="rounded px-1.5 py-0.5 text-xs font-bold text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/50"
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                     <h3 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">{ann.title}</h3>
                     <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{ann.body}</p>

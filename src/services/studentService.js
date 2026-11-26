@@ -3,11 +3,93 @@ import { DEFAULT_STUDENT_DATA } from '../data/defaultStudentData'
 import { db, isFirebaseConfigured } from '../firebase'
 
 const DEMO_STUDENTS_KEY = 'dashprototype_demo_students_v5'
+const SCHOOL_CONFIG_KEY = 'dashprototype_school_config_v1'
+
+const DEFAULT_SCHOOL_CONFIG = {
+  announcements: [],
+  schedules: {
+    '12SHS2510': [],
+    '12SHS2509': [],
+  },
+}
+
+export function readSchoolConfig() {
+  try {
+    const raw = localStorage.getItem(SCHOOL_CONFIG_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw)
+      if (parsed && typeof parsed === 'object') {
+        return {
+          announcements: Array.isArray(parsed.announcements) ? parsed.announcements : [],
+          schedules: {
+            '12SHS2510': parsed.schedules?.['12SHS2510'] || [],
+            '12SHS2509': parsed.schedules?.['12SHS2509'] || [],
+          },
+        }
+      }
+    }
+  } catch {
+    // Ignore storage read errors.
+  }
+  return DEFAULT_SCHOOL_CONFIG
+}
+
+function writeSchoolConfigLocal(config) {
+  try {
+    localStorage.setItem(SCHOOL_CONFIG_KEY, JSON.stringify(config))
+    window.dispatchEvent(new CustomEvent('dashprototype-school-updated'))
+  } catch {
+    // Ignore storage write errors.
+  }
+}
+
+export function subscribeToSchoolConfig(callback) {
+  if (!isFirebaseConfigured || !db) {
+    const emit = () => callback(readSchoolConfig())
+    emit()
+    window.addEventListener('dashprototype-school-updated', emit)
+    return () => window.removeEventListener('dashprototype-school-updated', emit)
+  }
+
+  const docRef = doc(db, 'settings', 'school')
+  return onSnapshot(
+    docRef,
+    (snap) => {
+      if (snap.exists()) {
+        const data = snap.data()
+        callback({
+          announcements: Array.isArray(data.announcements) ? data.announcements : [],
+          schedules: {
+            '12SHS2510': data.schedules?.['12SHS2510'] || [],
+            '12SHS2509': data.schedules?.['12SHS2509'] || [],
+          },
+        })
+      } else {
+        callback(readSchoolConfig())
+      }
+    },
+    () => {
+      callback(readSchoolConfig())
+    }
+  )
+}
+
+export async function saveSchoolConfig(nextConfig) {
+  writeSchoolConfigLocal(nextConfig)
+  if (!isFirebaseConfigured || !db) return
+  try {
+    await setDoc(doc(db, 'settings', 'school'), nextConfig)
+  } catch {
+    // Fallback to local config if Firestore rules restrict settings/school writes.
+  }
+}
 
 export function buildInitialStudentRecord(uid, { name, email, section }) {
   const safeName = (name || 'New Student').trim()
   const firstName = safeName.split(/\s+/)[0] || 'Student'
   const safeSection = section === '12SHS2509' ? '12SHS2509' : '12SHS2510'
+  const school = readSchoolConfig()
+
   return {
     ...DEFAULT_STUDENT_DATA,
     student: {
@@ -20,6 +102,10 @@ export function buildInitialStudentRecord(uid, { name, email, section }) {
       strand: `Grade 12 — Section ${safeSection}`,
       studentNumber: `SHS-2026-${String(Math.floor(1000 + Math.random() * 9000))}`,
     },
+    schedule: school.schedules[safeSection] || [],
+    announcements: school.announcements.filter(
+      (ann) => ann.tag === 'All Sections' || ann.tag === safeSection
+    ),
   }
 }
 
@@ -52,15 +138,6 @@ export function ensureDemoStudentRecord(uid, profile) {
   const map = readDemoStudentsMap()
   if (!map[uid]) {
     const newRecord = buildInitialStudentRecord(uid, profile)
-    const sectionPeer = Object.values(map).find(
-      (entry) => entry?.student?.section === newRecord.student.section
-    )
-    if (sectionPeer) {
-      newRecord.schedule = sectionPeer.schedule || []
-      newRecord.announcements = (sectionPeer.announcements || []).filter(
-        (ann) => ann.tag === 'All Sections' || ann.tag === newRecord.student.section
-      )
-    }
     map[uid] = newRecord
     writeDemoStudentsMap(map)
   }
@@ -79,13 +156,27 @@ export function subscribeToStudentData(studentId, fallbackProfile, onData, onSta
       const record =
         map[targetId] ||
         (fallbackProfile ? ensureDemoStudentRecord(targetId, fallbackProfile) : DEFAULT_STUDENT_DATA)
-      onData(record)
+      const sec = record.student?.section || '12SHS2510'
+      const school = readSchoolConfig()
+      onData({
+        ...record,
+        schedule:
+          school.schedules[sec]?.length > 0 ? school.schedules[sec] : record.schedule || [],
+        announcements:
+          school.announcements.length > 0
+            ? school.announcements.filter((a) => a.tag === 'All Sections' || a.tag === sec)
+            : record.announcements || [],
+      })
     }
 
     loadDemo()
     onStatusChange?.({ mode: 'demo', error: null })
     window.addEventListener('dashprototype-students-updated', loadDemo)
-    return () => window.removeEventListener('dashprototype-students-updated', loadDemo)
+    window.addEventListener('dashprototype-school-updated', loadDemo)
+    return () => {
+      window.removeEventListener('dashprototype-students-updated', loadDemo)
+      window.removeEventListener('dashprototype-school-updated', loadDemo)
+    }
   }
 
   const docRef = doc(db, 'students', targetId)
