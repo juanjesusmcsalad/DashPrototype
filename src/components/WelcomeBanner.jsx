@@ -17,21 +17,21 @@ export default function WelcomeBanner({ firstName, displayDate }) {
         </div>
 
         {/* 3D models extracted from Figma node 36:58 */}
-        <div className="relative hidden h-36 w-72 shrink-0 sm:block md:w-80" aria-hidden="true">
+        <div className="relative hidden h-36 w-80 shrink-0 sm:block md:w-[22rem]" aria-hidden="true">
           <img
             src="/models/scholarcap.png"
             alt=""
-            className="pointer-events-none absolute -bottom-8 left-0 h-40 w-40 object-contain drop-shadow-md"
+            className="pointer-events-none absolute -bottom-8 -left-2 h-40 w-40 object-contain drop-shadow-md"
           />
           <img
             src="/models/bulldawg.png"
             alt=""
-            className="pointer-events-none absolute -top-3 right-12 h-40 w-40 object-contain drop-shadow-lg"
+            className="pointer-events-none absolute -top-3 right-20 h-40 w-40 object-contain drop-shadow-lg"
           />
           <img
             src="/models/backpack.png"
             alt=""
-            className="pointer-events-none absolute -right-3 -bottom-4 h-28 w-28 object-contain drop-shadow-md"
+            className="pointer-events-none absolute -right-5 -bottom-4 h-24 w-24 object-contain drop-shadow-md"
           />
         </div>
       </div>
