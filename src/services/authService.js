@@ -3,6 +3,7 @@ import {
   browserSessionPersistence,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   setPersistence,
   signInWithEmailAndPassword,
   signOut,
@@ -353,4 +354,15 @@ export async function updateUserMetadata(uid, updates) {
     return
   }
   await setDoc(doc(db, 'users', uid), updates, { merge: true })
+}
+
+export async function sendPasswordResetForEmail(email) {
+  const cleanEmail = String(email || '').trim().toLowerCase()
+  if (!cleanEmail) {
+    throw new Error('Account email is missing.')
+  }
+  if (!isFirebaseConfigured || !auth) {
+    throw new Error('Password reset emails require Firebase Auth mode.')
+  }
+  await sendPasswordResetEmail(auth, cleanEmail)
 }

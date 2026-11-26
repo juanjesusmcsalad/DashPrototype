@@ -3,6 +3,7 @@ import { ALLOWED_SUBJECTS } from '../data/defaultStudentData'
 import { isFirebaseConfigured } from '../firebase'
 import {
   ALLOWED_SECTIONS,
+  sendPasswordResetForEmail,
   subscribeToAllUserAccounts,
   updateUserMetadata,
 } from '../services/authService'
@@ -424,6 +425,13 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     }
   }
 
+  const handleSendPasswordReset = async (acc) => {
+    await runAdminAction(
+      () => sendPasswordResetForEmail(acc.email),
+      `Password reset email sent to ${acc.email}.`
+    )
+  }
+
   const renderSectionFilterPills = () => (
     <div className="flex flex-wrap gap-1.5 rounded-full bg-white p-1 shadow-sm ring-1 ring-slate-100 dark:bg-[#181e38] dark:ring-slate-700">
       {['ALL', ...ALLOWED_SECTIONS].map((sec) => (
@@ -791,9 +799,9 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
 
             {isFirebaseConfigured && (
               <div className="rounded-2xl border border-[#ffd41c] bg-[#fff9dc] px-4 py-3 text-xs text-[#35408e] dark:border-[#ffd41c]/50 dark:bg-[#272318] dark:text-[#ffd41c]">
-                <strong>Note:</strong> When connected to Firebase Auth, Firebase securely hashes
-                passwords on Google servers, so only accounts signed up via this portal store a
-                reference note in Firestore.
+                <strong>Firebase Security:</strong> Passwords are encrypted and hashed on Google
+                servers (never stored in plaintext). Use <strong>Reset Email</strong> if a student
+                or admin forgets their password.
               </div>
             )}
 
@@ -851,6 +859,15 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                                 className="rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:border-[#35408e] hover:text-[#35408e] dark:border-slate-700 dark:text-slate-200 dark:hover:border-[#ffd41c] dark:hover:text-[#ffd41c]"
                               >
                                 {isShown ? 'Hide' : 'Show'}
+                              </button>
+                            )}
+                            {isFirebaseConfigured && (
+                              <button
+                                type="button"
+                                onClick={() => handleSendPasswordReset(acc)}
+                                className="rounded-lg border border-[#35408e]/30 px-2.5 py-1 text-[11px] font-semibold text-[#35408e] hover:bg-[#eef0fb] dark:border-slate-600 dark:text-[#ffd41c] dark:hover:bg-[#232b52]"
+                              >
+                                Reset Email
                               </button>
                             )}
                             <button
