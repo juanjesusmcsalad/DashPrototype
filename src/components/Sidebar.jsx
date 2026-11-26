@@ -99,14 +99,14 @@ export default function Sidebar({ activeTab, onSelectTab, onLogout, mobileOpen, 
         }`}
       >
         <div>
-          {/* Top graduation emblem */}
+          {/* Top graduation emblem from Figma */}
           <div className="mb-8 flex items-center justify-center pt-1">
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#242c66]/80 shadow-inner ring-1 ring-[#ffd41c]/40">
-              <svg className="h-11 w-11 text-[#ffd41c]" viewBox="0 0 64 64" fill="currentColor">
-                <path d="M32 10L6 22l26 12 21-9.7V36h4V22L32 10z" />
-                <path d="M16 30.5V40c0 4.4 7.2 8 16 8s16-3.6 16-8v-9.5L32 37.9 16 30.5z" opacity="0.92" />
-                <rect x="18" y="49" width="28" height="6" rx="3" fill="#ffffff" opacity="0.95" />
-              </svg>
+              <img
+                src="/models/graduation-cap.png"
+                alt="CT Senior High"
+                className="h-12 w-12 object-contain"
+              />
             </div>
           </div>
 

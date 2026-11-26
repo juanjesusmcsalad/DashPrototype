@@ -98,15 +98,11 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                   </button>
                 </div>
 
-                {/* Laptop graphic */}
-                <svg className="h-20 w-24 shrink-0" viewBox="0 0 110 90" fill="none" aria-hidden="true">
-                  <rect x="20" y="14" width="70" height="46" rx="5" fill="#DCE1F8" stroke="#35408e" strokeWidth="2" />
-                  <rect x="26" y="20" width="58" height="34" rx="2" fill="#FFFFFF" />
-                  <rect x="33" y="27" width="26" height="5" rx="2.5" fill="#FFD41C" />
-                  <rect x="33" y="36" width="40" height="4" rx="2" fill="#35408e" opacity="0.3" />
-                  <path d="M12 64h86l-6 10H18l-6-10z" fill="#C7CEEF" />
-                  <rect x="44" y="67" width="22" height="3" rx="1.5" fill="#35408e" />
-                </svg>
+                <img
+                  src="/models/laptop-card.png"
+                  alt=""
+                  className="h-16 w-16 shrink-0 object-contain drop-shadow-sm"
+                />
               </div>
 
               {/* Engagement Analytics Card */}
@@ -124,15 +120,11 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                   </button>
                 </div>
 
-                {/* Pie + Bar chart graphic */}
-                <svg className="h-20 w-24 shrink-0" viewBox="0 0 110 90" fill="none" aria-hidden="true">
-                  <circle cx="36" cy="36" r="18" fill="#DCE1F8" />
-                  <path d="M36 36V18a18 18 0 0 1 16 10L36 36z" fill="#FFD41C" />
-                  <rect x="46" y="62" width="8" height="16" rx="2" fill="#9AA4DB" />
-                  <rect x="59" y="52" width="8" height="26" rx="2" fill="#6874C4" />
-                  <rect x="72" y="42" width="8" height="36" rx="2" fill="#35408e" />
-                  <rect x="85" y="28" width="8" height="50" rx="2" fill="#FFD41C" />
-                </svg>
+                <img
+                  src="/models/analytics-card.png"
+                  alt=""
+                  className="h-16 w-16 shrink-0 object-contain drop-shadow-sm"
+                />
               </div>
             </div>
           </section>

@@ -82,9 +82,11 @@ export default function Header({
           onClick={() => onNavigate('profile')}
           className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#35408e] text-xs font-bold text-[#ffd41c] shadow-sm ring-2 ring-[#ffd41c]">
-            {initials}
-          </div>
+          <img
+            src="/models/avatar.png"
+            alt={initials}
+            className="h-10 w-10 rounded-full bg-[#35408e] object-cover shadow-sm ring-2 ring-[#ffd41c]"
+          />
           <div className="leading-tight">
             <p className="text-xs font-bold text-slate-900 sm:text-sm">{student.name}</p>
             <p className="text-[10px] font-medium tracking-wide text-slate-500 uppercase">
