@@ -1,3 +1,4 @@
+import { getMergedRecommendations, resolveGradeHistory } from '../utils/academicHelpers'
 import { GradeTrendLineChart } from './Charts'
 import WelcomeBanner from './WelcomeBanner'
 
@@ -19,7 +20,9 @@ function StatCard({ value, label, highlighted = false, onClick }) {
 }
 
 export default function DashboardView({ data, searchQuery, onNavigate }) {
-  const { student, subjects, tasks, recommendations, gradeHistory } = data
+  const { student, subjects, tasks, gradeHistory } = data
+  const recommendations = getMergedRecommendations(data)
+  const resolvedHistory = resolveGradeHistory(gradeHistory, subjects)
 
   const averageGrade =
     subjects.length > 0
@@ -144,7 +147,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 Full insights
               </button>
             </div>
-            <GradeTrendLineChart gradeHistory={gradeHistory} />
+            <GradeTrendLineChart gradeHistory={resolvedHistory} />
           </section>
         </div>
 

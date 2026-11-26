@@ -13,8 +13,9 @@ import {
   subscribeToSchoolConfig,
   updateStudentFields,
 } from '../services/studentService'
+import { resolveGradeHistory } from '../utils/academicHelpers'
 import AdminStudentEditor from './AdminStudentEditor'
-import { StudentComparisonBarChart, SubjectBarChart } from './Charts'
+import { GradeTrendLineChart, SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
 import ThemeToggle from './ThemeToggle'
 
@@ -871,7 +872,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Section Analytics</h1>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Compare performance across sections 12SHS2510 and 12SHS2509.
+                Section summaries and individual student performance for 12SHS2510 and 12SHS2509.
               </p>
             </div>
 
@@ -903,19 +904,20 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <div className={`${CARD} p-5`}>
                 <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                  All Students: Grade vs Attendance
-                </h2>
-                <StudentComparisonBarChart
-                  labels={students.map((s) => s.student?.name || s.id)}
-                  averages={students.map((s) => computeAverage(s.subjects))}
-                  attendanceRates={students.map((s) => s.student?.attendanceRate || 0)}
-                />
-              </div>
-              <div className={`${CARD} p-5`}>
-                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
                   Selected Student Subjects ({selectedStudent?.student?.name || '—'})
                 </h2>
                 <SubjectBarChart subjects={selectedStudent?.subjects || []} />
+              </div>
+              <div className={`${CARD} p-5`}>
+                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Selected Student Grade Trend ({selectedStudent?.student?.name || '—'})
+                </h2>
+                <GradeTrendLineChart
+                  gradeHistory={resolveGradeHistory(
+                    selectedStudent?.gradeHistory,
+                    selectedStudent?.subjects
+                  )}
+                />
               </div>
             </div>
           </div>
@@ -1119,21 +1121,23 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               <section className={`${CARD} p-5 lg:col-span-8`}>
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                    Student Grades vs Attendance
+                    Subject Overview {selectedStudent?.student?.name ? `(${selectedStudent.student.name})` : ''}
                   </h2>
                   <button
                     type="button"
-                    onClick={() => setActiveTab('analytics')}
+                    onClick={() => setActiveTab('students')}
                     className="text-xs font-semibold text-[#35408e] hover:text-[#242c66] dark:text-[#ffd41c]"
                   >
-                    Section analytics
+                    Manage students
                   </button>
                 </div>
-                <StudentComparisonBarChart
-                  labels={students.map((s) => s.student?.name || s.id)}
-                  averages={students.map((s) => computeAverage(s.subjects))}
-                  attendanceRates={students.map((s) => s.student?.attendanceRate || 0)}
-                />
+                {selectedStudent ? (
+                  <SubjectBarChart subjects={selectedStudent.subjects || []} />
+                ) : (
+                  <p className="flex h-64 items-center justify-center text-xs text-slate-500 dark:text-slate-400">
+                    No students registered yet.
+                  </p>
+                )}
               </section>
 
               <section className={`${CARD} space-y-3 p-5 lg:col-span-4`}>

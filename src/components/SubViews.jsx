@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { downloadStudentCsv } from '../utils/academicHelpers'
+import {
+  downloadStudentCsv,
+  getMergedRecommendations,
+  resolveGradeHistory,
+} from '../utils/academicHelpers'
 import {
   GradeTrendLineChart,
   SubjectBarChart,
@@ -67,7 +71,7 @@ export function AcademicProgressView({ data, searchQuery }) {
         </div>
         <div className={`${CARD} p-5`}>
           <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Monthly Grade Trajectory</h2>
-          <GradeTrendLineChart gradeHistory={data.gradeHistory} />
+          <GradeTrendLineChart gradeHistory={resolveGradeHistory(data.gradeHistory, data.subjects)} />
         </div>
       </div>
 
@@ -247,6 +251,7 @@ export function PerformanceInsightsView({ data }) {
   const sorted = [...data.subjects].sort((a, b) => Number(b.grade || 0) - Number(a.grade || 0))
   const topSubject = sorted[0]
   const focusSubject = sorted[sorted.length - 1]
+  const recommendations = getMergedRecommendations(data)
 
   return (
     <div className="space-y-6">
@@ -291,19 +296,26 @@ export function PerformanceInsightsView({ data }) {
         </div>
         <div className={`${CARD} p-5`}>
           <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Personalized Recommendations</h2>
-          {data.recommendations.length === 0 ? (
+          {recommendations.length === 0 ? (
             <p className="text-xs text-slate-500 dark:text-slate-400">No recommendations yet.</p>
           ) : (
             <ul className="space-y-3">
-              {data.recommendations.map((rec) => (
+              {recommendations.map((rec) => (
                 <li
                   key={rec.id}
-                  className="flex items-center justify-between rounded-xl bg-[#eef0fb]/70 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-[#11162b] dark:text-slate-100"
+                  className="flex items-center justify-between gap-3 rounded-xl bg-[#eef0fb]/70 px-4 py-3 text-sm font-medium text-slate-800 dark:bg-[#11162b] dark:text-slate-100"
                 >
                   <span>{rec.text}</span>
-                  <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
-                    {rec.category}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {rec.isAuto && (
+                      <span className="rounded-full bg-[#35408e]/10 px-2 py-0.5 text-[10px] font-bold text-[#35408e] dark:bg-white/10 dark:text-slate-300">
+                        Auto
+                      </span>
+                    )}
+                    <span className="rounded-full bg-[#ffd41c]/30 px-2.5 py-0.5 text-[11px] font-bold text-[#35408e] dark:text-[#ffd41c]">
+                      {rec.category}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
