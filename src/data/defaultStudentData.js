@@ -23,10 +23,6 @@ export const DEFAULT_STUDENT_DATA = {
     totalDays: 0,
   },
   subjects: ALLOWED_SUBJECTS,
-  gradeHistory: {
-    labels: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    values: [0, 0, 0, 0, 0],
-  },
   weeklyEngagement: {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     studyHours: [0, 0, 0, 0, 0, 0, 0],

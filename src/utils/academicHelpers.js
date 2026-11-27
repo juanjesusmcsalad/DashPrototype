@@ -55,32 +55,6 @@ export function formatTaskDueDate(rawValue) {
   return clean
 }
 
-export function computeSubjectAverage(subjects = []) {
-  if (!Array.isArray(subjects) || subjects.length === 0) return 0
-  const total = subjects.reduce((sum, s) => sum + Number(s.grade || 0), 0)
-  return Number((total / subjects.length).toFixed(2))
-}
-
-export function resolveGradeHistory(gradeHistory, subjects = []) {
-  const labels =
-    Array.isArray(gradeHistory?.labels) && gradeHistory.labels.length > 0
-      ? gradeHistory.labels
-      : ['Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  const rawValues = Array.isArray(gradeHistory?.values)
-    ? gradeHistory.values.map((v) => Number(v || 0))
-    : labels.map(() => 0)
-
-  const values = labels.map((_, idx) => rawValues[idx] ?? 0)
-  const avg = computeSubjectAverage(subjects)
-  const allZero = values.every((v) => v === 0)
-
-  if (allZero && avg > 0 && values.length > 0) {
-    values[values.length - 1] = avg
-  }
-
-  return { labels, values }
-}
-
 export function generateAutoRecommendations(data) {
   const student = data?.student || {}
   const subjects = Array.isArray(data?.subjects) ? data.subjects : []

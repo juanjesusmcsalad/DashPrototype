@@ -3,10 +3,8 @@ import {
   downloadStudentCsv,
   formatTaskDueDate,
   getMergedRecommendations,
-  resolveGradeHistory,
 } from '../utils/academicHelpers'
 import {
-  GradeTrendLineChart,
   SubjectBarChart,
   TaskCompletionDoughnut,
   WeeklyEngagementBarChart,
@@ -65,15 +63,9 @@ export function AcademicProgressView({ data, searchQuery }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className={`${CARD} p-5`}>
-          <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Grades by Subject</h2>
-          <SubjectBarChart subjects={data.subjects} />
-        </div>
-        <div className={`${CARD} p-5`}>
-          <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Monthly Grade Trajectory</h2>
-          <GradeTrendLineChart gradeHistory={resolveGradeHistory(data.gradeHistory, data.subjects)} />
-        </div>
+      <div className={`${CARD} p-5`}>
+        <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">Grades by Subject</h2>
+        <SubjectBarChart subjects={data.subjects} />
       </div>
 
       <div className={`${CARD} overflow-hidden`}>

@@ -1,5 +1,5 @@
-import { getMergedRecommendations, resolveGradeHistory } from '../utils/academicHelpers'
-import { GradeTrendLineChart } from './Charts'
+import { getMergedRecommendations } from '../utils/academicHelpers'
+import { SubjectBarChart } from './Charts'
 import WelcomeBanner from './WelcomeBanner'
 
 function StatCard({ value, label, highlighted = false, onClick }) {
@@ -24,9 +24,8 @@ function StatCard({ value, label, highlighted = false, onClick }) {
 }
 
 export default function DashboardView({ data, searchQuery, onNavigate }) {
-  const { student, subjects, tasks, gradeHistory } = data
+  const { student, subjects, tasks } = data
   const recommendations = getMergedRecommendations(data)
-  const resolvedHistory = resolveGradeHistory(gradeHistory, subjects)
 
   const averageGrade =
     subjects.length > 0
@@ -140,8 +139,8 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
           <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-slate-700/70 dark:bg-[#181e38]">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Grade Average Trend</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Monthly academic trajectory (Chart.js)</p>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Grades by Subject</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Live breakdown across your 5 enrolled subjects</p>
               </div>
               <button
                 type="button"
@@ -151,7 +150,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 Full insights
               </button>
             </div>
-            <GradeTrendLineChart gradeHistory={resolvedHistory} />
+            <SubjectBarChart subjects={subjects} />
           </section>
         </div>
 

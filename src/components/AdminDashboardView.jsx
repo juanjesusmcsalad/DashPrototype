@@ -14,9 +14,9 @@ import {
   subscribeToSchoolConfig,
   updateStudentFields,
 } from '../services/studentService'
-import { formatTaskDueDate, resolveGradeHistory } from '../utils/academicHelpers'
+import { formatTaskDueDate } from '../utils/academicHelpers'
 import AdminStudentEditor from './AdminStudentEditor'
-import { GradeTrendLineChart, SubjectBarChart } from './Charts'
+import { SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
 import ThemeToggle from './ThemeToggle'
 
@@ -924,24 +924,11 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               ))}
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <div className={`${CARD} p-5`}>
-                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Selected Student Subjects ({selectedStudent?.student?.name || '—'})
-                </h2>
-                <SubjectBarChart subjects={selectedStudent?.subjects || []} />
-              </div>
-              <div className={`${CARD} p-5`}>
-                <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Selected Student Grade Trend ({selectedStudent?.student?.name || '—'})
-                </h2>
-                <GradeTrendLineChart
-                  gradeHistory={resolveGradeHistory(
-                    selectedStudent?.gradeHistory,
-                    selectedStudent?.subjects
-                  )}
-                />
-              </div>
+            <div className={`${CARD} p-5`}>
+              <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
+                Selected Student Subjects ({selectedStudent?.student?.name || '—'})
+              </h2>
+              <SubjectBarChart subjects={selectedStudent?.subjects || []} />
             </div>
           </div>
         )

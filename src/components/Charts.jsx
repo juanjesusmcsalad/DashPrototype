@@ -3,26 +3,20 @@ import {
   BarElement,
   CategoryScale,
   Chart as ChartJS,
-  Filler,
   Legend,
   LinearScale,
-  LineElement,
-  PointElement,
   Tooltip,
 } from 'chart.js'
 import { useEffect, useState } from 'react'
-import { Bar, Doughnut, Line } from 'react-chartjs-2'
+import { Bar, Doughnut } from 'react-chartjs-2'
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
   BarElement,
   ArcElement,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 )
 
 const BASE_FONT = {
@@ -45,61 +39,6 @@ function useIsDarkTheme() {
   }, [])
 
   return isDark
-}
-
-export function GradeTrendLineChart({ gradeHistory }) {
-  const isDark = useIsDarkTheme()
-  const tickColor = isDark ? '#cbd5e1' : '#64748b'
-  const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
-
-  const data = {
-    labels: gradeHistory.labels,
-    datasets: [
-      {
-        label: 'Grade Average',
-        data: gradeHistory.values,
-        borderColor: isDark ? '#ffd41c' : '#35408e',
-        backgroundColor: isDark ? 'rgba(255, 212, 28, 0.14)' : 'rgba(53, 64, 142, 0.14)',
-        pointBackgroundColor: isDark ? '#35408e' : '#ffd41c',
-        pointBorderColor: isDark ? '#ffd41c' : '#35408e',
-        pointBorderWidth: 2,
-        pointRadius: 4,
-        tension: 0.35,
-        fill: true,
-      },
-    ],
-  }
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: '#232b66',
-        padding: 10,
-        cornerRadius: 10,
-      },
-    },
-    scales: {
-      x: {
-        grid: { display: false },
-        ticks: { color: tickColor, font: BASE_FONT },
-      },
-      y: {
-        min: 0,
-        max: 100,
-        grid: { color: gridColor },
-        ticks: { color: tickColor, font: BASE_FONT },
-      },
-    },
-  }
-
-  return (
-    <div className="h-56 w-full">
-      <Line data={data} options={options} />
-    </div>
-  )
 }
 
 export function SubjectBarChart({ subjects }) {

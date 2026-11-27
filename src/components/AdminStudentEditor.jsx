@@ -28,12 +28,6 @@ export default function AdminStudentEditor({
       gradeInput: String(s.grade ?? 0),
     }))
   )
-  const [gradeHistoryLabels] = useState(
-    () => studentRecord?.gradeHistory?.labels || ['Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  )
-  const [gradeHistoryInput, setGradeHistoryInput] = useState(() =>
-    (studentRecord?.gradeHistory?.values || [0, 0, 0, 0, 0]).map(String)
-  )
   const [isDirty, setIsDirty] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -78,27 +72,9 @@ export default function AdminStudentEditor({
       : '0.00'
 
   const handleGradeInputChange = (subjectId, value) => {
-    const nextSubjects = subjects.map((s) =>
-      s.id === subjectId ? { ...s, gradeInput: value } : s
+    setSubjects((prev) =>
+      prev.map((s) => (s.id === subjectId ? { ...s, gradeInput: value } : s))
     )
-    setSubjects(nextSubjects)
-
-    if (nextSubjects.length > 0) {
-      const nextAvg = (
-        nextSubjects.reduce((sum, s) => {
-          const val = Number(s.gradeInput)
-          return sum + (Number.isNaN(val) ? Number(s.grade || 0) : Math.min(100, Math.max(0, val)))
-        }, 0) / nextSubjects.length
-      ).toFixed(2)
-      setGradeHistoryInput((histPrev) => {
-        const updated = [...histPrev]
-        if (updated.length > 0) {
-          updated[updated.length - 1] = String(Number(nextAvg))
-        }
-        return updated
-      })
-    }
-
     setIsDirty(true)
   }
 
@@ -125,12 +101,6 @@ export default function AdminStudentEditor({
         }
       })
 
-      const cleanedHistory = gradeHistoryLabels.map((_, idx) => {
-        const rawVal = Number(gradeHistoryInput[idx])
-        if (gradeHistoryInput[idx]?.trim() === '' || Number.isNaN(rawVal)) return 0
-        return Math.min(100, Math.max(0, Number(rawVal.toFixed(2))))
-      })
-
       await onSaveStudentInfo(studentRecord.id, {
         student: {
           ...studentRecord.student,
@@ -141,10 +111,6 @@ export default function AdminStudentEditor({
           attendanceRate: parsedAttendance,
         },
         subjects: cleanedSubjects,
-        gradeHistory: {
-          labels: gradeHistoryLabels,
-          values: cleanedHistory,
-        },
       })
       setIsDirty(false)
     } finally {
@@ -372,43 +338,6 @@ export default function AdminStudentEditor({
                     className="w-16 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
                   />
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-xs font-bold tracking-wide text-slate-500 uppercase dark:text-slate-400">
-                Monthly Grade Trend
-              </h3>
-              <span className="text-[11px] text-slate-400">
-                Latest month auto-syncs with average
-              </span>
-            </div>
-            <div className="grid grid-cols-5 gap-2">
-              {gradeHistoryLabels.map((month, idx) => (
-                <label
-                  key={month}
-                  className="rounded-xl bg-[#f5f6fb] p-2 text-center dark:bg-[#11162b]"
-                >
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase dark:text-slate-400">
-                    {month}
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    step="0.1"
-                    aria-label={`${month} grade average`}
-                    value={gradeHistoryInput[idx] ?? '0'}
-                    onChange={(e) => {
-                      const val = e.target.value
-                      setGradeHistoryInput((prev) => prev.map((v, i) => (i === idx ? val : v)))
-                      setIsDirty(true)
-                    }}
-                    className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-1 py-1 text-center text-xs font-bold text-[#35408e] outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#181e38] dark:text-[#ffd41c]"
-                  />
-                </label>
               ))}
             </div>
           </div>
