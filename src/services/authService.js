@@ -11,7 +11,11 @@ import {
 } from 'firebase/auth'
 import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { auth, db, isFirebaseConfigured } from '../firebase'
-import { buildInitialStudentRecord, ensureDemoStudentRecord } from './studentService'
+import {
+  buildInitialStudentRecord,
+  ensureDemoStudentRecord,
+  fetchRemoteSchoolConfig,
+} from './studentService'
 
 export const ALLOWED_SECTIONS = ['12SHS2510', '12SHS2509']
 
@@ -263,10 +267,11 @@ export async function signUpStudent({ name, email, password, section, staySigned
     createdAt: new Date().toISOString(),
   }
 
+  const school = await fetchRemoteSchoolConfig()
   await setDoc(doc(db, 'users', cred.user.uid), userProfile)
   await setDoc(
     doc(db, 'students', cred.user.uid),
-    buildInitialStudentRecord(cred.user.uid, userProfile)
+    buildInitialStudentRecord(cred.user.uid, userProfile, school)
   )
 
   return userProfile

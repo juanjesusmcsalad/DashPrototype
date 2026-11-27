@@ -1,4 +1,4 @@
-import { collection, doc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { DEFAULT_STUDENT_DATA } from '../data/defaultStudentData'
 import { db, isFirebaseConfigured } from '../firebase'
 
@@ -7,10 +7,22 @@ const SCHOOL_CONFIG_KEY = 'dashprototype_school_config_v1'
 
 const DEFAULT_SCHOOL_CONFIG = {
   announcements: [],
+  notes: [],
   schedules: {
     '12SHS2510': [],
     '12SHS2509': [],
   },
+}
+
+function normalizeSchoolConfig(raw) {
+  return {
+    announcements: Array.isArray(raw?.announcements) ? raw.announcements : [],
+    notes: Array.isArray(raw?.notes) ? raw.notes : [],
+    schedules: {
+      '12SHS2510': Array.isArray(raw?.schedules?.['12SHS2510']) ? raw.schedules['12SHS2510'] : [],
+      '12SHS2509': Array.isArray(raw?.schedules?.['12SHS2509']) ? raw.schedules['12SHS2509'] : [],
+    },
+  }
 }
 
 export function readSchoolConfig() {
@@ -19,13 +31,7 @@ export function readSchoolConfig() {
     if (raw) {
       const parsed = JSON.parse(raw)
       if (parsed && typeof parsed === 'object') {
-        return {
-          announcements: Array.isArray(parsed.announcements) ? parsed.announcements : [],
-          schedules: {
-            '12SHS2510': parsed.schedules?.['12SHS2510'] || [],
-            '12SHS2509': parsed.schedules?.['12SHS2509'] || [],
-          },
-        }
+        return normalizeSchoolConfig(parsed)
       }
     }
   } catch {
@@ -43,6 +49,19 @@ function writeSchoolConfigLocal(config) {
   }
 }
 
+export async function fetchRemoteSchoolConfig() {
+  if (!isFirebaseConfigured || !db) return readSchoolConfig()
+  try {
+    const snap = await getDoc(doc(db, 'settings', 'school'))
+    if (snap.exists()) {
+      return normalizeSchoolConfig(snap.data())
+    }
+  } catch {
+    // Fallback to local config if Firestore read fails.
+  }
+  return readSchoolConfig()
+}
+
 export function subscribeToSchoolConfig(callback) {
   if (!isFirebaseConfigured || !db) {
     const emit = () => callback(readSchoolConfig())
@@ -56,14 +75,7 @@ export function subscribeToSchoolConfig(callback) {
     docRef,
     (snap) => {
       if (snap.exists()) {
-        const data = snap.data()
-        callback({
-          announcements: Array.isArray(data.announcements) ? data.announcements : [],
-          schedules: {
-            '12SHS2510': data.schedules?.['12SHS2510'] || [],
-            '12SHS2509': data.schedules?.['12SHS2509'] || [],
-          },
-        })
+        callback(normalizeSchoolConfig(snap.data()))
       } else {
         callback(readSchoolConfig())
       }
@@ -75,20 +87,50 @@ export function subscribeToSchoolConfig(callback) {
 }
 
 export async function saveSchoolConfig(nextConfig) {
-  writeSchoolConfigLocal(nextConfig)
+  const normalized = normalizeSchoolConfig(nextConfig)
+  writeSchoolConfigLocal(normalized)
   if (!isFirebaseConfigured || !db) return
   try {
-    await setDoc(doc(db, 'settings', 'school'), nextConfig)
+    await setDoc(doc(db, 'settings', 'school'), normalized)
   } catch {
     // Fallback to local config if Firestore rules restrict settings/school writes.
   }
 }
 
-export function buildInitialStudentRecord(uid, { name, email, section }) {
+function mergeStudentWithSchool(record, school, schoolLoaded = false) {
+  const sec = record.student?.section || '12SHS2510'
+  const schoolAnnouncements = Array.isArray(school?.announcements)
+    ? school.announcements.filter((a) => !a.tag || a.tag === 'All Sections' || a.tag === sec)
+    : []
+  const schoolNotes = Array.isArray(school?.notes)
+    ? school.notes.filter((n) => !n.tag || n.tag === 'All Sections' || n.tag === sec)
+    : []
+  const schoolSchedule = Array.isArray(school?.schedules?.[sec]) ? school.schedules[sec] : []
+
+  const studentRecs = Array.isArray(record.recommendations) ? record.recommendations : []
+  const seenRecIds = new Set(studentRecs.map((r) => r.id))
+  const mergedRecs = [
+    ...studentRecs,
+    ...schoolNotes.filter((n) => !seenRecIds.has(n.id)),
+  ]
+
+  return {
+    ...record,
+    schedule:
+      schoolLoaded || schoolSchedule.length > 0 ? schoolSchedule : record.schedule || [],
+    announcements:
+      schoolLoaded || schoolAnnouncements.length > 0
+        ? schoolAnnouncements
+        : record.announcements || [],
+    recommendations: mergedRecs,
+  }
+}
+
+export function buildInitialStudentRecord(uid, { name, email, section }, schoolOverride = null) {
   const safeName = (name || 'New Student').trim()
   const firstName = safeName.split(/\s+/)[0] || 'Student'
   const safeSection = section === '12SHS2509' ? '12SHS2509' : '12SHS2510'
-  const school = readSchoolConfig()
+  const school = schoolOverride ? normalizeSchoolConfig(schoolOverride) : readSchoolConfig()
 
   return {
     ...DEFAULT_STUDENT_DATA,
@@ -104,7 +146,10 @@ export function buildInitialStudentRecord(uid, { name, email, section }) {
     },
     schedule: school.schedules[safeSection] || [],
     announcements: school.announcements.filter(
-      (ann) => ann.tag === 'All Sections' || ann.tag === safeSection
+      (ann) => !ann.tag || ann.tag === 'All Sections' || ann.tag === safeSection
+    ),
+    recommendations: school.notes.filter(
+      (note) => !note.tag || note.tag === 'All Sections' || note.tag === safeSection
     ),
   }
 }
@@ -156,17 +201,8 @@ export function subscribeToStudentData(studentId, fallbackProfile, onData, onSta
       const record =
         map[targetId] ||
         (fallbackProfile ? ensureDemoStudentRecord(targetId, fallbackProfile) : DEFAULT_STUDENT_DATA)
-      const sec = record.student?.section || '12SHS2510'
       const school = readSchoolConfig()
-      onData({
-        ...record,
-        schedule:
-          school.schedules[sec]?.length > 0 ? school.schedules[sec] : record.schedule || [],
-        announcements:
-          school.announcements.length > 0
-            ? school.announcements.filter((a) => a.tag === 'All Sections' || a.tag === sec)
-            : record.announcements || [],
-      })
+      onData(mergeStudentWithSchool(record, school, true))
     }
 
     loadDemo()
@@ -179,34 +215,72 @@ export function subscribeToStudentData(studentId, fallbackProfile, onData, onSta
     }
   }
 
+  let latestStudent = null
+  let latestSchool = DEFAULT_SCHOOL_CONFIG
+  let schoolLoaded = false
+
+  const emitCombined = () => {
+    if (!latestStudent) return
+    onData(mergeStudentWithSchool(latestStudent, latestSchool, schoolLoaded))
+  }
+
+  const schoolRef = doc(db, 'settings', 'school')
+  const unsubSchool = onSnapshot(
+    schoolRef,
+    (snap) => {
+      if (snap.exists()) {
+        latestSchool = normalizeSchoolConfig(snap.data())
+        schoolLoaded = true
+      } else {
+        latestSchool = DEFAULT_SCHOOL_CONFIG
+        schoolLoaded = false
+      }
+      emitCombined()
+    },
+    () => {
+      // Ignore settings/school read errors so student doc still renders.
+    }
+  )
+
   const docRef = doc(db, 'students', targetId)
   const unsubscribe = onSnapshot(
     docRef,
     async (snapshot) => {
       if (snapshot.exists()) {
-        onData({ ...DEFAULT_STUDENT_DATA, ...snapshot.data() })
+        latestStudent = { ...DEFAULT_STUDENT_DATA, ...snapshot.data() }
+        emitCombined()
         onStatusChange?.({ mode: 'firestore', error: null })
       } else {
         const seedRecord = fallbackProfile
-          ? buildInitialStudentRecord(targetId, fallbackProfile)
+          ? buildInitialStudentRecord(
+              targetId,
+              fallbackProfile,
+              schoolLoaded ? latestSchool : null
+            )
           : DEFAULT_STUDENT_DATA
         try {
           await setDoc(docRef, seedRecord)
-          onData(seedRecord)
+          latestStudent = seedRecord
+          emitCombined()
           onStatusChange?.({ mode: 'firestore', error: null })
         } catch (err) {
-          onData(seedRecord)
+          latestStudent = seedRecord
+          emitCombined()
           onStatusChange?.({ mode: 'demo', error: err.message })
         }
       }
     },
     (err) => {
-      onData(DEFAULT_STUDENT_DATA)
+      latestStudent = DEFAULT_STUDENT_DATA
+      emitCombined()
       onStatusChange?.({ mode: 'demo', error: err.message })
     }
   )
 
-  return unsubscribe
+  return () => {
+    unsubscribe()
+    unsubSchool()
+  }
 }
 
 /**

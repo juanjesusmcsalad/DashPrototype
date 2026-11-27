@@ -63,6 +63,8 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [announcementTitle, setAnnouncementTitle] = useState('')
   const [announcementBody, setAnnouncementBody] = useState('')
   const [announcementTarget, setAnnouncementTarget] = useState('ALL')
+  const [sharedNoteText, setSharedNoteText] = useState('')
+  const [sharedNoteTarget, setSharedNoteTarget] = useState('ALL')
   const [saveMessage, setSaveMessage] = useState('')
 
   useEffect(() => {
@@ -238,6 +240,44 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     if (!target) return
     const updatedRecs = (target.recommendations || []).filter((r) => r.id !== recId)
     await runAdminAction(() => updateStudentFields(studentId, { recommendations: updatedRecs }))
+  }
+
+  const handleBroadcastNote = async (e) => {
+    e.preventDefault()
+    if (!sharedNoteText.trim()) return
+    const tag = sharedNoteTarget === 'ALL' ? 'All Sections' : sharedNoteTarget
+    const newNote = {
+      id: `note-${Date.now()}`,
+      text: sharedNoteText.trim(),
+      category: tag,
+      priority: 'Normal',
+      tag,
+    }
+    const nextSchool = {
+      ...schoolConfig,
+      notes: [newNote, ...(schoolConfig.notes || [])],
+    }
+    await runAdminAction(
+      async () => {
+        await saveSchoolConfig(nextSchool)
+        setSchoolConfig(nextSchool)
+        setSharedNoteText('')
+      },
+      sharedNoteTarget === 'ALL'
+        ? 'Shared note posted for all students (including future sign-ups)!'
+        : `Class note posted for section ${sharedNoteTarget}!`
+    )
+  }
+
+  const handleDeleteSharedNote = async (noteId) => {
+    const nextSchool = {
+      ...schoolConfig,
+      notes: (schoolConfig.notes || []).filter((n) => n.id !== noteId),
+    }
+    await runAdminAction(async () => {
+      await saveSchoolConfig(nextSchool)
+      setSchoolConfig(nextSchool)
+    }, 'Class note removed.')
   }
 
   const handleBulkAssignTask = async (e) => {
@@ -515,11 +555,73 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </select>
               <button
                 type="submit"
-                className="rounded-xl bg-[#ffd41c] px-4 py-2 text-xs font-bold text-[#232b66] shadow-sm hover:brightness-95 md:col-span-2"
+                className="rounded-xl bg-[#ffd41c] px-4 py-2 text-xs font-bold text-[#232b66] hover:brightness-95 md:col-span-2"
               >
                 Assign Bulk Task
               </button>
             </form>
+
+            {/* Broadcast Class / All-Sections Note */}
+            <div className={`${CARD} space-y-3 p-4`}>
+              <form onSubmit={handleBroadcastNote} className="grid grid-cols-1 gap-2.5 md:grid-cols-12">
+                <div className="flex items-center justify-between text-xs font-bold text-[#35408e] md:col-span-12 dark:text-[#ffd41c]">
+                  <span>Post Note to All Students or Specific Section</span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    New sign-ups automatically inherit notes matching their section
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={sharedNoteText}
+                  onChange={(e) => setSharedNoteText(e.target.value)}
+                  placeholder="e.g. Bring scientific calculators for Finite Mathematics tomorrow."
+                  className="rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-8 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                />
+                <select
+                  value={sharedNoteTarget}
+                  onChange={(e) => setSharedNoteTarget(e.target.value)}
+                  className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                >
+                  <option value="ALL">All Sections</option>
+                  {ALLOWED_SECTIONS.map((sec) => (
+                    <option key={sec} value={sec}>
+                      {sec} Only
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="submit"
+                  className="rounded-xl bg-[#35408e] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] md:col-span-2 dark:bg-[#ffd41c] dark:text-[#232b66]"
+                >
+                  Post Note
+                </button>
+              </form>
+
+              {(schoolConfig.notes || []).length > 0 && (
+                <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-2.5 dark:border-slate-700/70">
+                  {(schoolConfig.notes || []).map((note) => (
+                    <div
+                      key={note.id}
+                      className="flex items-center gap-2 rounded-full bg-[#eef0fb] py-1 pr-2 pl-3 text-xs text-slate-800 dark:bg-[#11162b] dark:text-slate-200"
+                    >
+                      <span className="rounded-full bg-[#ffd41c]/40 px-2 py-0.5 text-[10px] font-bold text-[#35408e] dark:text-[#ffd41c]">
+                        {note.tag || note.category}
+                      </span>
+                      <span>{note.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteSharedNote(note.id)}
+                        aria-label="Remove shared note"
+                        className="rounded-full px-1 font-bold text-slate-400 hover:text-rose-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
               <section className={`${CARD} p-5 lg:col-span-5`}>
