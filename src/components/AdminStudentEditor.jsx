@@ -78,25 +78,27 @@ export default function AdminStudentEditor({
       : '0.00'
 
   const handleGradeInputChange = (subjectId, value) => {
-    setSubjects((prev) => {
-      const nextSubjects = prev.map((s) => (s.id === subjectId ? { ...s, gradeInput: value } : s))
-      if (nextSubjects.length > 0) {
-        const nextAvg = (
-          nextSubjects.reduce((sum, s) => {
-            const val = Number(s.gradeInput)
-            return sum + (Number.isNaN(val) ? Number(s.grade || 0) : Math.min(100, Math.max(0, val)))
-          }, 0) / nextSubjects.length
-        ).toFixed(2)
-        setGradeHistoryInput((histPrev) => {
-          const updated = [...histPrev]
-          if (updated.length > 0) {
-            updated[updated.length - 1] = String(Number(nextAvg))
-          }
-          return updated
-        })
-      }
-      return nextSubjects
-    })
+    const nextSubjects = subjects.map((s) =>
+      s.id === subjectId ? { ...s, gradeInput: value } : s
+    )
+    setSubjects(nextSubjects)
+
+    if (nextSubjects.length > 0) {
+      const nextAvg = (
+        nextSubjects.reduce((sum, s) => {
+          const val = Number(s.gradeInput)
+          return sum + (Number.isNaN(val) ? Number(s.grade || 0) : Math.min(100, Math.max(0, val)))
+        }, 0) / nextSubjects.length
+      ).toFixed(2)
+      setGradeHistoryInput((histPrev) => {
+        const updated = [...histPrev]
+        if (updated.length > 0) {
+          updated[updated.length - 1] = String(Number(nextAvg))
+        }
+        return updated
+      })
+    }
+
     setIsDirty(true)
   }
 
