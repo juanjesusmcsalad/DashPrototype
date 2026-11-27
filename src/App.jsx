@@ -3,6 +3,7 @@ import AdminDashboardView from './components/AdminDashboardView'
 import AuthView from './components/AuthView'
 import DashboardView from './components/DashboardView'
 import Header from './components/Header'
+import QuickstartModal from './components/QuickstartModal'
 import Sidebar from './components/Sidebar'
 import {
   AcademicProgressView,
@@ -14,11 +15,29 @@ import {
   TasksView,
 } from './components/SubViews'
 import { DEFAULT_STUDENT_DATA } from './data/defaultStudentData'
-import { signOutUser, subscribeToAuthState } from './services/authService'
+import { signOutUser, subscribeToAuthState, updateUserMetadata } from './services/authService'
 import {
   subscribeToStudentData,
   updateStudentFields,
 } from './services/studentService'
+
+function hasLocalTourDone(uid) {
+  if (!uid) return true
+  try {
+    return localStorage.getItem(`dashprototype_tour_done_${uid}`) === '1'
+  } catch {
+    return false
+  }
+}
+
+function markLocalTourDone(uid) {
+  if (!uid) return
+  try {
+    localStorage.setItem(`dashprototype_tour_done_${uid}`, '1')
+  } catch {
+    // Ignore storage write errors.
+  }
+}
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(undefined) // undefined = checking auth
@@ -27,6 +46,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
+  const [manualTutorialOpen, setManualTutorialOpen] = useState(false)
+  const [dismissedTutorialUid, setDismissedTutorialUid] = useState(null)
   const [darkMode, setDarkMode] = useState(() => {
     try {
       return localStorage.getItem('dashprototype_theme') === 'dark'
@@ -111,8 +132,25 @@ export default function App() {
   }
 
   const handleLogout = async () => {
+    setManualTutorialOpen(false)
     await signOutUser()
   }
+
+  const handleCloseTutorial = () => {
+    setManualTutorialOpen(false)
+    if (!currentUser?.uid) return
+    const uid = currentUser.uid
+    setDismissedTutorialUid(uid)
+    markLocalTourDone(uid)
+    setCurrentUser((prev) => (prev ? { ...prev, tutorialCompleted: true } : prev))
+    updateUserMetadata(uid, { tutorialCompleted: true }).catch(() => {})
+  }
+
+  const tutorialAlreadyDone =
+    Boolean(currentUser?.tutorialCompleted) || hasLocalTourDone(currentUser?.uid)
+  const isTutorialOpen =
+    Boolean(currentUser) &&
+    (manualTutorialOpen || (!tutorialAlreadyDone && dismissedTutorialUid !== currentUser.uid))
 
   if (currentUser === undefined) {
     return (
@@ -128,12 +166,22 @@ export default function App() {
 
   if (currentUser.role === 'admin') {
     return (
-      <AdminDashboardView
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
-      />
+      <>
+        <AdminDashboardView
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenTutorial={() => setManualTutorialOpen(true)}
+          darkMode={darkMode}
+          onToggleDarkMode={toggleDarkMode}
+        />
+        <QuickstartModal
+          key={isTutorialOpen ? 'admin-tour-open' : 'admin-tour-closed'}
+          isOpen={isTutorialOpen}
+          role="admin"
+          userName={currentUser.name}
+          onClose={handleCloseTutorial}
+        />
+      </>
     )
   }
 
@@ -202,6 +250,7 @@ export default function App() {
             onOpenMobileMenu={() => setMobileMenuOpen(true)}
             announcements={data.announcements}
             onNavigate={setActiveTab}
+            onOpenTutorial={() => setManualTutorialOpen(true)}
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
           />
@@ -215,6 +264,14 @@ export default function App() {
           <div className="pb-4">{renderContent()}</div>
         </main>
       </div>
+
+      <QuickstartModal
+        key={isTutorialOpen ? 'student-tour-open' : 'student-tour-closed'}
+        isOpen={isTutorialOpen}
+        role="student"
+        userName={currentUser.name}
+        onClose={handleCloseTutorial}
+      />
     </div>
   )
 }

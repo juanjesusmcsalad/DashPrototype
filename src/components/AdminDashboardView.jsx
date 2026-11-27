@@ -39,7 +39,13 @@ function computeAverage(subjects = []) {
   return Number((total / subjects.length).toFixed(2))
 }
 
-export default function AdminDashboardView({ currentUser, onLogout, darkMode, onToggleDarkMode }) {
+export default function AdminDashboardView({
+  currentUser,
+  onLogout,
+  onOpenTutorial,
+  darkMode,
+  onToggleDarkMode,
+}) {
   const [activeTab, setActiveTab] = useState('overview')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [students, setStudents] = useState([])
@@ -1428,7 +1434,17 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <button
+                type="button"
+                onClick={onOpenTutorial}
+                aria-label="Open quickstart tutorial"
+                title="Quickstart Guide"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-bold text-[#35408e] shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-[#eef0fb] dark:bg-[#1e2647] dark:text-[#ffd41c] dark:ring-slate-700 dark:hover:bg-[#27315a]"
+              >
+                ?
+              </button>
+
               <ThemeToggle darkMode={darkMode} onToggle={onToggleDarkMode} />
 
               <button

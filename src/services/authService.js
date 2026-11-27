@@ -132,6 +132,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
   let role = isAllowlistedAdmin ? 'admin' : 'student'
   let name = firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'Student'
   let section = isAllowlistedAdmin ? 'Admin' : '12SHS2510'
+  let tutorialCompleted = false
 
   if (db) {
     try {
@@ -142,6 +143,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
         role = userData.role === 'admin' || isAllowlistedAdmin ? 'admin' : 'student'
         name = userData.name || name
         section = userData.section || section
+        tutorialCompleted = Boolean(userData.tutorialCompleted)
         if (isAllowlistedAdmin && userData.role !== 'admin') {
           await setDoc(userRef, { role: 'admin', section: 'Admin', email: cleanEmail }, { merge: true })
         }
@@ -169,6 +171,7 @@ async function resolveFirebaseUserProfile(firebaseUser) {
     name,
     role,
     section,
+    tutorialCompleted,
   }
 }
 
@@ -313,6 +316,7 @@ export async function signInWithRole({
       email: match.email,
       role: match.role,
       section: match.section,
+      tutorialCompleted: Boolean(match.tutorialCompleted),
     }
     writeDemoSession(sessionUser, staySignedIn)
     return sessionUser
