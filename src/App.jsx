@@ -200,11 +200,16 @@ export default function App() {
             onSearchChange={setSearchQuery}
             onOpenMobileMenu={() => setMobileMenuOpen(true)}
             announcements={data.announcements}
-            syncStatus={syncStatus}
             onNavigate={setActiveTab}
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
           />
+
+          {syncStatus.error && (
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
+              Sync warning: {syncStatus.error}
+            </div>
+          )}
 
           <div className="pb-4">{renderContent()}</div>
         </main>

@@ -7,7 +7,6 @@ export default function Header({
   onSearchChange,
   onOpenMobileMenu,
   announcements,
-  syncStatus,
   onNavigate,
   darkMode,
   onToggleDarkMode,
@@ -58,28 +57,8 @@ export default function Header({
         </div>
       </div>
 
-      {/* Student Profile + Sync Badge + Notification Bell */}
+      {/* Student Profile + Notification Bell */}
       <div className="relative flex items-center gap-3 sm:gap-4">
-        <span
-          title={
-            syncStatus.mode === 'firestore'
-              ? 'Connected to Firebase Firestore'
-              : 'Running in local demo mode (configure .env for live Firestore)'
-          }
-          className={`hidden items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline-flex ${
-            syncStatus.mode === 'firestore'
-              ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:ring-emerald-700'
-              : 'bg-[#ffd41c]/20 text-[#35408e] ring-1 ring-[#ffd41c] dark:bg-[#ffd41c]/15 dark:text-[#ffd41c]'
-          }`}
-        >
-          <span
-            className={`h-1.5 w-1.5 rounded-full ${
-              syncStatus.mode === 'firestore' ? 'bg-emerald-500' : 'bg-[#35408e] dark:bg-[#ffd41c]'
-            }`}
-          />
-          {syncStatus.mode === 'firestore' ? 'Firestore Live' : 'Demo Mode'}
-        </span>
-
         <ThemeToggle darkMode={darkMode} onToggle={onToggleDarkMode} />
 
         <button
