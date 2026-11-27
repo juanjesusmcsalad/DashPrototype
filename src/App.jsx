@@ -238,6 +238,7 @@ export default function App() {
           onSelectTab={setActiveTab}
           onLogout={handleLogout}
           mobileOpen={mobileMenuOpen}
+          onOpenMobile={() => setMobileMenuOpen(true)}
           onCloseMobile={() => setMobileMenuOpen(false)}
         />
 
@@ -264,7 +265,7 @@ export default function App() {
             </div>
           )}
 
-          <div className="pb-4">{renderContent()}</div>
+          <div className="pb-24 lg:pb-4">{renderContent()}</div>
         </main>
       </div>
 

@@ -18,7 +18,7 @@ const STUDENT_STEPS = [
       'Your 5 subject bars update automatically whenever an administrator saves your official grades.',
   },
   {
-    selector: '[data-tour="sidebar-nav"]',
+    selector: '[data-tour="sidebar-nav"], [data-tour="mobile-bottom-nav"]',
     placement: 'right',
     badge: 'Step 3 of 5 • Menu',
     title: 'Navigation Menu',
@@ -61,7 +61,7 @@ const ADMIN_STEPS = [
       'Click 12SHS2510 or 12SHS2509 here anytime to jump straight to that section in Manage Students.',
   },
   {
-    selector: '[data-tour="sidebar-nav"]',
+    selector: '[data-tour="sidebar-nav"], [data-tour="mobile-bottom-nav"]',
     placement: 'right',
     badge: 'Step 3 of 5 • Admin Tools',
     title: 'Admin Controls',
@@ -103,17 +103,26 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
     }
     window.addEventListener('keydown', handleKey)
 
+    const findVisibleTarget = () => {
+      if (!current.selector) return null
+      const vwNow = window.innerWidth
+      const candidates = document.querySelectorAll(current.selector)
+      for (const node of candidates) {
+        const rect = node.getBoundingClientRect()
+        if (rect.width > 0 && rect.height > 0 && rect.right > 0 && rect.left < vwNow) {
+          return node
+        }
+      }
+      return null
+    }
+
     const measure = () => {
-      const el = current.selector ? document.querySelector(current.selector) : null
+      const el = findVisibleTarget()
       if (!el) {
         setTargetRect(null)
         return
       }
       const r = el.getBoundingClientRect()
-      if (r.width === 0 || r.height === 0) {
-        setTargetRect(null)
-        return
-      }
       setTargetRect({
         top: r.top,
         left: r.left,
@@ -124,7 +133,7 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
       })
     }
 
-    const el = current.selector ? document.querySelector(current.selector) : null
+    const el = findVisibleTarget()
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
     }

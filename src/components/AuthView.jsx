@@ -40,16 +40,16 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] p-4 transition-colors sm:p-6 dark:bg-[#0f1326]">
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f6fb] p-3 transition-colors sm:p-6 dark:bg-[#0f1326]">
       <div className="grid w-full max-w-5xl overflow-hidden rounded-3xl bg-white shadow-xl shadow-[#35408e]/10 ring-1 ring-slate-100 lg:grid-cols-12 dark:bg-[#181e38] dark:ring-slate-700/70">
         {/* Left Brand Showcase */}
-        <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] p-8 text-white lg:col-span-5">
+        <div className="relative flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] p-5 text-white sm:p-8 lg:col-span-5">
           <div className="pointer-events-none absolute -top-16 -right-16 h-52 w-52 rounded-full bg-[#ffd41c]/15 blur-2xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-12 h-48 w-48 rounded-full bg-[#1a214f]/50 blur-2xl" />
 
           <div className="relative z-10">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#242c66]/80 p-1.5 ring-1 ring-[#ffd41c]/50">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#242c66]/80 p-1.5 ring-1 ring-[#ffd41c]/50 sm:h-12 sm:w-12">
                 <img
                   src="/models/nu-logo.png"
                   alt="National University Logo"
@@ -57,19 +57,19 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                 />
               </div>
               <div>
-                <p className="text-xs font-bold tracking-wider text-[#ffd41c] uppercase">
+                <p className="text-[11px] font-bold tracking-wider text-[#ffd41c] uppercase sm:text-xs">
                   NU MOA • CT Senior High
                 </p>
                 <p className="text-sm font-semibold text-white">Trackable Dash</p>
               </div>
             </div>
 
-            <h1 className="mt-8 text-2xl font-bold leading-snug sm:text-3xl">
+            <h1 className="mt-5 text-xl font-bold leading-snug sm:mt-8 sm:text-3xl">
               {mode === 'admin'
                 ? 'Administrator Control Center'
                 : 'Track your Senior High journey in one place.'}
             </h1>
-            <p className="mt-2.5 text-xs leading-relaxed text-white/80 sm:text-sm">
+            <p className="mt-2 text-xs leading-relaxed text-white/80 sm:mt-2.5 sm:text-sm">
               {mode === 'admin'
                 ? 'Manage sections 12SHS2510 & 12SHS2509, inspect user credentials, edit grades, and publish announcements.'
                 : 'Access sections 12SHS2510 and 12SHS2509 to monitor grades, attendance, tasks, and insights.'}
@@ -77,17 +77,17 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
           </div>
 
           {/* Mascot Showcase */}
-          <div className="relative z-10 mt-8 flex items-center justify-center pt-4" aria-hidden="true">
+          <div className="relative z-10 mt-4 flex items-center justify-center pt-2 sm:mt-8 sm:pt-4" aria-hidden="true">
             <img
               src="/models/bulldawg.png"
               alt=""
-              className="h-48 w-48 object-contain drop-shadow-xl"
+              className="h-28 w-28 object-contain drop-shadow-xl sm:h-48 sm:w-48"
             />
           </div>
         </div>
 
         {/* Right Auth Form */}
-        <div className="flex flex-col justify-center p-6 sm:p-10 lg:col-span-7">
+        <div className="flex flex-col justify-center p-5 sm:p-10 lg:col-span-7">
           <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex rounded-full bg-[#f5f6fb] p-1 ring-1 ring-slate-200/80 dark:bg-[#11162b] dark:ring-slate-700">
               <button

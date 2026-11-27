@@ -652,7 +652,7 @@ export default function AdminDashboardView({
                   </select>
                 </div>
 
-                <div className="max-h-[540px] space-y-2 overflow-y-auto pr-1">
+                <div className="max-h-64 space-y-2 overflow-y-auto pr-1 lg:max-h-[540px]">
                   {filteredStudents.length === 0 ? (
                     <div className="rounded-xl bg-[#f5f6fb] p-4 text-center text-xs text-slate-500 dark:bg-[#11162b] dark:text-slate-400">
                       <p>No students registered yet. Students appear here once they sign up.</p>
@@ -918,7 +918,86 @@ export default function AdminDashboardView({
               </div>
             )}
 
-            <div className={`${CARD} overflow-x-auto`}>
+            {/* Mobile Account Cards */}
+            <div className="space-y-3 sm:hidden">
+              {filteredAccounts.map((acc) => {
+                const rawPassword = !isFirebaseConfigured ? (acc.password || '') : ''
+                const isShown = Boolean(visiblePasswords[acc.uid])
+                return (
+                  <div key={acc.uid} className={`${CARD} space-y-2.5 p-4 text-xs`}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{acc.name}</p>
+                        <p className="truncate font-mono text-[11px] text-slate-500 dark:text-slate-400">{acc.email}</p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <span className="rounded-full bg-[#eef0fb] px-2 py-0.5 text-[10px] font-bold text-[#35408e] dark:bg-[#232b52] dark:text-[#ffd41c]">
+                          {acc.section || '12SHS2510'}
+                        </span>
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold capitalize ${
+                            acc.role === 'admin'
+                              ? 'bg-[#ffd41c] text-[#232b66]'
+                              : 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200'
+                          }`}
+                        >
+                          {acc.role}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-[11px]">
+                      {rawPassword ? (
+                        <span className="font-mono text-slate-700 dark:text-slate-200">
+                          {isShown ? rawPassword : '••••••••'}
+                        </span>
+                      ) : (
+                        <span className="text-emerald-600 dark:text-emerald-400">Protected by Firebase Auth</span>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-2 dark:border-slate-700/70">
+                      {rawPassword && (
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility(acc.uid)}
+                          className="rounded-lg border border-slate-200 px-2.5 py-1 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:text-slate-200"
+                        >
+                          {isShown ? 'Hide' : 'Show'}
+                        </button>
+                      )}
+                      {isFirebaseConfigured && (
+                        <button
+                          type="button"
+                          onClick={() => handleSendPasswordReset(acc)}
+                          className="rounded-lg border border-[#35408e]/30 px-2.5 py-1 text-[11px] font-semibold text-[#35408e] dark:border-slate-600 dark:text-[#ffd41c]"
+                        >
+                          Reset Email
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => copyCredentials(acc)}
+                        className="rounded-lg bg-[#35408e] px-2.5 py-1 text-[11px] font-semibold text-white dark:bg-[#ffd41c] dark:text-[#232b66]"
+                      >
+                        {copiedId === acc.uid ? 'Copied!' : 'Copy'}
+                      </button>
+                      {acc.uid !== currentUser.uid && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAccount(acc)}
+                          className="rounded-lg border border-rose-200 px-2.5 py-1 text-[11px] font-semibold text-rose-600 dark:border-rose-800 dark:text-rose-300"
+                        >
+                          Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className={`${CARD} hidden overflow-x-auto sm:block`}>
               <table className="w-full min-w-[680px] text-left text-xs">
                 <thead className="border-b border-slate-100 bg-[#f5f6fb] text-[11px] font-bold tracking-wide text-slate-500 uppercase dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-400">
                   <tr>
@@ -1359,6 +1438,7 @@ export default function AdminDashboardView({
           onSelectTab={setActiveTab}
           onLogout={onLogout}
           mobileOpen={mobileMenuOpen}
+          onOpenMobile={() => setMobileMenuOpen(true)}
           onCloseMobile={() => setMobileMenuOpen(false)}
           navItems={ADMIN_NAV_ITEMS}
           badgeText="Admin Portal"
@@ -1405,7 +1485,7 @@ export default function AdminDashboardView({
                     }
                   }}
                   placeholder="Search students, tasks, announcements, schedule..."
-                  className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
+                  className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-base text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] sm:text-sm dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
                 />
 
                 {searchFocused && query && (
@@ -1463,14 +1543,15 @@ export default function AdminDashboardView({
               <button
                 type="button"
                 onClick={() => setActiveTab('admin-profile')}
-                className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70 dark:hover:bg-white/10"
+                aria-label="Open administrator profile"
+                className="flex items-center gap-2.5 rounded-full p-1 text-left transition hover:bg-white/70 sm:pr-2 dark:hover:bg-white/10"
               >
                 <img
                   src="/models/nu-logo.png"
                   alt={currentUser.name}
-                  className="h-10 w-10 rounded-full bg-[#242c66] object-contain p-1 shadow-sm ring-2 ring-[#ffd41c]"
+                  className="h-9 w-9 rounded-full bg-[#242c66] object-contain p-1 shadow-sm ring-2 ring-[#ffd41c] sm:h-10 sm:w-10"
                 />
-                <div className="leading-tight">
+                <div className="hidden leading-tight sm:block">
                   <p className="text-xs font-bold text-slate-900 sm:text-sm dark:text-slate-100">{currentUser.name}</p>
                   <p className="text-[10px] font-semibold tracking-wide text-[#35408e] uppercase dark:text-[#ffd41c]">
                     Administrator
@@ -1500,7 +1581,7 @@ export default function AdminDashboardView({
             </div>
           )}
 
-          <div className="pb-4">{renderTabContent()}</div>
+          <div className="pb-24 lg:pb-4">{renderTabContent()}</div>
         </main>
       </div>
     </div>

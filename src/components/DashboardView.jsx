@@ -7,16 +7,16 @@ function StatCard({ value, label, highlighted = false, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group flex flex-col items-center justify-center rounded-2xl px-4 py-7 text-center transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg ${
+      className={`group flex flex-col items-center justify-center rounded-2xl px-2.5 py-4 text-center transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg sm:px-4 sm:py-7 ${
         highlighted
           ? 'border-2 border-[#35408e] bg-white shadow-[0_10px_28px_rgba(53,64,142,0.12)] dark:border-[#ffd41c] dark:bg-[#181e38]'
           : 'border border-slate-100 bg-gradient-to-br from-white to-[#f6f8ff] shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-slate-700/70 dark:from-[#1b2240] dark:to-[#131830]'
       }`}
     >
-      <span className="text-xl font-bold tracking-tight text-slate-900 transition-all duration-200 ease-out group-hover:scale-110 group-hover:text-[#35408e] sm:text-2xl dark:text-white dark:group-hover:text-[#ffd41c]">
+      <span className="text-lg font-bold tracking-tight text-slate-900 transition-all duration-200 ease-out group-hover:scale-110 group-hover:text-[#35408e] sm:text-2xl dark:text-white dark:group-hover:text-[#ffd41c]">
         {value}
       </span>
-      <span className="mt-1.5 text-xs font-medium text-slate-500 transition-colors duration-200 group-hover:text-slate-700 dark:text-slate-400 dark:group-hover:text-slate-200">
+      <span className="mt-1 text-[11px] font-medium leading-tight text-slate-500 transition-colors duration-200 group-hover:text-slate-700 sm:mt-1.5 sm:text-xs dark:text-slate-400 dark:group-hover:text-slate-200">
         {label}
       </span>
     </button>
@@ -53,7 +53,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
           {/* Academic Overview */}
           <section data-tour="student-overview">
             <h2 className="mb-3 text-base font-bold text-slate-900 dark:text-slate-100">Academic Overview</h2>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
               <StatCard
                 value={averageGrade}
                 label="Current Grade Average"

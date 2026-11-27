@@ -186,7 +186,7 @@ export default function Header({
             }}
             placeholder="Search tasks, announcements, grades, schedule..."
             aria-label="Search tasks, announcements, subjects, or pages"
-            className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
+            className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-base text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] sm:text-sm dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
           />
 
           {searchFocused && q && (
@@ -242,14 +242,15 @@ export default function Header({
         <button
           type="button"
           onClick={() => onNavigate('profile')}
-          className="flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 text-left transition hover:bg-white/70 dark:hover:bg-white/10"
+          aria-label="Open student profile"
+          className="flex items-center gap-2.5 rounded-full p-1 text-left transition hover:bg-white/70 sm:pr-2 dark:hover:bg-white/10"
         >
           <img
             src="/models/nu-logo.png"
             alt={initials}
-            className="h-10 w-10 rounded-full bg-[#242c66] object-contain p-1 shadow-sm ring-2 ring-[#ffd41c]"
+            className="h-9 w-9 rounded-full bg-[#242c66] object-contain p-1 shadow-sm ring-2 ring-[#ffd41c] sm:h-10 sm:w-10"
           />
-          <div className="leading-tight">
+          <div className="hidden leading-tight sm:block">
             <p className="text-xs font-bold text-slate-900 sm:text-sm dark:text-slate-100">{student.name}</p>
             <p className="text-[10px] font-medium tracking-wide text-slate-500 uppercase dark:text-slate-400">
               {student.section ? `${student.section} • ${student.school}` : student.school}
@@ -272,7 +273,7 @@ export default function Header({
         </button>
 
         {showNotifications && (
-          <div className="absolute top-12 right-0 z-30 w-72 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100 dark:bg-[#181e38] dark:ring-slate-700">
+          <div className="absolute top-12 right-0 z-30 w-72 max-w-[calc(100vw-2rem)] rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100 dark:bg-[#181e38] dark:ring-slate-700">
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-bold text-slate-900 dark:text-slate-100">Recent Announcements</p>
               <button

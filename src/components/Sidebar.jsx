@@ -93,11 +93,23 @@ function NavIcon({ name, active }) {
   }
 }
 
+const MOBILE_SHORT_LABELS = {
+  dashboard: 'Home',
+  'academic-progress': 'Grades',
+  tasks: 'Tasks',
+  announcements: 'Notices',
+  overview: 'Overview',
+  students: 'Students',
+  schedule: 'Schedule',
+  accounts: 'Accounts',
+}
+
 export default function Sidebar({
   activeTab,
   onSelectTab,
   onLogout,
   mobileOpen,
+  onOpenMobile,
   onCloseMobile,
   navItems = DEFAULT_NAV_ITEMS,
   badgeText = '',
@@ -106,6 +118,10 @@ export default function Sidebar({
     onSelectTab(id)
     onCloseMobile?.()
   }
+
+  const mobileQuickItems = navItems.some((i) => i.id === 'students')
+    ? navItems.slice(0, 4)
+    : [navItems[0], navItems[1], navItems[2], navItems[5]].filter(Boolean)
 
   return (
     <>
@@ -180,6 +196,45 @@ export default function Sidebar({
           <span>Logout</span>
         </button>
       </aside>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <nav
+        data-tour="mobile-bottom-nav"
+        aria-label="Mobile Navigation"
+        className="fixed inset-x-3 bottom-3 z-30 flex items-center justify-around rounded-2xl bg-gradient-to-r from-[#424fa6] via-[#35408e] to-[#1b225c] px-2 py-1.5 text-white shadow-xl shadow-[#171d4b]/35 ring-1 ring-white/15 lg:hidden"
+      >
+        {mobileQuickItems.map((item) => {
+          const isActive = activeTab === item.id
+          const shortLabel = MOBILE_SHORT_LABELS[item.id] || item.label.split(' ')[0]
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleSelect(item.id)}
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1.5 py-1.5 text-[10px] transition ${
+                isActive
+                  ? 'bg-[#ffd41c] font-bold text-[#232b66] shadow-sm'
+                  : 'font-medium text-white/85 hover:bg-white/10'
+              }`}
+            >
+              <NavIcon name={item.icon} active={isActive} />
+              <span className="max-w-full truncate">{shortLabel}</span>
+            </button>
+          )
+        })}
+        <button
+          type="button"
+          onClick={() => onOpenMobile?.()}
+          className="flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1.5 py-1.5 text-[10px] font-medium text-white/85 transition hover:bg-white/10"
+        >
+          <svg className="h-4 w-4 shrink-0 stroke-white/80" viewBox="0 0 24 24" fill="none" strokeWidth="2">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="18" x2="20" y2="18" />
+          </svg>
+          <span>More</span>
+        </button>
+      </nav>
     </>
   )
 }

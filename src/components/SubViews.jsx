@@ -165,35 +165,37 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className={`${CARD} flex flex-wrap gap-3 p-4`}>
+      <form onSubmit={handleSubmit} className={`${CARD} grid grid-cols-1 gap-2.5 p-4 sm:flex sm:flex-wrap sm:gap-3`}>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Add a new assignment or research task..."
-          className="min-w-52 flex-1 rounded-xl border border-slate-200 px-3.5 py-2 text-sm outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-base outline-none focus:border-[#35408e] sm:min-w-52 sm:flex-1 sm:py-2 sm:text-sm dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
         />
-        <select
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-        >
-          {data.subjects.map((s) => (
-            <option key={s.id} value={s.shortName}>
-              {s.shortName}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          aria-label="Task due date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-        />
+        <div className="grid grid-cols-2 gap-2.5 sm:contents">
+          <select
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e] sm:w-auto dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+          >
+            {data.subjects.map((s) => (
+              <option key={s.id} value={s.shortName}>
+                {s.shortName}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            aria-label="Task due date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e] sm:w-auto dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+          />
+        </div>
         <button
           type="submit"
-          className="rounded-xl bg-[#35408e] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
+          className="w-full rounded-xl bg-[#35408e] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#262f6d] sm:w-auto sm:py-2 dark:bg-[#ffd41c] dark:text-[#232b66]"
         >
           Add Task
         </button>
@@ -353,49 +355,51 @@ export function EngagementAnalyticsView({ data, onLogStudyHours }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className={`${CARD} p-5`}>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Weekly Study Hours</p>
-          <p className="mt-1 text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{totalStudyHours} hrs</p>
+      <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+        <div className={`${CARD} p-3 text-center sm:p-5 sm:text-left`}>
+          <p className="text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">Study Hours</p>
+          <p className="mt-1 text-lg font-bold text-[#35408e] sm:text-2xl dark:text-[#ffd41c]">{totalStudyHours} hrs</p>
         </div>
-        <div className={`${CARD} p-5`}>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Attendance Rate</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">{data.student.attendanceRate ?? 0}%</p>
+        <div className={`${CARD} p-3 text-center sm:p-5 sm:text-left`}>
+          <p className="text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">Attendance</p>
+          <p className="mt-1 text-lg font-bold text-slate-900 sm:text-2xl dark:text-white">{data.student.attendanceRate ?? 0}%</p>
         </div>
-        <div className={`${CARD} p-5`}>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Task Completion</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900 dark:text-white">
+        <div className={`${CARD} p-3 text-center sm:p-5 sm:text-left`}>
+          <p className="text-[11px] text-slate-500 sm:text-xs dark:text-slate-400">Completion</p>
+          <p className="mt-1 text-lg font-bold text-slate-900 sm:text-2xl dark:text-white">
             {Math.round((completedCount / Math.max(1, data.tasks.length)) * 100)}%
           </p>
         </div>
       </div>
 
-      <form onSubmit={handleLogSubmit} className={`${CARD} flex flex-wrap items-center gap-3 p-4`}>
+      <form onSubmit={handleLogSubmit} className={`${CARD} grid grid-cols-1 gap-2.5 p-4 sm:flex sm:flex-wrap sm:items-center sm:gap-3`}>
         <span className="text-xs font-bold text-slate-700 dark:text-slate-200">Log Study Session:</span>
-        <select
-          value={dayIndex}
-          onChange={(e) => setDayIndex(Number(e.target.value))}
-          className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-        >
-          {data.weeklyEngagement.labels.map((label, idx) => (
-            <option key={label} value={idx}>
-              {label}
-            </option>
-          ))}
-        </select>
-        <input
-          type="number"
-          step="0.5"
-          min="0.5"
-          max="8"
-          value={hours}
-          onChange={(e) => setHours(e.target.value)}
-          className="w-24 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-semibold outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
-        />
-        <span className="text-xs text-slate-500 dark:text-slate-400">hours</span>
+        <div className="flex items-center gap-2">
+          <select
+            value={dayIndex}
+            onChange={(e) => setDayIndex(Number(e.target.value))}
+            className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#35408e] sm:flex-none sm:py-1.5 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+          >
+            {data.weeklyEngagement.labels.map((label, idx) => (
+              <option key={label} value={idx}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <input
+            type="number"
+            step="0.5"
+            min="0.5"
+            max="8"
+            value={hours}
+            onChange={(e) => setHours(e.target.value)}
+            className="w-20 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold outline-none focus:border-[#35408e] sm:w-24 sm:py-1.5 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+          />
+          <span className="text-xs text-slate-500 dark:text-slate-400">hrs</span>
+        </div>
         <button
           type="submit"
-          className="rounded-xl bg-[#35408e] px-4 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
+          className="w-full rounded-xl bg-[#35408e] px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-[#262f6d] sm:w-auto sm:py-1.5 dark:bg-[#ffd41c] dark:text-[#232b66]"
         >
           Add Study Hours
         </button>
