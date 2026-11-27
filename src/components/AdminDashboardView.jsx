@@ -49,6 +49,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [sectionFilter, setSectionFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('name')
   const [search, setSearch] = useState('')
+  const [searchFocused, setSearchFocused] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
   const [visiblePasswords, setVisiblePasswords] = useState({})
   const [copiedId, setCopiedId] = useState('')
@@ -1228,6 +1229,113 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     }
   }
 
+  const adminSearchResults = []
+  if (query) {
+    for (const item of ADMIN_NAV_ITEMS) {
+      if (item.label.toLowerCase().includes(query)) {
+        adminSearchResults.push({
+          id: `nav-${item.id}`,
+          type: 'Page',
+          title: item.label,
+          subtitle: 'Open admin section',
+          onSelect: () => setActiveTab(item.id),
+        })
+      }
+    }
+
+    for (const entry of students) {
+      const sName = entry.student?.name || ''
+      const sEmail = entry.student?.email || ''
+      const sSec = entry.student?.section || ''
+      if (
+        sName.toLowerCase().includes(query) ||
+        sEmail.toLowerCase().includes(query) ||
+        sSec.toLowerCase().includes(query)
+      ) {
+        adminSearchResults.push({
+          id: `stu-${entry.id}`,
+          type: 'Student',
+          title: sName,
+          subtitle: `${sSec} • ${sEmail}`,
+          onSelect: () => {
+            setSelectedId(entry.id)
+            setActiveTab('students')
+          },
+        })
+      }
+
+      for (const t of entry.tasks || []) {
+        if (t.title?.toLowerCase().includes(query) || t.subject?.toLowerCase().includes(query)) {
+          adminSearchResults.push({
+            id: `stask-${entry.id}-${t.id}`,
+            type: 'Task',
+            title: t.title,
+            subtitle: `${sName} • ${t.subject}`,
+            onSelect: () => {
+              setSelectedId(entry.id)
+              setActiveTab('students')
+            },
+          })
+        }
+      }
+    }
+
+    for (const ann of schoolConfig.announcements || []) {
+      if (
+        ann.title?.toLowerCase().includes(query) ||
+        ann.body?.toLowerCase().includes(query) ||
+        ann.tag?.toLowerCase().includes(query)
+      ) {
+        adminSearchResults.push({
+          id: `ann-${ann.id}`,
+          type: 'Announcement',
+          title: ann.title,
+          subtitle: `${ann.tag} • ${ann.date}`,
+          onSelect: () => setActiveTab('announcements'),
+        })
+      }
+    }
+
+    for (const note of schoolConfig.notes || []) {
+      if (note.text?.toLowerCase().includes(query) || note.tag?.toLowerCase().includes(query)) {
+        adminSearchResults.push({
+          id: `note-${note.id}`,
+          type: 'Note',
+          title: note.text,
+          subtitle: note.tag || 'All Sections',
+          onSelect: () => setActiveTab('students'),
+        })
+      }
+    }
+
+    for (const sec of ALLOWED_SECTIONS) {
+      for (const slot of schoolConfig.schedules?.[sec] || []) {
+        if (
+          slot.subject?.toLowerCase().includes(query) ||
+          slot.day?.toLowerCase().includes(query)
+        ) {
+          adminSearchResults.push({
+            id: `sch-${sec}-${slot.id}`,
+            type: 'Schedule',
+            title: slot.subject,
+            subtitle: `${sec} • ${slot.day} • ${slot.time}`,
+            onSelect: () => {
+              setSchedSection(sec)
+              setActiveTab('schedule')
+            },
+          })
+        }
+      }
+    }
+  }
+
+  const visibleAdminResults = adminSearchResults.slice(0, 8)
+
+  const handleSelectAdminResult = (item) => {
+    setSearchFocused(false)
+    item.onSelect()
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f6fb] p-3 transition-colors sm:p-5 lg:h-screen lg:overflow-hidden dark:bg-[#0f1326]">
       <div className="mx-auto flex h-full max-w-[1380px] gap-6">
@@ -1242,20 +1350,20 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         />
 
         <main className="flex min-w-0 flex-1 flex-col gap-5 lg:overflow-y-auto lg:pr-1">
-          <header className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden dark:bg-[#181e38] dark:text-slate-200 dark:ring-slate-700"
-                aria-label="Open navigation menu"
-              >
-                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
+          <header className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden dark:bg-[#181e38] dark:text-slate-200 dark:ring-slate-700"
+              aria-label="Open navigation menu"
+            >
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
 
-              <div className="relative w-64 sm:w-80">
+            <div className="order-last flex w-full justify-center sm:order-none sm:flex-1">
+              <div className="relative w-full max-w-md">
                 <svg
                   className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400"
                   viewBox="0 0 24 24"
@@ -1269,10 +1377,54 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 <input
                   type="search"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search students or accounts"
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+                  onChange={(e) => {
+                    setSearch(e.target.value)
+                    setSearchFocused(true)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && visibleAdminResults.length > 0) {
+                      e.preventDefault()
+                      handleSelectAdminResult(visibleAdminResults[0])
+                    }
+                  }}
+                  placeholder="Search students, tasks, announcements, schedule..."
                   className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
                 />
+
+                {searchFocused && query && (
+                  <div className="absolute top-full right-0 left-0 z-40 mt-2 max-h-80 overflow-y-auto rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-200/80 dark:bg-[#181e38] dark:ring-slate-700">
+                    {visibleAdminResults.length === 0 ? (
+                      <p className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">
+                        No matches for &ldquo;{search}&rdquo;.
+                      </p>
+                    ) : (
+                      <div className="space-y-1">
+                        {visibleAdminResults.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onMouseDown={() => handleSelectAdminResult(item)}
+                            className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-[#eef0fb] dark:hover:bg-[#232b52]"
+                          >
+                            <div className="min-w-0">
+                              <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                                {item.title}
+                              </p>
+                              <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+                                {item.subtitle}
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-[#ffd41c]/35 px-2 py-0.5 text-[10px] font-bold text-[#35408e] dark:text-[#ffd41c]">
+                              {item.type}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

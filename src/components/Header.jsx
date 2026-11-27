@@ -1,8 +1,21 @@
 import { useState } from 'react'
+import { getMergedRecommendations } from '../utils/academicHelpers'
 import ThemeToggle from './ThemeToggle'
+
+const STUDENT_PAGES = [
+  { tab: 'dashboard', label: 'Dashboard', keywords: 'home overview summary' },
+  { tab: 'academic-progress', label: 'Academic Progress', keywords: 'grades subjects report csv' },
+  { tab: 'tasks', label: 'Tasks', keywords: 'assignments homework todo due date pending' },
+  { tab: 'performance-insights', label: 'Performance Insights', keywords: 'recommendations notes strongest focus' },
+  { tab: 'engagement-analytics', label: 'Engagement Analytics', keywords: 'attendance study hours weekly' },
+  { tab: 'announcements', label: 'Announcements', keywords: 'notices updates news' },
+  { tab: 'schedule', label: 'Class Schedule', keywords: 'timetable classes days time' },
+  { tab: 'profile', label: 'Student Profile', keywords: 'account email section school' },
+]
 
 export default function Header({
   student,
+  data,
   searchQuery,
   onSearchChange,
   onOpenMobileMenu,
@@ -12,6 +25,7 @@ export default function Header({
   onToggleDarkMode,
 }) {
   const [showNotifications, setShowNotifications] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
 
   const initials = student.name
     .split(' ')
@@ -20,22 +34,130 @@ export default function Header({
     .slice(0, 2)
     .toUpperCase()
 
-  return (
-    <header className="flex flex-wrap items-center justify-between gap-4">
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onOpenMobileMenu}
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden dark:bg-[#181e38] dark:text-slate-200 dark:ring-slate-700"
-          aria-label="Open navigation menu"
-        >
-          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+  const q = searchQuery.trim().toLowerCase()
+  const searchResults = []
 
-        {/* Search Pill matching mockup */}
-        <div className="relative w-64 sm:w-80">
+  if (q) {
+    for (const page of STUDENT_PAGES) {
+      if (
+        page.label.toLowerCase().includes(q) ||
+        page.keywords.toLowerCase().includes(q)
+      ) {
+        searchResults.push({
+          id: `page-${page.tab}`,
+          type: 'Page',
+          title: page.label,
+          subtitle: 'Open section',
+          tab: page.tab,
+        })
+      }
+    }
+
+    for (const task of data?.tasks || []) {
+      if (
+        task.title?.toLowerCase().includes(q) ||
+        task.subject?.toLowerCase().includes(q) ||
+        task.dueDate?.toLowerCase().includes(q)
+      ) {
+        const dueLabel =
+          task.dueDate && task.dueDate !== 'No due date' ? ` • Due ${task.dueDate}` : ''
+        searchResults.push({
+          id: `task-${task.id}`,
+          type: 'Task',
+          title: task.title,
+          subtitle: `${task.subject} • ${task.completed ? 'Done' : 'Pending'}${dueLabel}`,
+          tab: 'tasks',
+        })
+      }
+    }
+
+    for (const ann of data?.announcements || announcements || []) {
+      if (
+        ann.title?.toLowerCase().includes(q) ||
+        ann.body?.toLowerCase().includes(q) ||
+        ann.tag?.toLowerCase().includes(q)
+      ) {
+        searchResults.push({
+          id: `ann-${ann.id}`,
+          type: 'Announcement',
+          title: ann.title,
+          subtitle: `${ann.tag} • ${ann.date}`,
+          tab: 'announcements',
+        })
+      }
+    }
+
+    for (const subj of data?.subjects || []) {
+      if (
+        subj.name?.toLowerCase().includes(q) ||
+        subj.shortName?.toLowerCase().includes(q) ||
+        subj.teacher?.toLowerCase().includes(q)
+      ) {
+        searchResults.push({
+          id: `subj-${subj.id}`,
+          type: 'Subject',
+          title: subj.name,
+          subtitle: `${subj.teacher} • ${subj.grade}%`,
+          tab: 'academic-progress',
+        })
+      }
+    }
+
+    for (const slot of data?.schedule || []) {
+      if (
+        slot.subject?.toLowerCase().includes(q) ||
+        slot.day?.toLowerCase().includes(q) ||
+        slot.time?.toLowerCase().includes(q)
+      ) {
+        searchResults.push({
+          id: `sched-${slot.id}`,
+          type: 'Schedule',
+          title: slot.subject,
+          subtitle: `${slot.day} • ${slot.time}`,
+          tab: 'schedule',
+        })
+      }
+    }
+
+    for (const rec of getMergedRecommendations(data)) {
+      if (
+        rec.text?.toLowerCase().includes(q) ||
+        rec.category?.toLowerCase().includes(q)
+      ) {
+        searchResults.push({
+          id: `rec-${rec.id}`,
+          type: 'Note',
+          title: rec.text,
+          subtitle: rec.category || 'Recommendation',
+          tab: 'performance-insights',
+        })
+      }
+    }
+  }
+
+  const visibleResults = searchResults.slice(0, 8)
+
+  const handleSelectResult = (item) => {
+    setSearchFocused(false)
+    onNavigate(item.tab)
+  }
+
+  return (
+    <header className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+      <button
+        type="button"
+        onClick={onOpenMobileMenu}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-700 shadow-sm ring-1 ring-slate-200/80 lg:hidden dark:bg-[#181e38] dark:text-slate-200 dark:ring-slate-700"
+        aria-label="Open navigation menu"
+      >
+        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Centered Global Search */}
+      <div className="order-last flex w-full justify-center sm:order-none sm:flex-1">
+        <div className="relative w-full max-w-md">
           <svg
             className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400"
             viewBox="0 0 24 24"
@@ -49,11 +171,55 @@ export default function Header({
           <input
             type="search"
             value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Search"
-            aria-label="Search subjects, tasks, or recommendations"
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+            onChange={(e) => {
+              onSearchChange(e.target.value)
+              setSearchFocused(true)
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && visibleResults.length > 0) {
+                e.preventDefault()
+                handleSelectResult(visibleResults[0])
+              }
+            }}
+            placeholder="Search tasks, announcements, grades, schedule..."
+            aria-label="Search tasks, announcements, subjects, or pages"
             className="w-full rounded-full bg-white py-2.5 pr-4 pl-10 text-sm text-slate-700 placeholder-slate-400 shadow-[0_6px_20px_rgba(53,64,142,0.08)] ring-1 ring-slate-100 transition outline-none focus:ring-2 focus:ring-[#35408e] dark:bg-[#181e38] dark:text-slate-100 dark:placeholder-slate-400 dark:ring-slate-700 dark:focus:ring-[#ffd41c]"
           />
+
+          {searchFocused && q && (
+            <div className="absolute top-full right-0 left-0 z-40 mt-2 max-h-80 overflow-y-auto rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-200/80 dark:bg-[#181e38] dark:ring-slate-700">
+              {visibleResults.length === 0 ? (
+                <p className="px-3 py-2.5 text-xs text-slate-500 dark:text-slate-400">
+                  No matches for &ldquo;{searchQuery}&rdquo;.
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {visibleResults.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onMouseDown={() => handleSelectResult(item)}
+                      className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2 text-left transition hover:bg-[#eef0fb] dark:hover:bg-[#232b52]"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-xs font-bold text-slate-900 dark:text-white">
+                          {item.title}
+                        </p>
+                        <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">
+                          {item.subtitle}
+                        </p>
+                      </div>
+                      <span className="shrink-0 rounded-full bg-[#ffd41c]/35 px-2 py-0.5 text-[10px] font-bold text-[#35408e] dark:text-[#ffd41c]">
+                        {item.type}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
