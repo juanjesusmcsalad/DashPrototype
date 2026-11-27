@@ -51,7 +51,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
         {/* Left Main Area */}
         <div className="space-y-6 xl:col-span-8">
           {/* Academic Overview */}
-          <section>
+          <section data-tour="student-overview">
             <h2 className="mb-3 text-base font-bold text-slate-900 dark:text-slate-100">Academic Overview</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <StatCard
@@ -136,7 +136,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
           </section>
 
           {/* Compact Chart.js Preview on Dashboard */}
-          <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-slate-700/70 dark:bg-[#181e38]">
+          <section data-tour="student-charts" className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-slate-700/70 dark:bg-[#181e38]">
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Grades by Subject</h2>

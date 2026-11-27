@@ -2,93 +2,94 @@ import { useEffect, useState } from 'react'
 
 const STUDENT_STEPS = [
   {
-    badge: 'Step 1 of 4 • Overview',
-    title: 'Welcome to Trackable Dash',
+    selector: '[data-tour="student-overview"]',
+    placement: 'bottom',
+    badge: 'Step 1 of 5 • Overview',
+    title: 'Academic Overview',
     description:
-      'Your personal NU MOA Senior High dashboard brings your grades, attendance, and tasks into one clear view.',
-    highlights: [
-      'Check your Grade Average, Attendance Rate, and Tasks Completed cards at the top.',
-      'Your Grades by Subject chart and progress bars update automatically whenever teachers save grades.',
-    ],
+      'Your Grade Average, Attendance Rate, and Tasks Completed live right here. Click any card to inspect details.',
   },
   {
-    badge: 'Step 2 of 4 • Progress & Tasks',
-    title: 'Manage Tasks & Study Hours',
+    selector: '[data-tour="student-charts"]',
+    placement: 'top',
+    badge: 'Step 2 of 5 • Grades',
+    title: 'Grades by Subject',
     description:
-      'Stay on top of deadlines and track your weekly effort without guesswork.',
-    highlights: [
-      'Open Tasks to create personal reminders with your own due date and check off completed work.',
-      'Open Engagement Analytics to log daily study hours against your weekly target.',
-      'Export or print your official report anytime inside Academic Progress.',
-    ],
+      'Your 5 subject bars update automatically whenever an administrator saves your official grades.',
   },
   {
-    badge: 'Step 3 of 4 • Insights & Class Info',
-    title: 'Recommendations, Schedule & Notices',
+    selector: '[data-tour="sidebar-nav"]',
+    placement: 'right',
+    badge: 'Step 3 of 5 • Menu',
+    title: 'Navigation Menu',
     description:
-      'Get clear guidance on where to focus and never miss class updates.',
-    highlights: [
-      'Performance Insights highlights your strongest subject, focus area, and personalized study notes.',
-      'Class Schedule shows your section timetable, and Announcements shows updates for your section.',
-    ],
+      'Switch between Academic Progress, Tasks (with custom due dates), Performance Insights, Engagement Analytics, Announcements, and Class Schedule.',
   },
   {
-    badge: 'Step 4 of 4 • Navigation & Help',
-    title: 'Quick-Jump Search & Replay Help',
+    selector: '[data-tour="global-search"]',
+    placement: 'bottom',
+    badge: 'Step 4 of 5 • Search',
+    title: 'Quick-Jump Search',
     description:
-      'Move anywhere in seconds using the centered search bar at the top.',
-    highlights: [
-      'Type any task, announcement, subject, or page name in Search and click a result (or press Enter) to jump straight there.',
-      'This quickstart only appears automatically once — click the ? button in the header anytime to open it again.',
-    ],
+      'Search any task, announcement, subject, schedule, or page here — click a result or press Enter to jump straight to it.',
+  },
+  {
+    selector: '[data-tour="help-trigger"]',
+    placement: 'bottom',
+    badge: 'Step 5 of 5 • Replay Anytime',
+    title: 'Need This Guide Again?',
+    description:
+      'This spotlight tour will not open automatically again for your account. Click the ? button anytime to replay it.',
   },
 ]
 
 const ADMIN_STEPS = [
   {
-    badge: 'Step 1 of 4 • Admin Control',
-    title: 'Welcome to the Admin Portal',
+    selector: '[data-tour="admin-kpis"]',
+    placement: 'bottom',
+    badge: 'Step 1 of 5 • Overview',
+    title: 'Portal Summary',
     description:
-      'Manage CT Senior High sections 12SHS2510 and 12SHS2509 cleanly from one shared workspace.',
-    highlights: [
-      'Admin Overview gives you live student counts, overall averages, and quick links to each section.',
-      'All changes sync live across every administrator device via Firebase Firestore.',
-    ],
+      'See live student counts, overall averages, attendance, and total accounts across your NU MOA CT sections.',
   },
   {
-    badge: 'Step 2 of 4 • Students, Tasks & Notes',
-    title: 'Edit Records & Broadcast Notes',
+    selector: '[data-tour="admin-sections"]',
+    placement: 'left',
+    badge: 'Step 2 of 5 • Sections',
+    title: 'Sections Directory',
     description:
-      'Update individual student metrics or push tasks and notes to a whole class at once.',
-    highlights: [
-      'In Manage Students, use Assign Bulk Task (with custom due dates) or Post Note for All Sections or one specific section.',
-      'Select any student to edit their attendance, subject grades, weekly study hours, or personal adviser notes.',
-    ],
+      'Click 12SHS2510 or 12SHS2509 here anytime to jump straight to that section in Manage Students.',
   },
   {
-    badge: 'Step 3 of 4 • Timetables & Notices',
-    title: 'Schedules & Announcements',
+    selector: '[data-tour="sidebar-nav"]',
+    placement: 'right',
+    badge: 'Step 3 of 5 • Admin Tools',
+    title: 'Admin Controls',
     description:
-      'Configure class timetables and publish announcements that stay in sync even for future sign-ups.',
-    highlights: [
-      'Newly registered students automatically inherit existing All Sections and matching-section announcements, notes, and schedules.',
-      'Items directed to one section stay hidden from the other section.',
-    ],
+      'Edit grades and post class notes in Manage Students, build timetables in Class Schedule, reset/delete accounts in User Credentials, and post notices in Announcements.',
   },
   {
-    badge: 'Step 4 of 4 • Accounts & Search',
-    title: 'User Credentials, Search & Help',
+    selector: '[data-tour="global-search"]',
+    placement: 'bottom',
+    badge: 'Step 4 of 5 • Search',
+    title: 'Quick-Jump Search',
     description:
-      'Manage accounts safely and jump straight to any student or setting.',
-    highlights: [
-      'In User Credentials, send free password-reset emails or delete removed student accounts.',
-      'Use the centered search bar to jump to any student, task, or page — and click the ? button anytime to reopen this guide.',
-    ],
+      'Type any student name, task, announcement, note, or page to jump straight there.',
+  },
+  {
+    selector: '[data-tour="help-trigger"]',
+    placement: 'bottom',
+    badge: 'Step 5 of 5 • Replay Anytime',
+    title: 'Need This Guide Again?',
+    description:
+      'This spotlight tour will not open automatically again for your account. Click the ? button anytime to replay it.',
   },
 ]
 
-export default function QuickstartModal({ isOpen, role = 'student', userName, onClose }) {
+export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
   const [stepIndex, setStepIndex] = useState(0)
+  const [targetRect, setTargetRect] = useState(null)
+
   const steps = role === 'admin' ? ADMIN_STEPS : STUDENT_STEPS
   const current = steps[stepIndex] || steps[0]
   const isFirst = stepIndex === 0
@@ -96,61 +97,198 @@ export default function QuickstartModal({ isOpen, role = 'student', userName, on
 
   useEffect(() => {
     if (!isOpen) return undefined
+
     const handleKey = (e) => {
       if (e.key === 'Escape') onClose()
     }
     window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [isOpen, onClose])
+
+    const measure = () => {
+      const el = current.selector ? document.querySelector(current.selector) : null
+      if (!el) {
+        setTargetRect(null)
+        return
+      }
+      const r = el.getBoundingClientRect()
+      if (r.width === 0 || r.height === 0) {
+        setTargetRect(null)
+        return
+      }
+      setTargetRect({
+        top: r.top,
+        left: r.left,
+        right: r.right,
+        bottom: r.bottom,
+        width: r.width,
+        height: r.height,
+      })
+    }
+
+    const el = current.selector ? document.querySelector(current.selector) : null
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' })
+    }
+
+    const rafId = requestAnimationFrame(measure)
+    const timerId = setTimeout(measure, 300)
+    window.addEventListener('resize', measure)
+    window.addEventListener('scroll', measure, true)
+
+    return () => {
+      cancelAnimationFrame(rafId)
+      clearTimeout(timerId)
+      window.removeEventListener('keydown', handleKey)
+      window.removeEventListener('resize', measure)
+      window.removeEventListener('scroll', measure, true)
+    }
+  }, [isOpen, stepIndex, current.selector, onClose])
 
   if (!isOpen) return null
 
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1280
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 800
+  const pad = 8
+
+  const cut = targetRect
+    ? {
+        top: Math.max(0, targetRect.top - pad),
+        left: Math.max(0, targetRect.left - pad),
+        right: Math.min(vw, targetRect.right + pad),
+        bottom: Math.min(vh, targetRect.bottom + pad),
+      }
+    : null
+
+  const cutW = cut ? Math.max(0, cut.right - cut.left) : 0
+  const cutH = cut ? Math.max(0, cut.bottom - cut.top) : 0
+
+  const cardWidth = Math.min(352, vw - 32)
+  let cardStyle = {
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+  }
+  let arrowSide = null
+  let arrowOffset = '50%'
+
+  if (cut && cutW > 0 && cutH > 0) {
+    if (current.placement === 'right' && vw - cut.right >= cardWidth + 28) {
+      const top = Math.min(Math.max(16, cut.top), Math.max(16, vh - 260))
+      cardStyle = { top, left: cut.right + 16 }
+      arrowSide = 'left'
+      arrowOffset = `${Math.min(180, Math.max(24, cut.top + Math.min(cutH, 120) / 2 - top))}px`
+    } else if (current.placement === 'left' && cut.left >= cardWidth + 28) {
+      const top = Math.min(Math.max(16, cut.top), Math.max(16, vh - 260))
+      cardStyle = { top, left: cut.left - cardWidth - 16 }
+      arrowSide = 'right'
+      arrowOffset = `${Math.min(180, Math.max(24, cut.top + Math.min(cutH, 120) / 2 - top))}px`
+    } else {
+      const spaceBelow = vh - cut.bottom
+      const spaceAbove = cut.top
+      const centerX = cut.left + cutW / 2
+      const left = Math.min(Math.max(16, centerX - cardWidth / 2), vw - cardWidth - 16)
+      arrowOffset = `${Math.min(cardWidth - 24, Math.max(24, centerX - left))}px`
+
+      if (current.placement === 'top' || (spaceBelow < 235 && spaceAbove > spaceBelow)) {
+        cardStyle = { bottom: Math.max(16, vh - cut.top + 14), left }
+        arrowSide = 'bottom'
+      } else {
+        cardStyle = { top: Math.min(vh - 235, cut.bottom + 14), left }
+        arrowSide = 'top'
+      }
+    }
+  }
+
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="quickstart-title"
-      onClick={onClose}
-    >
+    <div role="dialog" aria-modal="true" aria-labelledby="quickstart-title">
+      {cut ? (
+        <>
+          <div
+            onClick={onClose}
+            className="fixed top-0 right-0 left-0 z-40 bg-slate-950/55 backdrop-blur-[3px] transition-all duration-300 ease-out"
+            style={{ height: cut.top }}
+          />
+          <div
+            onClick={onClose}
+            className="fixed right-0 bottom-0 left-0 z-40 bg-slate-950/55 backdrop-blur-[3px] transition-all duration-300 ease-out"
+            style={{ top: cut.bottom }}
+          />
+          <div
+            onClick={onClose}
+            className="fixed left-0 z-40 bg-slate-950/55 backdrop-blur-[3px] transition-all duration-300 ease-out"
+            style={{ top: cut.top, width: cut.left, height: cutH }}
+          />
+          <div
+            onClick={onClose}
+            className="fixed right-0 z-40 bg-slate-950/55 backdrop-blur-[3px] transition-all duration-300 ease-out"
+            style={{ top: cut.top, left: cut.right, height: cutH }}
+          />
+          <div
+            className="pointer-events-none fixed z-40 rounded-2xl border-2 border-[#ffd41c] shadow-[0_0_0_4px_rgba(255,212,28,0.28)] transition-all duration-300 ease-out"
+            style={{ top: cut.top, left: cut.left, width: cutW, height: cutH }}
+          />
+        </>
+      ) : (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-slate-950/55 backdrop-blur-[3px]"
+        />
+      )}
+
       <div
-        className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl ring-1 ring-slate-200/80 dark:bg-[#181e38] dark:ring-slate-700"
+        className="fixed z-50 rounded-2xl bg-white shadow-2xl ring-1 ring-slate-200/80 transition-all duration-300 ease-out dark:bg-[#181e38] dark:ring-slate-700"
+        style={{ width: cardWidth, ...cardStyle }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-6 py-5 text-white">
-          <div className="flex items-center justify-between gap-3">
-            <span className="rounded-full bg-[#ffd41c] px-3 py-0.5 text-[11px] font-bold text-[#232b66]">
+        {arrowSide === 'top' && (
+          <div
+            className="absolute -top-2 h-4 w-4 -translate-x-1/2 rotate-45 bg-[#4655b8]"
+            style={{ left: arrowOffset }}
+          />
+        )}
+        {arrowSide === 'bottom' && (
+          <div
+            className="absolute -bottom-2 h-4 w-4 -translate-x-1/2 rotate-45 border-r border-b border-slate-200/80 bg-white dark:border-slate-700 dark:bg-[#181e38]"
+            style={{ left: arrowOffset }}
+          />
+        )}
+        {arrowSide === 'left' && (
+          <div
+            className="absolute -left-2 h-4 w-4 -translate-y-1/2 rotate-45 bg-[#3e4ca9]"
+            style={{ top: arrowOffset }}
+          />
+        )}
+        {arrowSide === 'right' && (
+          <div
+            className="absolute -right-2 h-4 w-4 -translate-y-1/2 rotate-45 bg-[#35408e]"
+            style={{ top: arrowOffset }}
+          />
+        )}
+
+        <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-5 py-4 text-white">
+          <div className="flex items-center justify-between gap-2">
+            <span className="rounded-full bg-[#ffd41c] px-2.5 py-0.5 text-[10px] font-bold text-[#232b66]">
               {current.badge}
             </span>
             <button
               type="button"
               onClick={onClose}
               aria-label="Close quickstart"
-              className="rounded-full px-2 py-0.5 text-base font-bold text-white/80 transition hover:bg-white/15 hover:text-white"
+              className="rounded-full px-1.5 py-0.5 text-sm font-bold text-white/80 transition hover:bg-white/15 hover:text-white"
             >
               ×
             </button>
           </div>
-          <h2 id="quickstart-title" className="mt-3 text-xl font-bold tracking-tight">
-            {isFirst && userName ? `${current.title}, ${userName.split(/\s+/)[0]}!` : current.title}
+          <h2 id="quickstart-title" className="mt-2.5 text-base font-bold tracking-tight">
+            {current.title}
           </h2>
-          <p className="mt-1 text-xs leading-relaxed text-white/85">{current.description}</p>
         </div>
 
-        <div className="space-y-4 p-6">
-          <ul className="space-y-2.5">
-            {current.highlights.map((tip) => (
-              <li
-                key={tip}
-                className="flex items-start gap-2.5 rounded-xl bg-[#f5f6fb] px-3.5 py-2.5 text-xs leading-relaxed font-medium text-slate-700 dark:bg-[#11162b] dark:text-slate-200"
-              >
-                <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-[#ffd41c] ring-2 ring-[#35408e]/30" />
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
+        <div className="space-y-4 p-5">
+          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+            {current.description}
+          </p>
 
-          <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-700/70">
+          <div className="flex items-center justify-between border-t border-slate-100 pt-3.5 dark:border-slate-700/70">
             <div className="flex items-center gap-1.5" aria-label="Tutorial progress">
               {steps.map((s, idx) => (
                 <button
@@ -160,7 +298,7 @@ export default function QuickstartModal({ isOpen, role = 'student', userName, on
                   aria-label={`Go to step ${idx + 1}`}
                   className={`h-2 rounded-full transition-all ${
                     idx === stepIndex
-                      ? 'w-6 bg-[#35408e] dark:bg-[#ffd41c]'
+                      ? 'w-5 bg-[#35408e] dark:bg-[#ffd41c]'
                       : 'w-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700'
                   }`}
                 />
@@ -172,7 +310,7 @@ export default function QuickstartModal({ isOpen, role = 'student', userName, on
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10"
+                  className="rounded-full px-2.5 py-1 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-white/10"
                 >
                   Skip
                 </button>
@@ -181,7 +319,7 @@ export default function QuickstartModal({ isOpen, role = 'student', userName, on
                 <button
                   type="button"
                   onClick={() => setStepIndex((i) => Math.max(0, i - 1))}
-                  className="rounded-full border border-slate-200 px-4 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-[#35408e] dark:border-slate-700 dark:text-slate-200"
+                  className="rounded-full border border-slate-200 px-3.5 py-1 text-xs font-semibold text-slate-700 transition hover:border-[#35408e] dark:border-slate-700 dark:text-slate-200"
                 >
                   Back
                 </button>
@@ -189,7 +327,7 @@ export default function QuickstartModal({ isOpen, role = 'student', userName, on
               <button
                 type="button"
                 onClick={() => (isLast ? onClose() : setStepIndex((i) => Math.min(steps.length - 1, i + 1)))}
-                className="rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:brightness-110 dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]"
+                className="rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-4 py-1 text-xs font-bold text-white shadow-sm transition hover:brightness-110 dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]"
               >
                 {isLast ? 'Finish' : 'Next'}
               </button>

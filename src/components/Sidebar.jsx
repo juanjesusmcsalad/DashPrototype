@@ -143,7 +143,7 @@ export default function Sidebar({
             )}
           </div>
 
-          <nav className="space-y-1.5" aria-label="Primary Navigation">
+          <nav data-tour="sidebar-nav" className="space-y-1.5" aria-label="Primary Navigation">
             {navItems.map((item) => {
               const isActive = activeTab === item.id
               return (

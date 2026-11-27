@@ -158,7 +158,7 @@ export default function Header({
 
       {/* Centered Global Search */}
       <div className="order-last flex w-full justify-center sm:order-none sm:flex-1">
-        <div className="relative w-full max-w-md">
+        <div data-tour="global-search" className="relative w-full max-w-md">
           <svg
             className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400"
             viewBox="0 0 24 24"
@@ -228,6 +228,7 @@ export default function Header({
       <div className="relative flex items-center gap-2.5 sm:gap-3.5">
         <button
           type="button"
+          data-tour="help-trigger"
           onClick={onOpenTutorial}
           aria-label="Open quickstart tutorial"
           title="Quickstart Guide"

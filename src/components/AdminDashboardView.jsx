@@ -1168,7 +1168,7 @@ export default function AdminDashboardView({
               </div>
             </section>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div data-tour="admin-kpis" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <div className={`${CARD} p-5`}>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Registered Students</p>
                 <p className="mt-1 text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{students.length}</p>
@@ -1210,7 +1210,7 @@ export default function AdminDashboardView({
                 )}
               </section>
 
-              <section className={`${CARD} space-y-3 p-5 lg:col-span-4`}>
+              <section data-tour="admin-sections" className={`${CARD} space-y-3 p-5 lg:col-span-4`}>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Sections Directory</h2>
                 {sectionCounts.map((sec) => (
                   <button
@@ -1369,7 +1369,7 @@ export default function AdminDashboardView({
             </button>
 
             <div className="order-last flex w-full justify-center sm:order-none sm:flex-1">
-              <div className="relative w-full max-w-md">
+              <div data-tour="global-search" className="relative w-full max-w-md">
                 <svg
                   className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400"
                   viewBox="0 0 24 24"
@@ -1437,7 +1437,11 @@ export default function AdminDashboardView({
             <div className="flex items-center gap-2.5 sm:gap-3">
               <button
                 type="button"
-                onClick={onOpenTutorial}
+                data-tour="help-trigger"
+                onClick={() => {
+                  setActiveTab('overview')
+                  onOpenTutorial()
+                }}
                 aria-label="Open quickstart tutorial"
                 title="Quickstart Guide"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-sm font-bold text-[#35408e] shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-[#eef0fb] dark:bg-[#1e2647] dark:text-[#ffd41c] dark:ring-slate-700 dark:hover:bg-[#27315a]"

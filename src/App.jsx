@@ -250,7 +250,10 @@ export default function App() {
             onOpenMobileMenu={() => setMobileMenuOpen(true)}
             announcements={data.announcements}
             onNavigate={setActiveTab}
-            onOpenTutorial={() => setManualTutorialOpen(true)}
+            onOpenTutorial={() => {
+              setActiveTab('dashboard')
+              setManualTutorialOpen(true)
+            }}
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
           />
