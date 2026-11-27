@@ -31,7 +31,7 @@ const STUDENT_STEPS = [
     badge: 'Step 4 of 5 • Search',
     title: 'Quick Search',
     description:
-      'Search any task, announcement, subject, schedule, or page here click a result or press Enter to jump straight to it.',
+      'Search any task, announcement, subject, schedule, or page here — click a result or press Enter to jump straight to it.',
   },
   {
     selector: '[data-tour="help-trigger"]',
@@ -156,21 +156,24 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
 
   const vw = typeof window !== 'undefined' ? window.innerWidth : 1280
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800
-  const pad = 8
+  const isMobile = vw < 640
+  const pad = isMobile ? 6 : 8
 
   const cut = targetRect
     ? {
-        top: Math.max(0, targetRect.top - pad),
-        left: Math.max(0, targetRect.left - pad),
-        right: Math.min(vw, targetRect.right + pad),
-        bottom: Math.min(vh, targetRect.bottom + pad),
+        top: Math.max(4, targetRect.top - pad),
+        left: Math.max(4, targetRect.left - pad),
+        right: Math.min(vw - 4, targetRect.right + pad),
+        bottom: Math.min(vh - 4, targetRect.bottom + pad),
       }
     : null
 
   const cutW = cut ? Math.max(0, cut.right - cut.left) : 0
   const cutH = cut ? Math.max(0, cut.bottom - cut.top) : 0
 
-  const cardWidth = Math.min(352, vw - 32)
+  const edgePad = isMobile ? 12 : 16
+  const cardWidth = Math.min(352, vw - edgePad * 2)
+  const neededHeight = isMobile ? 200 : 235
   let cardStyle = {
     top: '50%',
     left: '50%',
@@ -180,12 +183,12 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
   let arrowOffset = '50%'
 
   if (cut && cutW > 0 && cutH > 0) {
-    if (current.placement === 'right' && vw - cut.right >= cardWidth + 28) {
+    if (!isMobile && current.placement === 'right' && vw - cut.right >= cardWidth + 28) {
       const top = Math.min(Math.max(16, cut.top), Math.max(16, vh - 260))
       cardStyle = { top, left: cut.right + 16 }
       arrowSide = 'left'
       arrowOffset = `${Math.min(180, Math.max(24, cut.top + Math.min(cutH, 120) / 2 - top))}px`
-    } else if (current.placement === 'left' && cut.left >= cardWidth + 28) {
+    } else if (!isMobile && current.placement === 'left' && cut.left >= cardWidth + 28) {
       const top = Math.min(Math.max(16, cut.top), Math.max(16, vh - 260))
       cardStyle = { top, left: cut.left - cardWidth - 16 }
       arrowSide = 'right'
@@ -194,15 +197,29 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
       const spaceBelow = vh - cut.bottom
       const spaceAbove = cut.top
       const centerX = cut.left + cutW / 2
-      const left = Math.min(Math.max(16, centerX - cardWidth / 2), vw - cardWidth - 16)
+      const left = Math.min(
+        Math.max(edgePad, centerX - cardWidth / 2),
+        vw - cardWidth - edgePad
+      )
       arrowOffset = `${Math.min(cardWidth - 24, Math.max(24, centerX - left))}px`
 
-      if (current.placement === 'top' || (spaceBelow < 235 && spaceAbove > spaceBelow)) {
-        cardStyle = { bottom: Math.max(16, vh - cut.top + 14), left }
+      const preferTop = current.placement === 'top'
+      if (preferTop && spaceAbove >= neededHeight) {
+        cardStyle = { bottom: Math.max(edgePad, vh - cut.top + 12), left }
         arrowSide = 'bottom'
-      } else {
-        cardStyle = { top: Math.min(vh - 235, cut.bottom + 14), left }
+      } else if (!preferTop && spaceBelow >= neededHeight) {
+        cardStyle = { top: Math.max(edgePad, cut.bottom + 12), left }
         arrowSide = 'top'
+      } else if (spaceAbove >= neededHeight && spaceAbove >= spaceBelow) {
+        cardStyle = { bottom: Math.max(edgePad, vh - cut.top + 12), left }
+        arrowSide = 'bottom'
+      } else if (spaceBelow >= neededHeight) {
+        cardStyle = { top: Math.max(edgePad, cut.bottom + 12), left }
+        arrowSide = 'top'
+      } else if (spaceAbove >= spaceBelow) {
+        cardStyle = { top: edgePad, left }
+      } else {
+        cardStyle = { bottom: edgePad, left }
       }
     }
   }
@@ -273,7 +290,7 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
           />
         )}
 
-        <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-5 py-4 text-white">
+        <div className="relative overflow-hidden rounded-t-2xl bg-gradient-to-br from-[#4f5ec4] via-[#35408e] to-[#171d4b] px-4 py-3 text-white sm:px-5 sm:py-4">
           <div className="flex items-center justify-between gap-2">
             <span className="rounded-full bg-[#ffd41c] px-2.5 py-0.5 text-[10px] font-bold text-[#232b66]">
               {current.badge}
@@ -287,12 +304,12 @@ export default function QuickstartModal({ isOpen, role = 'student', onClose }) {
               ×
             </button>
           </div>
-          <h2 id="quickstart-title" className="mt-2.5 text-base font-bold tracking-tight">
+          <h2 id="quickstart-title" className="mt-2 text-sm font-bold tracking-tight sm:mt-2.5 sm:text-base">
             {current.title}
           </h2>
         </div>
 
-        <div className="space-y-4 p-5">
+        <div className="space-y-3 p-4 sm:space-y-4 sm:p-5">
           <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
             {current.description}
           </p>

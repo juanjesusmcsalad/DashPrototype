@@ -97,7 +97,7 @@ const MOBILE_SHORT_LABELS = {
   dashboard: 'Home',
   'academic-progress': 'Grades',
   tasks: 'Tasks',
-  announcements: 'Notices',
+  announcements: 'Announcements',
   overview: 'Overview',
   students: 'Students',
   schedule: 'Schedule',
@@ -211,7 +211,7 @@ export default function Sidebar({
               key={item.id}
               type="button"
               onClick={() => handleSelect(item.id)}
-              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1.5 py-1.5 text-[10px] transition ${
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[9.5px] tracking-tight transition sm:text-[10px] ${
                 isActive
                   ? 'bg-[#ffd41c] font-bold text-[#232b66] shadow-sm'
                   : 'font-medium text-white/85 hover:bg-white/10'
