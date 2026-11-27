@@ -231,8 +231,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f6fb] p-3 transition-colors sm:p-5 lg:h-screen lg:overflow-hidden dark:bg-[#0f1326]">
-      <div className="mx-auto flex h-full max-w-[1380px] gap-6">
+    <div className="min-h-screen bg-[#f5f6fb] p-3 transition-colors sm:p-4 lg:h-screen lg:overflow-hidden dark:bg-[#0f1326]">
+      <div className="mx-auto flex h-full max-w-[1380px] gap-5">
         <Sidebar
           activeTab={activeTab}
           onSelectTab={setActiveTab}
@@ -242,7 +242,13 @@ export default function App() {
           onCloseMobile={() => setMobileMenuOpen(false)}
         />
 
-        <main className="flex min-w-0 flex-1 flex-col gap-5 lg:overflow-y-auto lg:pr-1">
+        <main
+          className={`flex min-w-0 flex-1 flex-col gap-3.5 sm:gap-4 ${
+            activeTab === 'dashboard'
+              ? 'lg:overflow-y-auto xl:overflow-hidden'
+              : 'lg:overflow-y-auto lg:pr-1'
+          }`}
+        >
           <Header
             student={data.student}
             data={data}
@@ -260,12 +266,18 @@ export default function App() {
           />
 
           {syncStatus.error && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-medium text-rose-700 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
               Sync warning: {syncStatus.error}
             </div>
           )}
 
-          <div className="pb-24 lg:pb-4">{renderContent()}</div>
+          <div
+            className={`pb-24 lg:pb-0 ${
+              activeTab === 'dashboard' ? 'xl:flex xl:min-h-0 xl:flex-1 xl:flex-col' : ''
+            }`}
+          >
+            {renderContent()}
+          </div>
         </main>
       </div>
 

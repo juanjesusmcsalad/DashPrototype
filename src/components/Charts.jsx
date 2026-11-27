@@ -41,7 +41,7 @@ function useIsDarkTheme() {
   return isDark
 }
 
-export function SubjectBarChart({ subjects }) {
+export function SubjectBarChart({ subjects, className = 'h-64 w-full' }) {
   const isDark = useIsDarkTheme()
   const tickColor = isDark ? '#cbd5e1' : '#64748b'
   const gridColor = isDark ? 'rgba(148, 163, 184, 0.14)' : 'rgba(148, 163, 184, 0.18)'
@@ -82,7 +82,7 @@ export function SubjectBarChart({ subjects }) {
   }
 
   return (
-    <div className="h-64 w-full">
+    <div className={className}>
       <Bar data={data} options={options} />
     </div>
   )

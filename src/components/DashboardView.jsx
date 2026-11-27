@@ -7,16 +7,16 @@ function StatCard({ value, label, highlighted = false, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group flex flex-col items-center justify-center rounded-2xl px-2.5 py-4 text-center transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg sm:px-4 sm:py-7 ${
+      className={`group flex flex-col items-center justify-center rounded-2xl px-2.5 py-3 text-center transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg sm:px-4 sm:py-4 ${
         highlighted
           ? 'border-2 border-[#35408e] bg-white shadow-[0_10px_28px_rgba(53,64,142,0.12)] dark:border-[#ffd41c] dark:bg-[#181e38]'
-          : 'border border-slate-100 bg-gradient-to-br from-white to-[#f6f8ff] shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-slate-700/70 dark:from-[#1b2240] dark:to-[#131830]'
+          : 'border border-slate-200/80 bg-gradient-to-br from-white to-[#f6f8ff] shadow-[0_8px_24px_rgba(15,23,42,0.05)] hover:border-[#ffd41c] dark:border-white/[0.08] dark:from-[#1b2240] dark:to-[#131830] dark:hover:border-[#ffd41c]'
       }`}
     >
-      <span className="text-lg font-bold tracking-tight text-slate-900 transition-all duration-200 ease-out group-hover:scale-110 group-hover:text-[#35408e] sm:text-2xl dark:text-white dark:group-hover:text-[#ffd41c]">
+      <span className="text-lg font-bold tracking-tight text-slate-900 transition-all duration-200 ease-out group-hover:scale-110 group-hover:text-[#35408e] sm:text-xl dark:text-white dark:group-hover:text-[#ffd41c]">
         {value}
       </span>
-      <span className="mt-1 text-[11px] font-medium leading-tight text-slate-500 transition-colors duration-200 group-hover:text-slate-700 sm:mt-1.5 sm:text-xs dark:text-slate-400 dark:group-hover:text-slate-200">
+      <span className="mt-1 text-[11px] font-medium leading-tight text-slate-500 transition-colors duration-200 group-hover:text-slate-700 sm:text-xs dark:text-slate-400 dark:group-hover:text-slate-200">
         {label}
       </span>
     </button>
@@ -44,16 +44,18 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
   )
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3.5 xl:h-full xl:min-h-0">
       <WelcomeBanner firstName={student.firstName} displayDate={student.displayDate} />
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+      <div className="grid grid-cols-1 gap-4 xl:min-h-0 xl:flex-1 xl:grid-cols-12">
         {/* Left Main Area */}
-        <div className="space-y-6 xl:col-span-8">
+        <div className="flex flex-col gap-3.5 xl:col-span-8 xl:min-h-0">
           {/* Academic Overview */}
-          <section data-tour="student-overview">
-            <h2 className="mb-3 text-base font-bold text-slate-900 dark:text-slate-100">Academic Overview</h2>
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
+          <section data-tour="student-overview" className="shrink-0">
+            <h2 className="mb-2 text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+              Academic Overview
+            </h2>
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
               <StatCard
                 value={averageGrade}
                 label="Current Grade Average"
@@ -74,9 +76,11 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
           </section>
 
           {/* Enrolled Courses */}
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Enrolled Courses</h2>
+          <section className="shrink-0">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+                Enrolled Courses
+              </h2>
               <button
                 type="button"
                 onClick={() => onNavigate('academic-progress')}
@@ -86,9 +90,9 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
               {/* Academic Progress Card */}
-              <div className="group flex items-center justify-between rounded-2xl border-2 border-[#35408e]/85 bg-gradient-to-br from-[#f2f4ff] via-[#e7ebfd] to-[#d6ddfb] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-[#4c59b5] dark:from-[#26315e] dark:via-[#1e2647] dark:to-[#151b36]">
+              <div className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-gradient-to-br from-[#f2f4ff] via-[#e7ebfd] to-[#d6ddfb] p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffd41c] hover:shadow-md dark:border-white/[0.08] dark:from-[#26315e] dark:via-[#1e2647] dark:to-[#151b36] dark:hover:border-[#ffd41c]">
                 <div>
                   <h3 className="origin-left text-sm font-bold leading-snug text-[#35408e] transition-transform duration-200 ease-out group-hover:scale-105 dark:text-white">
                     Academic
@@ -98,7 +102,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                   <button
                     type="button"
                     onClick={() => onNavigate('academic-progress')}
-                    className="mt-4 rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-6 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-[#35408e] hover:to-[#151b45] hover:shadow"
+                    className="mt-3 rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-[#35408e] hover:to-[#151b45] hover:shadow"
                   >
                     View
                   </button>
@@ -107,20 +111,22 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 <img
                   src="/models/laptop-card.png"
                   alt=""
-                  className="h-16 w-16 shrink-0 object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
+                  className="h-14 w-14 shrink-0 object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
                 />
               </div>
 
               {/* Engagement Analytics Card */}
-              <div className="group flex items-center justify-between rounded-2xl border border-[#ffd41c] bg-[#fff9dc] p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md dark:border-[#ffd41c]/60 dark:bg-[#272318]">
+              <div className="group flex items-center justify-between rounded-2xl border border-slate-200/80 bg-gradient-to-br from-[#f2f4ff] via-[#e7ebfd] to-[#d6ddfb] p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-[#ffd41c] hover:shadow-md dark:border-white/[0.08] dark:from-[#26315e] dark:via-[#1e2647] dark:to-[#151b36] dark:hover:border-[#ffd41c]">
                 <div>
-                  <h3 className="origin-left text-sm font-bold leading-snug text-[#35408e] transition-transform duration-200 ease-out group-hover:scale-105 dark:text-[#ffd41c]">
-                    Engagement Analytics
+                  <h3 className="origin-left text-sm font-bold leading-snug text-[#35408e] transition-transform duration-200 ease-out group-hover:scale-105 dark:text-white">
+                    Engagement
+                    <br />
+                    Analytics
                   </h3>
                   <button
                     type="button"
                     onClick={() => onNavigate('engagement-analytics')}
-                    className="mt-5 rounded-full bg-[#ffd41c] px-6 py-1.5 text-xs font-bold text-[#232b66] shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:brightness-95"
+                    className="mt-3 rounded-full bg-gradient-to-r from-[#424fa6] to-[#20275e] px-5 py-1.5 text-xs font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:from-[#35408e] hover:to-[#151b45] hover:shadow"
                   >
                     View
                   </button>
@@ -129,18 +135,23 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 <img
                   src="/models/analytics-card.png"
                   alt=""
-                  className="h-16 w-16 shrink-0 object-contain drop-shadow-sm"
+                  className="h-14 w-14 shrink-0 object-contain drop-shadow-sm transition-transform duration-200 group-hover:scale-105"
                 />
               </div>
             </div>
           </section>
 
-          {/* Compact Chart.js Preview on Dashboard */}
-          <section data-tour="student-charts" className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-slate-700/70 dark:bg-[#181e38]">
-            <div className="mb-3 flex items-center justify-between">
+          {/* Compact Chart.js Preview fitting remaining 100vh space on desktop */}
+          <section
+            data-tour="student-charts"
+            className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] xl:min-h-0 xl:flex-1 dark:border-white/[0.08] dark:bg-[#181e38]"
+          >
+            <div className="mb-2 flex shrink-0 items-center justify-between">
               <div>
                 <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Grades by Subject</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Live breakdown across your 5 enrolled subjects</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Live breakdown across your 5 enrolled subjects
+                </p>
               </div>
               <button
                 type="button"
@@ -150,16 +161,21 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                 Full insights
               </button>
             </div>
-            <SubjectBarChart subjects={subjects} />
+            <SubjectBarChart
+              subjects={subjects}
+              className="h-52 w-full xl:h-full xl:min-h-[140px] xl:flex-1"
+            />
           </section>
         </div>
 
         {/* Right Column: Subject Performance & Recommendations */}
-        <aside className="space-y-6 xl:col-span-4">
+        <aside className="flex flex-col gap-3.5 xl:col-span-4 xl:min-h-0">
           {/* Subject Performance */}
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Subject Performance</h2>
+          <section className="shrink-0">
+            <div className="mb-2 flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+                Subject Performance
+              </h2>
               <button
                 type="button"
                 onClick={() => onNavigate('academic-progress')}
@@ -169,7 +185,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               </button>
             </div>
 
-            <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-slate-700/70 dark:bg-[#181e38]">
+            <div className="space-y-2.5 rounded-2xl border border-slate-200/80 bg-white p-3.5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] dark:border-white/[0.08] dark:bg-[#181e38]">
               {filteredSubjects.length === 0 ? (
                 <p className="text-xs text-slate-500 dark:text-slate-400">No subjects match "{searchQuery}".</p>
               ) : (
@@ -179,7 +195,7 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
                       <span>{subject.shortName}</span>
                       <span className="text-[#35408e] dark:text-[#ffd41c]">{subject.grade}%</span>
                     </div>
-                    <div className="h-3 w-full overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80">
+                    <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200/80 dark:bg-slate-700/80">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-[#5565d0] via-[#35408e] to-[#1b225c] transition-all duration-300 dark:from-[#ffd41c] dark:to-[#eab308]"
                         style={{ width: `${Math.min(100, Math.max(0, Number(subject.grade || 0)))}%` }}
@@ -192,9 +208,11 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
           </section>
 
           {/* Recommendations */}
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">Recommendations</h2>
+          <section className="flex flex-col xl:min-h-0 xl:flex-1">
+            <div className="mb-2 flex shrink-0 items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+                Recommendations
+              </h2>
               <button
                 type="button"
                 onClick={() => onNavigate('performance-insights')}
@@ -204,9 +222,9 @@ export default function DashboardView({ data, searchQuery, onNavigate }) {
               </button>
             </div>
 
-            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_10px_28px_rgba(15,23,42,0.06)] dark:border-slate-700/70 dark:bg-[#181e38]">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_10px_28px_rgba(15,23,42,0.06)] xl:min-h-0 xl:flex-1 xl:overflow-y-auto dark:border-white/[0.08] dark:bg-[#181e38]">
               <h3 className="text-xs font-bold text-slate-900 dark:text-slate-100">Personalized Recommendations</h3>
-              <ul className="mt-4 space-y-3.5">
+              <ul className="mt-3 space-y-2.5">
                 {filteredRecommendations.length === 0 ? (
                   <li className="text-xs text-slate-500 dark:text-slate-400">
                     {query ? 'No matching recommendations.' : 'No recommendations yet.'}
