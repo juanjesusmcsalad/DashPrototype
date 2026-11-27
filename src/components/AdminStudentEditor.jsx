@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { ALLOWED_SECTIONS } from '../services/authService'
-import { downloadStudentCsv } from '../utils/academicHelpers'
+import { downloadStudentCsv, formatTaskDueDate } from '../utils/academicHelpers'
 
 export default function AdminStudentEditor({
   studentRecord,
@@ -54,7 +54,7 @@ export default function AdminStudentEditor({
   const [taskSubject, setTaskSubject] = useState(
     () => studentRecord?.subjects?.[0]?.shortName || 'Research'
   )
-  const [taskDueDate, setTaskDueDate] = useState('Dec 12, 2026')
+  const [taskDueDate, setTaskDueDate] = useState('')
 
   // Recommendation state
   const [newRec, setNewRec] = useState('')
@@ -157,10 +157,11 @@ export default function AdminStudentEditor({
       id: `t-${Date.now()}`,
       title: taskTitle.trim(),
       subject: taskSubject,
-      dueDate: taskDueDate.trim() || 'Dec 12, 2026',
+      dueDate: formatTaskDueDate(taskDueDate),
       completed: false,
     })
     setTaskTitle('')
+    setTaskDueDate('')
   }
 
   const handleAddRecSubmit = async (e) => {
@@ -449,11 +450,11 @@ export default function AdminStudentEditor({
               ))}
             </select>
             <input
-              type="text"
+              type="date"
+              aria-label="Student task due date"
               value={taskDueDate}
               onChange={(e) => setTaskDueDate(e.target.value)}
-              placeholder="Due date"
-              className="rounded-xl border border-slate-200 px-2.5 py-2 text-xs outline-none focus:border-[#35408e] sm:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+              className="rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-xs outline-none focus:border-[#35408e] sm:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
             />
             <button
               type="submit"
@@ -490,7 +491,8 @@ export default function AdminStudentEditor({
                         {task.title}
                       </p>
                       <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        {task.subject} • Due {task.dueDate}
+                        {task.subject} •{' '}
+                        {!task.dueDate || task.dueDate === 'No due date' ? 'No due date' : `Due ${task.dueDate}`}
                       </p>
                     </div>
                   </label>

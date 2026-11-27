@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import {
   downloadStudentCsv,
+  formatTaskDueDate,
   getMergedRecommendations,
   resolveGradeHistory,
 } from '../utils/academicHelpers'
@@ -115,6 +116,7 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
   const [filter, setFilter] = useState('all')
   const [title, setTitle] = useState('')
   const [subject, setSubject] = useState(data.subjects[0]?.shortName || 'Research')
+  const [dueDate, setDueDate] = useState('')
 
   const query = searchQuery.trim().toLowerCase()
   const filteredTasks = data.tasks.filter((task) => {
@@ -135,10 +137,11 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
       id: `t-${Date.now()}`,
       title: title.trim(),
       subject,
-      dueDate: 'Dec 10, 2026',
+      dueDate: formatTaskDueDate(dueDate),
       completed: false,
     })
     setTitle('')
+    setDueDate('')
   }
 
   return (
@@ -188,6 +191,13 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
             </option>
           ))}
         </select>
+        <input
+          type="date"
+          aria-label="Task due date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-[#35408e] dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+        />
         <button
           type="submit"
           className="rounded-xl bg-[#35408e] px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#262f6d] dark:bg-[#ffd41c] dark:text-[#232b66]"
@@ -225,7 +235,8 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
                     {task.title}
                   </p>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {task.subject} • Due {task.dueDate}
+                    {task.subject} •{' '}
+                    {!task.dueDate || task.dueDate === 'No due date' ? 'No due date' : `Due ${task.dueDate}`}
                   </p>
                 </div>
               </div>

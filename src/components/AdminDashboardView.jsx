@@ -14,7 +14,7 @@ import {
   subscribeToSchoolConfig,
   updateStudentFields,
 } from '../services/studentService'
-import { resolveGradeHistory } from '../utils/academicHelpers'
+import { formatTaskDueDate, resolveGradeHistory } from '../utils/academicHelpers'
 import AdminStudentEditor from './AdminStudentEditor'
 import { GradeTrendLineChart, SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
@@ -54,7 +54,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
   const [copiedId, setCopiedId] = useState('')
   const [bulkTaskTitle, setBulkTaskTitle] = useState('')
   const [bulkTaskSubject, setBulkTaskSubject] = useState(ALLOWED_SUBJECTS[1].shortName)
-  const [bulkTaskDueDate, setBulkTaskDueDate] = useState('Dec 12, 2026')
+  const [bulkTaskDueDate, setBulkTaskDueDate] = useState('')
   const [bulkTaskTarget, setBulkTaskTarget] = useState('ALL')
   const [schedSection, setSchedSection] = useState(ALLOWED_SECTIONS[0])
   const [schedDay, setSchedDay] = useState('Monday')
@@ -262,7 +262,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 id: `t-bulk-${baseId}-${idx}`,
                 title: titleText,
                 subject: bulkTaskSubject,
-                dueDate: bulkTaskDueDate.trim() || 'Dec 12, 2026',
+                dueDate: formatTaskDueDate(bulkTaskDueDate),
                 completed: false,
               },
               ...(entry.tasks || []),
@@ -271,6 +271,7 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         )
       )
       setBulkTaskTitle('')
+      setBulkTaskDueDate('')
     }, `Assigned "${titleText}" to ${targets.length} student${targets.length === 1 ? '' : 's'} (${bulkTaskTarget === 'ALL' ? 'All Sections' : bulkTaskTarget}).`)
   }
 
@@ -494,11 +495,11 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                 ))}
               </select>
               <input
-                type="text"
+                type="date"
+                aria-label="Bulk task due date"
                 value={bulkTaskDueDate}
                 onChange={(e) => setBulkTaskDueDate(e.target.value)}
-                placeholder="Due date"
-                className="rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
+                className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-[#35408e] md:col-span-2 dark:border-slate-700 dark:bg-[#11162b] dark:text-slate-100"
               />
               <select
                 value={bulkTaskTarget}

@@ -41,6 +41,20 @@ export function downloadStudentCsv(data) {
   URL.revokeObjectURL(url)
 }
 
+export function formatTaskDueDate(rawValue) {
+  const clean = String(rawValue || '').trim()
+  if (!clean) return 'No due date'
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    const [year, month, day] = clean.split('-').map(Number)
+    return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    })
+  }
+  return clean
+}
+
 export function computeSubjectAverage(subjects = []) {
   if (!Array.isArray(subjects) || subjects.length === 0) return 0
   const total = subjects.reduce((sum, s) => sum + Number(s.grade || 0), 0)
@@ -129,9 +143,11 @@ export function generateAutoRecommendations(data) {
 
   if (pendingTasks.length > 0) {
     const first = pendingTasks[0]
+    const dueLabel =
+      first.dueDate && first.dueDate !== 'No due date' ? `, due ${first.dueDate}` : ''
     auto.push({
       id: 'auto-tasks',
-      text: `You have ${pendingTasks.length} pending task${pendingTasks.length === 1 ? '' : 's'} — start with "${first.title}" (${first.subject}, due ${first.dueDate}).`,
+      text: `You have ${pendingTasks.length} pending task${pendingTasks.length === 1 ? '' : 's'} — start with "${first.title}" (${first.subject}${dueLabel}).`,
       category: 'Tasks',
       priority: pendingTasks.length >= 3 ? 'High' : 'Medium',
       isAuto: true,
