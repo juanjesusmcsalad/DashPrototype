@@ -9,10 +9,11 @@ import {
   signOut,
   updateProfile,
 } from 'firebase/auth'
-import { collection, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc } from 'firebase/firestore'
 import { auth, db, isFirebaseConfigured } from '../firebase'
 import {
   buildInitialStudentRecord,
+  deleteStudentRecord,
   ensureDemoStudentRecord,
   fetchRemoteSchoolConfig,
 } from './studentService'
@@ -322,6 +323,14 @@ export async function signInWithRole({
     staySignedIn ? browserLocalPersistence : browserSessionPersistence
   )
   const cred = await signInWithEmailAndPassword(auth, cleanEmail, password)
+  const isAllowlistedAdmin = ADMIN_EMAILS.includes(cleanEmail)
+  if (expectedRole === 'student' && !isAllowlistedAdmin && db) {
+    const existingProfile = await getDoc(doc(db, 'users', cred.user.uid))
+    if (!existingProfile.exists()) {
+      await signOut(auth)
+      throw new Error('This account has been removed by an administrator.')
+    }
+  }
   const profile = await resolveFirebaseUserProfile(cred.user)
 
   if (expectedRole === 'admin' && profile.role !== 'admin') {
@@ -370,4 +379,21 @@ export async function sendPasswordResetForEmail(email) {
     throw new Error('Password reset emails require Firebase Auth mode.')
   }
   await sendPasswordResetEmail(auth, cleanEmail)
+}
+
+export async function deleteUserAccount(uid) {
+  if (!uid) throw new Error('Account ID is missing.')
+
+  if (!isFirebaseConfigured || !db) {
+    const users = readDemoUsers()
+    const nextUsers = users.filter((u) => u.uid !== uid)
+    writeDemoUsers(nextUsers)
+    await deleteStudentRecord(uid)
+    return
+  }
+
+  await Promise.all([
+    deleteDoc(doc(db, 'users', uid)),
+    deleteStudentRecord(uid),
+  ])
 }

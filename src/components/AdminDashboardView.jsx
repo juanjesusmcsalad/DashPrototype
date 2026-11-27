@@ -3,6 +3,7 @@ import { ALLOWED_SUBJECTS } from '../data/defaultStudentData'
 import { isFirebaseConfigured } from '../firebase'
 import {
   ALLOWED_SECTIONS,
+  deleteUserAccount,
   sendPasswordResetForEmail,
   subscribeToAllUserAccounts,
   updateUserMetadata,
@@ -470,6 +471,18 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
     await runAdminAction(
       () => sendPasswordResetForEmail(acc.email),
       `Password reset email sent to ${acc.email}.`
+    )
+  }
+
+  const handleDeleteAccount = async (acc) => {
+    if (!acc || acc.uid === currentUser.uid) return
+    const confirmed = window.confirm(
+      `Delete account for ${acc.name} (${acc.email})? This removes their profile and student records from the portal.`
+    )
+    if (!confirmed) return
+    await runAdminAction(
+      () => deleteUserAccount(acc.uid),
+      `Deleted account for ${acc.name}.`
     )
   }
 
@@ -980,6 +993,15 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
                             >
                               {copiedId === acc.uid ? 'Copied!' : 'Copy'}
                             </button>
+                            {acc.uid !== currentUser.uid && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteAccount(acc)}
+                                className="rounded-lg border border-rose-200 px-2.5 py-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 dark:border-rose-800 dark:text-rose-300 dark:hover:bg-rose-950/50"
+                              >
+                                Delete
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>

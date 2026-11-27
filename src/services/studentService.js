@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, onSnapshot, setDoc, updateDoc } from 'firebase/firestore'
 import { DEFAULT_STUDENT_DATA } from '../data/defaultStudentData'
 import { db, isFirebaseConfigured } from '../firebase'
 
@@ -356,4 +356,19 @@ export async function seedDemoStudentData(studentId, profile) {
 
   const docRef = doc(db, 'students', targetId)
   await setDoc(docRef, record)
+}
+
+export async function deleteStudentRecord(studentId) {
+  if (!studentId) return
+
+  if (!isFirebaseConfigured || !db) {
+    const map = readDemoStudentsMap()
+    if (map[studentId]) {
+      delete map[studentId]
+      writeDemoStudentsMap(map)
+    }
+    return
+  }
+
+  await deleteDoc(doc(db, 'students', studentId))
 }
