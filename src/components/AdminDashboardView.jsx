@@ -26,7 +26,6 @@ const ADMIN_NAV_ITEMS = [
   { id: 'students', label: 'Manage Students', icon: 'users' },
   { id: 'schedule', label: 'Class Schedule', icon: 'calendar' },
   { id: 'accounts', label: 'User Credentials', icon: 'key' },
-  { id: 'analytics', label: 'Section Analytics', icon: 'chart' },
   { id: 'announcements', label: 'Announcements', icon: 'megaphone' },
   { id: 'admin-profile', label: 'Admin Profile', icon: 'user' },
 ]
@@ -141,20 +140,10 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
         )
       : 0
 
-  const sectionStats = ALLOWED_SECTIONS.map((sec) => {
-    const group = students.filter((s) => (s.student?.section || '12SHS2510') === sec)
-    const avg =
-      group.length > 0
-        ? (group.reduce((sum, s) => sum + computeAverage(s.subjects), 0) / group.length).toFixed(2)
-        : '0.00'
-    const att =
-      group.length > 0
-        ? Math.round(
-            group.reduce((sum, s) => sum + Number(s.student?.attendanceRate || 0), 0) / group.length
-          )
-        : 0
-    return { section: sec, count: group.length, avg, attendance: att, students: group }
-  })
+  const sectionCounts = ALLOWED_SECTIONS.map((sec) => ({
+    section: sec,
+    count: students.filter((s) => (s.student?.section || '12SHS2510') === sec).length,
+  }))
 
   const runAdminAction = async (fn, successMsg) => {
     try {
@@ -1013,50 +1002,6 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
           </div>
         )
 
-      case 'analytics':
-        return (
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white">Section Analytics</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Section summaries and individual student performance for 12SHS2510 and 12SHS2509.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              {sectionStats.map((stat) => (
-                <div key={stat.section} className={`${CARD} p-5`}>
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-[#35408e] px-3 py-1 text-xs font-bold text-white">
-                      {stat.section}
-                    </span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                      {stat.count} student{stat.count === 1 ? '' : 's'}
-                    </span>
-                  </div>
-                  <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Grade Average</p>
-                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{stat.avg}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">Attendance</p>
-                      <p className="text-2xl font-bold text-[#35408e] dark:text-[#ffd41c]">{stat.attendance}%</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className={`${CARD} p-5`}>
-              <h2 className="mb-3 text-sm font-bold text-slate-900 dark:text-slate-100">
-                Selected Student Subjects ({selectedStudent?.student?.name || '—'})
-              </h2>
-              <SubjectBarChart subjects={selectedStudent?.subjects || []} />
-            </div>
-          </div>
-        )
-
       case 'announcements': {
         const allAnnouncements = schoolConfig.announcements || []
 
@@ -1176,22 +1121,6 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </div>
             </div>
 
-            <div className="rounded-2xl border border-[#35408e]/25 bg-[#eef0fb]/70 p-5 dark:border-slate-700 dark:bg-[#181e38]">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
-                Administrator Security Checklist
-              </h2>
-              <ul className="mt-3 space-y-2 text-xs text-slate-600 dark:text-slate-300">
-                <li>
-                  1. Deploy <code>firestore.rules</code> in Firebase Console → Firestore Database → Rules so students can never set <code>role: &quot;admin&quot;</code> or edit official grades.
-                </li>
-                <li>
-                  2. Create your real Admin user in Firebase Console → Authentication, then set their document in <code>users/&#123;uid&#125;</code> with <code>role: &quot;admin&quot;</code>.
-                </li>
-                <li>
-                  3. Demo admin credentials are automatically disabled in production builds (<code>vite build</code>).
-                </li>
-              </ul>
-            </div>
           </div>
         )
 
@@ -1275,20 +1204,22 @@ export default function AdminDashboardView({ currentUser, onLogout, darkMode, on
               </section>
 
               <section className={`${CARD} space-y-3 p-5 lg:col-span-4`}>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Sections Summary</h2>
-                {sectionStats.map((stat) => (
-                  <div key={stat.section} className="rounded-xl bg-[#f5f6fb] p-4 dark:bg-[#11162b]">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">{stat.section}</span>
-                      <span className="rounded-full bg-[#ffd41c] px-2.5 py-0.5 text-[11px] font-bold text-[#232b66]">
-                        {stat.count} students
-                      </span>
-                    </div>
-                    <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-                      Avg Grade: <strong className="text-slate-900 dark:text-white">{stat.avg}</strong> • Attendance:{' '}
-                      <strong className="text-slate-900 dark:text-white">{stat.attendance}%</strong>
-                    </p>
-                  </div>
+                <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">Sections Directory</h2>
+                {sectionCounts.map((sec) => (
+                  <button
+                    key={sec.section}
+                    type="button"
+                    onClick={() => {
+                      setSectionFilter(sec.section)
+                      setActiveTab('students')
+                    }}
+                    className="flex w-full items-center justify-between rounded-xl bg-[#f5f6fb] p-4 text-left transition hover:bg-[#eef0fb] dark:bg-[#11162b] dark:hover:bg-[#1d2444]"
+                  >
+                    <span className="text-xs font-bold text-[#35408e] dark:text-[#ffd41c]">{sec.section}</span>
+                    <span className="rounded-full bg-[#ffd41c] px-2.5 py-0.5 text-[11px] font-bold text-[#232b66]">
+                      {sec.count} student{sec.count === 1 ? '' : 's'}
+                    </span>
+                  </button>
                 ))}
               </section>
             </div>
