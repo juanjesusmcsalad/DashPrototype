@@ -9,6 +9,7 @@ import {
   TaskCompletionDoughnut,
   WeeklyEngagementBarChart,
 } from './Charts'
+import SpoilerText from './SpoilerText'
 
 const CARD = 'rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-700/70 dark:bg-[#181e38]'
 
@@ -497,28 +498,36 @@ export function ProfileView({ data }) {
     <div className="space-y-6">
       <div>
         <h1 className="text-xl font-bold text-slate-900 dark:text-white">Student Profile</h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400">Your student account details.</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Your student account details. Click a covered box to reveal or hide it.
+        </p>
       </div>
 
       <div className={`${CARD} p-6`}>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <p className="text-xs text-slate-400">Full Name</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">{student.name}</p>
+            <SpoilerText
+              value={student.name}
+              className="text-sm font-bold text-slate-900 dark:text-white"
+            />
           </div>
           <div>
             <p className="text-xs text-slate-400">School</p>
-            <p className="text-sm font-bold text-slate-900 dark:text-white">{student.school}</p>
+            <p className="mt-1 text-sm font-bold text-slate-900 dark:text-white">{student.school}</p>
           </div>
           <div>
             <p className="text-xs text-slate-400">Section</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+            <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
               {student.section || '12SHS2510'}
             </p>
           </div>
           <div>
             <p className="text-xs text-slate-400">Email</p>
-            <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{student.email}</p>
+            <SpoilerText
+              value={student.email}
+              className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+            />
           </div>
         </div>
       </div>

@@ -19,6 +19,7 @@ import { formatTaskDueDate } from '../utils/academicHelpers'
 import AdminStudentEditor from './AdminStudentEditor'
 import { SubjectBarChart } from './Charts'
 import Sidebar from './Sidebar'
+import SpoilerText from './SpoilerText'
 import ThemeToggle from './ThemeToggle'
 
 const ADMIN_NAV_ITEMS = [
@@ -1105,24 +1106,32 @@ export default function AdminDashboardView({
           <div className="space-y-6">
             <div>
               <h1 className="text-xl font-bold text-slate-900 dark:text-white">Administrator Profile</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Account details and portal sync status.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Account details and portal sync status. Click a covered box to reveal or hide it.
+              </p>
             </div>
             <div className={`${CARD} grid grid-cols-1 gap-4 p-6 sm:grid-cols-2`}>
               <div>
                 <p className="text-xs text-slate-400">Administrator Name</p>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">{currentUser.name}</p>
+                <SpoilerText
+                  value={currentUser.name}
+                  className="text-sm font-bold text-slate-900 dark:text-white"
+                />
               </div>
               <div>
                 <p className="text-xs text-slate-400">Email</p>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{currentUser.email}</p>
+                <SpoilerText
+                  value={currentUser.email}
+                  className="text-sm font-semibold text-slate-800 dark:text-slate-100"
+                />
               </div>
               <div>
                 <p className="text-xs text-slate-400">Role</p>
-                <p className="text-sm font-bold text-[#35408e] uppercase dark:text-[#ffd41c]">{currentUser.role}</p>
+                <p className="mt-1 text-sm font-bold text-[#35408e] uppercase dark:text-[#ffd41c]">{currentUser.role}</p>
               </div>
               <div>
                 <p className="text-xs text-slate-400">Backend Mode</p>
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                <p className="mt-1 text-sm font-semibold text-slate-800 dark:text-slate-100">
                   {syncStatus.mode === 'firestore' ? 'Firebase Firestore Live' : 'Local Demo Mode'}
                 </p>
               </div>

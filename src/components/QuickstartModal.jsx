@@ -29,9 +29,9 @@ const STUDENT_STEPS = [
     selector: '[data-tour="global-search"]',
     placement: 'bottom',
     badge: 'Step 4 of 5 • Search',
-    title: 'Quick-Jump Search',
+    title: 'Quick Search',
     description:
-      'Search any task, announcement, subject, schedule, or page here — click a result or press Enter to jump straight to it.',
+      'Search any task, announcement, subject, schedule, or page here click a result or press Enter to jump straight to it.',
   },
   {
     selector: '[data-tour="help-trigger"]',
