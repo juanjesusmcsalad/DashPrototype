@@ -47,8 +47,17 @@ export default function AdminDashboardView({
   darkMode,
   onToggleDarkMode,
 }) {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTabState] = useState('overview')
+  const [tabDirection, setTabDirection] = useState('forward')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const setActiveTab = (nextTab) => {
+    if (nextTab === activeTab) return
+    const prevIdx = ADMIN_NAV_ITEMS.findIndex((item) => item.id === activeTab)
+    const nextIdx = ADMIN_NAV_ITEMS.findIndex((item) => item.id === nextTab)
+    setTabDirection(nextIdx >= 0 && prevIdx >= 0 && nextIdx < prevIdx ? 'back' : 'forward')
+    setActiveTabState(nextTab)
+  }
   const [students, setStudents] = useState([])
   const [accounts, setAccounts] = useState([])
   const [schoolConfig, setSchoolConfig] = useState(() => readSchoolConfig())
@@ -1444,7 +1453,7 @@ export default function AdminDashboardView({
           badgeText="Admin Portal"
         />
 
-        <main className="flex min-w-0 flex-1 flex-col gap-5 lg:overflow-y-auto lg:pr-1">
+        <main className="flex min-w-0 flex-1 flex-col gap-5 overflow-x-clip lg:overflow-y-auto lg:pr-1">
           <header className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <button
               type="button"
@@ -1581,7 +1590,14 @@ export default function AdminDashboardView({
             </div>
           )}
 
-          <div className="pb-24 lg:pb-4">{renderTabContent()}</div>
+          <div
+            key={activeTab}
+            className={`pb-24 lg:pb-4 ${
+              tabDirection === 'back' ? 'animate-tab-back' : 'animate-tab-forward'
+            }`}
+          >
+            {renderTabContent()}
+          </div>
         </main>
       </div>
     </div>

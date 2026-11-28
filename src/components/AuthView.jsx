@@ -3,8 +3,11 @@ import { isFirebaseConfigured } from '../firebase'
 import { ALLOWED_SECTIONS, signInWithRole, signUpStudent } from '../services/authService'
 import ThemeToggle from './ThemeToggle'
 
+const AUTH_MODES = ['signin', 'signup', 'admin']
+
 export default function AuthView({ darkMode, onToggleDarkMode }) {
   const [mode, setMode] = useState('signin') // 'signin' | 'signup' | 'admin'
+  const [modeDirection, setModeDirection] = useState('forward')
   const [name, setName] = useState('')
   const [section, setSection] = useState(ALLOWED_SECTIONS[0])
   const [email, setEmail] = useState('')
@@ -14,6 +17,11 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
   const [loading, setLoading] = useState(false)
 
   const switchMode = (nextMode) => {
+    if (nextMode !== mode) {
+      setModeDirection(
+        AUTH_MODES.indexOf(nextMode) < AUTH_MODES.indexOf(mode) ? 'back' : 'forward'
+      )
+    }
     setMode(nextMode)
     setError('')
     setPassword('')
@@ -139,6 +147,10 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
             </div>
           </div>
 
+          <div
+            key={mode}
+            className={modeDirection === 'back' ? 'animate-tab-back' : 'animate-tab-forward'}
+          >
           <div className="mb-5">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">
               {mode === 'signup'
@@ -272,6 +284,7 @@ export default function AuthView({ darkMode, onToggleDarkMode }) {
                     : `Sign In (${section})`}
             </button>
           </form>
+          </div>
         </div>
       </div>
     </div>

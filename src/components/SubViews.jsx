@@ -201,7 +201,10 @@ export function TasksView({ data, searchQuery, onToggleTask, onAddTask }) {
         </button>
       </form>
 
-      <div className={`${CARD} divide-y divide-slate-100 dark:divide-slate-700/60`}>
+      <div
+        key={filter}
+        className={`${CARD} animate-tab-forward divide-y divide-slate-100 dark:divide-slate-700/60`}
+      >
         {filteredTasks.length === 0 ? (
           <p className="px-5 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
             No tasks assigned yet. Add one above or wait for your administrator to assign tasks.

@@ -219,7 +219,7 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('grades')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out active:scale-95 ${
             editorTab === 'grades'
               ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
               : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
@@ -230,7 +230,7 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('tasks')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out active:scale-95 ${
             editorTab === 'tasks'
               ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
               : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
@@ -241,7 +241,7 @@ export default function AdminStudentEditor({
         <button
           type="button"
           onClick={() => setEditorTab('notes')}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition-all duration-200 ease-out active:scale-95 ${
             editorTab === 'notes'
               ? 'bg-gradient-to-r from-[#424fa6] to-[#20275e] text-white shadow-sm dark:from-[#ffd41c] dark:to-[#f2b800] dark:text-[#232b66]'
               : 'bg-[#f5f6fb] text-slate-600 hover:-translate-y-0.5 hover:bg-gradient-to-r hover:from-[#eef0fb] hover:to-[#e2e7fb] hover:text-[#35408e] dark:bg-[#11162b] dark:text-slate-300 dark:hover:from-[#1f274d] dark:hover:to-[#171d3c]'
@@ -250,6 +250,8 @@ export default function AdminStudentEditor({
           Study Hours &amp; Notes
         </button>
       </div>
+
+      <div key={editorTab} className="animate-tab-forward">
 
       {/* Tab 1: Grades & Info */}
       {editorTab === 'grades' && (
@@ -546,6 +548,7 @@ export default function AdminStudentEditor({
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

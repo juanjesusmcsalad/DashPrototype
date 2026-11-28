@@ -39,10 +39,22 @@ function markLocalTourDone(uid) {
   }
 }
 
+const STUDENT_TAB_ORDER = [
+  'dashboard',
+  'academic-progress',
+  'tasks',
+  'performance-insights',
+  'engagement-analytics',
+  'announcements',
+  'schedule',
+  'profile',
+]
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(undefined) // undefined = checking auth
   const [data, setData] = useState(DEFAULT_STUDENT_DATA)
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTabState] = useState('dashboard')
+  const [tabDirection, setTabDirection] = useState('forward')
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [syncStatus, setSyncStatus] = useState({ mode: 'demo', error: null })
@@ -55,6 +67,14 @@ export default function App() {
       return false
     }
   })
+
+  const setActiveTab = (nextTab) => {
+    if (nextTab === activeTab) return
+    const prevIdx = STUDENT_TAB_ORDER.indexOf(activeTab)
+    const nextIdx = STUDENT_TAB_ORDER.indexOf(nextTab)
+    setTabDirection(nextIdx >= 0 && prevIdx >= 0 && nextIdx < prevIdx ? 'back' : 'forward')
+    setActiveTabState(nextTab)
+  }
 
   useEffect(() => {
     const root = document.documentElement
@@ -71,7 +91,7 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = subscribeToAuthState((user) => {
       setCurrentUser(user)
-      setActiveTab('dashboard')
+      setActiveTabState('dashboard')
       setSearchQuery('')
     })
     return () => unsubscribe()
@@ -243,7 +263,7 @@ export default function App() {
         />
 
         <main
-          className={`flex min-w-0 flex-1 flex-col gap-3.5 sm:gap-4 ${
+          className={`flex min-w-0 flex-1 flex-col gap-3.5 overflow-x-clip sm:gap-4 ${
             activeTab === 'dashboard'
               ? 'lg:overflow-y-auto xl:overflow-hidden'
               : 'lg:overflow-y-auto lg:pr-1'
@@ -272,9 +292,10 @@ export default function App() {
           )}
 
           <div
+            key={activeTab}
             className={`pb-24 lg:pb-0 ${
-              activeTab === 'dashboard' ? 'xl:flex xl:min-h-0 xl:flex-1 xl:flex-col' : ''
-            }`}
+              tabDirection === 'back' ? 'animate-tab-back' : 'animate-tab-forward'
+            } ${activeTab === 'dashboard' ? 'xl:flex xl:min-h-0 xl:flex-1 xl:flex-col' : ''}`}
           >
             {renderContent()}
           </div>

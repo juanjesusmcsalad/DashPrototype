@@ -167,7 +167,7 @@ export default function Sidebar({
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(item.id)}
-                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition-all duration-200 ease-out ${
+                  className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[13px] transition-all duration-200 ease-out active:scale-[0.98] ${
                     isActive
                       ? 'bg-gradient-to-r from-[#ffd41c] to-[#f5be00] font-bold text-[#232b66] shadow-md shadow-[#151b45]/25'
                       : 'font-medium text-white/80 hover:translate-x-1 hover:bg-gradient-to-r hover:from-white/18 hover:to-[#4f5ec4]/35 hover:text-white hover:shadow-sm'
@@ -211,7 +211,7 @@ export default function Sidebar({
               key={item.id}
               type="button"
               onClick={() => handleSelect(item.id)}
-              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[9.5px] tracking-tight transition sm:text-[10px] ${
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[9.5px] tracking-tight transition-all duration-200 active:scale-95 sm:text-[10px] ${
                 isActive
                   ? 'bg-[#ffd41c] font-bold text-[#232b66] shadow-sm'
                   : 'font-medium text-white/85 hover:bg-white/10'
